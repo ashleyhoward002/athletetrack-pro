@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-const pdf = require("pdf-parse");
 
 // Initialize Gemini
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
@@ -32,6 +31,7 @@ export async function POST(req: NextRequest) {
         let textContent = "";
 
         if (file.type === "application/pdf") {
+            const pdf = (await import("pdf-parse")).default;
             const data = await pdf(buffer);
             textContent = data.text;
         } else {
