@@ -15,7 +15,8 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        const { query } = await req.json();
+        const { query, sport } = await req.json();
+        const sportName = sport || "basketball";
 
         // 1. Generate embedding for the user query
         const embeddingModel = genAI.getGenerativeModel({ model: "text-embedding-004" });
@@ -29,23 +30,34 @@ export async function POST(req: NextRequest) {
             match_count: 5
         });
 
+        // 3. Fetch available drills for the sport
+        const { data: drills } = await supabase
+            .from("drills")
+            .select("name, category, difficulty, description")
+            .eq("sport", sportName)
+            .limit(5);
+
         if (searchError) {
             console.error("Vector search error:", searchError);
             throw searchError;
         }
 
-        // 3. Construct the context
+        // 4. Construct the context
         const contextText = documents?.map((doc: any) => doc.content).join("\n---\n") || "";
+        const drillsText = drills?.map((d: any) => `- ${d.name} (${d.category}, ${d.difficulty}): ${d.description}`).join("\n") || "";
 
         // 4. Generate answer with Gemini
         const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }); // Or gemini-1.5-pro
 
-        const prompt = `You are an expert basketball coach and analyst.
+        const prompt = `You are an expert ${sportName} coach and analyst.
     Use the following context to answer the user's question.
-    If the answer is not in the context, use your general basketball knowledge but prioritize the context.
+    If the answer is not in the context, use your general ${sportName} knowledge but prioritize the context.
     
     Context:
     ${contextText}
+
+    Available Drills:
+    ${drillsText}
     
     User Question: ${query}
     `;

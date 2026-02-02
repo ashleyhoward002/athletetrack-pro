@@ -6,26 +6,26 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import ButtonSignin from "./ButtonSignin";
-import logo from "@/app/icon.png";
+
 import config from "@/config";
 
 const links: {
   href: string;
   label: string;
 }[] = [
-  {
-    href: "/#pricing",
-    label: "Pricing",
-  },
-  {
-    href: "/#testimonials",
-    label: "Reviews",
-  },
-  {
-    href: "/#faq",
-    label: "FAQ",
-  },
-];
+    {
+      href: "/#pricing",
+      label: "Pricing",
+    },
+    {
+      href: "/#testimonials",
+      label: "Reviews",
+    },
+    {
+      href: "/#faq",
+      label: "FAQ",
+    },
+  ];
 
 const cta: JSX.Element = <ButtonSignin extraStyle="btn-primary" />;
 
@@ -53,14 +53,12 @@ const Header = () => {
             href="/"
             title={`${config.appName} homepage`}
           >
-            <Image
-              src={logo}
+            <img
+              src="/icon.png"
               alt={`${config.appName} logo`}
-              className="w-8"
-              placeholder="blur"
-              priority={true}
-              width={48}
-              height={48}
+              className="w-8 h-8"
+              width={32}
+              height={32}
             />
             <span className="font-extrabold text-lg">{config.appName}</span>
           </Link>
@@ -120,14 +118,12 @@ const Header = () => {
               title={`${config.appName} homepage`}
               href="/"
             >
-              <Image
-                src={logo}
+              <img
+                src="/icon.png"
                 alt={`${config.appName} logo`}
-                className="w-8"
-                placeholder="blur"
-                priority={true}
-                width={48}
-                height={48}
+                className="w-8 h-8"
+                width={32}
+                height={32}
               />
               <span className="font-extrabold text-lg">{config.appName}</span>
             </Link>

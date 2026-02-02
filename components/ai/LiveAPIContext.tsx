@@ -1,20 +1,42 @@
 "use client";
 
-import { createContext, FC, ReactNode, useContext } from "react";
+import { createContext, FC, ReactNode, useContext, useEffect, useState } from "react";
 import { useLiveAPI, UseLiveAPIResults } from "@/hooks/useLiveAPI";
-import { LiveClientOptions } from "@/types/live-api";
 
 const LiveAPIContext = createContext<UseLiveAPIResults | undefined>(undefined);
 
 export type LiveAPIProviderProps = {
     children: ReactNode;
-    apiKey: string;
 };
 
-export const LiveAPIProvider: FC<LiveAPIProviderProps> = ({
-    apiKey,
-    children,
-}) => {
+export const LiveAPIProvider: FC<LiveAPIProviderProps> = ({ children }) => {
+    const [apiKey, setApiKey] = useState<string>("");
+
+    useEffect(() => {
+        // Fetch the API key from the authenticated server endpoint
+        fetch("/api/gemini-key")
+            .then((res) => res.json())
+            .then((data) => {
+                if (data.apiKey) {
+                    setApiKey(data.apiKey);
+                }
+            })
+            .catch((err) => console.error("Failed to fetch Gemini API key:", err));
+    }, []);
+
+    // Don't initialize the live API client until we have a key
+    if (!apiKey) {
+        return (
+            <LiveAPIContext.Provider value={undefined}>
+                {children}
+            </LiveAPIContext.Provider>
+        );
+    }
+
+    return <LiveAPIProviderInner apiKey={apiKey}>{children}</LiveAPIProviderInner>;
+};
+
+const LiveAPIProviderInner: FC<{ apiKey: string; children: ReactNode }> = ({ apiKey, children }) => {
     const liveAPI = useLiveAPI({ apiKey });
 
     return (
@@ -26,8 +48,5 @@ export const LiveAPIProvider: FC<LiveAPIProviderProps> = ({
 
 export const useLiveAPIContext = () => {
     const context = useContext(LiveAPIContext);
-    if (!context) {
-        throw new Error("useLiveAPIContext must be used within a LiveAPIProvider");
-    }
-    return context;
+    return context ?? null;
 };

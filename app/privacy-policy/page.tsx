@@ -12,9 +12,9 @@ import config from "@/config";
 // You are an excellent lawyer.
 
 // I need your help to write a simple privacy policy for my website. Here is some context:
-// - Website: https://fenago.com
-// - Name: FeNAgO
-// - Description: A Next.js agentic SaaS boilerplate to help entrepreneurs build AI-powered applications more efficiently
+// - Website: https://stattrackpro.com
+// - Name: StatTrack Pro
+// - Description: A comprehensive tool for athlete tracking and analysis.
 // - User data collected: name, email and payment information
 // - Non-personal data collection: web cookies
 // - Purpose of Data Collection: Order processing

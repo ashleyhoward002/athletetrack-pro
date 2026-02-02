@@ -1,12 +1,9 @@
 import { ReactNode } from "react";
 import { redirect } from "next/navigation";
-import config from "@/config";
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
+import Sidebar from "@/components/dashboard/Sidebar";
 
-// This is a server-side component to ensure the user is logged in.
-// If not, it will redirect to the login page.
-// It's applied to all subpages of /dashboard in /app/dashboard/*** pages
 export default async function LayoutPrivate({
   children,
 }: {
@@ -16,12 +13,19 @@ export default async function LayoutPrivate({
   const supabase = createClient(cookieStore);
 
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  if (!session) {
-    redirect(config.auth.loginUrl);
+  if (!user) {
+    redirect("/login");
   }
 
-  return <>{children}</>;
+  return (
+    <div className="flex h-screen overflow-hidden bg-base-200">
+      <Sidebar />
+      <main className="flex-1 overflow-y-auto">
+        {children}
+      </main>
+    </div>
+  );
 }

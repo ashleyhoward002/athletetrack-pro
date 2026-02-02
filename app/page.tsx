@@ -2,10 +2,12 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { AuroraHero } from '@/components/ui/AuroraHero';
+import Header from '@/components/Header';
 
 export default function LandingPage() {
   return (
     <main className="min-h-screen">
+      <Header />
       {/* Hero Section */}
       <AuroraHero>
         {/* Trust Badge */}
@@ -65,13 +67,13 @@ export default function LandingPage() {
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href="/register"
+              href="/signup"
               className="px-8 py-4 bg-[#00BFFF] hover:bg-[#00a6e6] text-white font-bold text-lg rounded-lg shadow-xl transform transition hover:scale-105"
             >
               Start Your 30-Day Free Trial
             </Link>
             <Link
-              href="/sample-profile"
+              href="/signup"
               className="px-8 py-4 bg-transparent border-2 border-white/50 hover:border-white text-white font-bold text-lg rounded-lg transition"
             >
               See Professional Sample Profile
@@ -283,7 +285,7 @@ export default function LandingPage() {
                 </li>
               </ul>
               <Link
-                href="/register"
+                href="/signup"
                 className="block w-full py-3 bg-gray-100 hover:bg-gray-200 text-center text-gray-700 font-semibold rounded-lg transition"
               >
                 Start Free Trial
@@ -322,7 +324,7 @@ export default function LandingPage() {
                 </li>
               </ul>
               <Link
-                href="/register"
+                href="/signup"
                 className="block w-full py-3 bg-white hover:bg-gray-100 text-[#004D99] text-center font-bold rounded-lg transition"
               >
                 Start Free Trial
@@ -358,7 +360,7 @@ export default function LandingPage() {
                 </li>
               </ul>
               <Link
-                href="/contact"
+                href="mailto:support@stattrackpro.com"
                 className="block w-full py-3 bg-gray-100 hover:bg-gray-200 text-center text-gray-700 font-semibold rounded-lg transition"
               >
                 Schedule Demo
@@ -380,13 +382,13 @@ export default function LandingPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href="/register"
+              href="/signup"
               className="px-8 py-4 bg-[#3CB371] hover:bg-[#2da05e] text-white font-bold text-lg rounded-lg shadow-xl transform transition hover:scale-105"
             >
               Start Your Free 30-Day Trial
             </Link>
             <Link
-              href="/demo"
+              href="/signup"
               className="px-8 py-4 bg-transparent border-2 border-white/50 hover:border-white text-white font-bold text-lg rounded-lg transition"
             >
               Schedule a Personalized Demo

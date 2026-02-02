@@ -1,14 +1,12 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useSession, signIn } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { createClient } from "@/utils/supabase/client";
+import { useEffect, useState } from "react";
 import config from "@/config";
 
-// A simple button to sign in with our providers (Google & Magic Links).
-// It automatically redirects user to callbackUrl (config.auth.callbackUrl) after login, which is normally a private page for users to manage their accounts.
-// If the user is already logged in, it will show their profile picture & redirect them to callbackUrl immediately.
+// A simple button to sign in. Redirects to the login page or dashboard if already authenticated.
 const ButtonSignin = ({
   text = "Get started",
   extraStyle,
@@ -17,37 +15,45 @@ const ButtonSignin = ({
   extraStyle?: string;
 }) => {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const supabase = createClient();
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+      setLoading(false);
+    };
+    getUser();
+  }, []);
 
   const handleClick = () => {
-    if (status === "authenticated") {
+    if (user) {
       router.push(config.auth.callbackUrl);
     } else {
-      signIn(undefined, { callbackUrl: config.auth.callbackUrl });
+      router.push(config.auth.loginUrl);
     }
   };
 
-  if (status === "authenticated") {
+  if (loading) {
+    return (
+      <button className={`btn ${extraStyle ? extraStyle : ""}`} disabled>
+        {text}
+      </button>
+    );
+  }
+
+  if (user) {
     return (
       <Link
         href={config.auth.callbackUrl}
         className={`btn ${extraStyle ? extraStyle : ""}`}
       >
-        {session.user?.image ? (
-          <img
-            src={session.user?.image}
-            alt={session.user?.name || "Account"}
-            className="w-6 h-6 rounded-full shrink-0"
-            referrerPolicy="no-referrer"
-            width={24}
-            height={24}
-          />
-        ) : (
-          <span className="w-6 h-6 bg-base-300 flex justify-center items-center rounded-full shrink-0">
-            {session.user?.name?.charAt(0) || session.user?.email?.charAt(0)}
-          </span>
-        )}
-        {session.user?.name || session.user?.email || "Account"}
+        <span className="w-6 h-6 bg-base-300 flex justify-center items-center rounded-full shrink-0">
+          {user.email?.charAt(0)?.toUpperCase() || "U"}
+        </span>
+        {user.user_metadata?.full_name || user.email || "Account"}
       </Link>
     );
   }

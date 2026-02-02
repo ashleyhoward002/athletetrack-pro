@@ -6,18 +6,22 @@ const Hero = () => {
   return (
     <section className="max-w-7xl mx-auto bg-base-100 flex flex-col lg:flex-row items-center justify-center gap-16 lg:gap-20 px-8 py-8 lg:py-20">
       <div className="flex flex-col gap-10 lg:gap-14 items-center justify-center text-center lg:text-left lg:items-start">
-        <h1 className="font-extrabold text-4xl lg:text-6xl tracking-tight">
-          Launch your Agentic SaaS in days, not weeks
+        <h1 className="font-extrabold text-4xl lg:text-6xl tracking-tight md:-mb-4 flex flex-col gap-3 items-center">
+          <span className="relative">StatTrack Pro</span>
+          <span className="whitespace-nowrap relative">
+            <span className="mr-3 sm:mr-4 md:mr-5">The Ultimate</span>
+            <span className="relative whitespace-nowrap">
+              <span className="absolute bg-neutral-content -left-2 -top-1 -bottom-1 -right-2 md:-left-3 md:-top-0 md:-bottom-0 md:-right-3 -rotate-1"></span>
+              <span className="relative text-neutral">Edge</span>
+            </span>
+          </span>
         </h1>
         <p className="text-lg opacity-80 leading-relaxed">
-          FeNAgO empowers students, developers, startups, and entrepreneurs to build
-          fully agentic SaaS solutions at lightning speed by handling security
-          (logins & registration), database setup, SEO, and monetization right out
-          of the box—powered by Next.js, Tailwind, and React. All you bring is
-          your idea!
+          StatTrack Pro empowers athletes, parents, and coaches to build professional recruiting profiles
+          with advanced analytics and AI insights.
         </p>
         <a
-          href="https://fenago.com"
+          href="https://stattrackpro.com"
           className="btn btn-primary btn-wide"
         >
           Get {config.appName}

@@ -12,9 +12,9 @@ import config from "@/config";
 // You are an excellent lawyer.
 
 // I need your help to write a simple Terms & Services for my website. Here is some context:
-// - Website: https://fenago.com
-// - Name: FeNAgO
-// - Contact information: support@fenago.com
+// - Website: https://stattrackpro.com
+// - Name: StatTrack Pro
+// - Contact information: support@stattrackpro.com
 // - Description: A Next.js agentic SaaS boilerplate to help entrepreneurs build AI-powered applications more efficiently
 // - Ownership: when buying a package, users can download code to create apps. 
 // - User data collected: name, email and payment information

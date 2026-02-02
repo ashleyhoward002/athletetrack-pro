@@ -1,34 +1,26 @@
-import ButtonAccount from "@/components/ButtonAccount";
-import StatsOverview from "@/components/basketball/StatsOverview";
-import QuickGameEntry from "@/components/basketball/QuickGameEntry";
-import RecentGames from "@/components/basketball/RecentGames";
-import ProgressTracking from "@/components/basketball/ProgressTracking";
+import StatsOverview from "@/components/sports/StatsOverview";
+import QuickGameEntry from "@/components/sports/QuickGameEntry";
+import RecentGames from "@/components/sports/RecentGames";
+import ProgressTracking from "@/components/sports/ProgressTracking";
 import RagChat from "@/components/ai/RagChat";
 import DocumentUpload from "@/components/ai/DocumentUpload";
 import VoiceConsole from "@/components/ai/VoiceConsole";
 import { LiveAPIProvider } from "@/components/ai/LiveAPIContext";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
-// This is a private page: It's protected by the layout.js component which ensures the user is authenticated.
 export default async function Dashboard() {
-  // TODO: Fetch user's player data from MongoDB
-  // const session = await getServerSession(authOptions);
-  // const playerData = await Player.findOne({ userId: session?.user?.id });
-
   return (
-    <LiveAPIProvider apiKey={process.env.GEMINI_API_KEY || ""}>
-      <main className="min-h-screen p-4 md:p-8 pb-24">
+    <LiveAPIProvider>
+      <div className="p-4 md:p-8 pb-24">
         <div className="max-w-7xl mx-auto space-y-8">
           {/* Header Section */}
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div>
-              <h1 className="text-4xl md:text-5xl font-extrabold">
-                Basketball Stats Tracker
-              </h1>
-              <p className="text-base-content/70 mt-2">Track, analyze, and improve your game</p>
-            </div>
-            <ButtonAccount />
+          <div>
+            <h1 className="text-3xl md:text-4xl font-extrabold">
+              Dashboard
+            </h1>
+            <p className="text-base-content/70 mt-1">Track, analyze, and improve your game</p>
           </div>
 
           {/* Quick Actions Bar */}
@@ -51,6 +43,12 @@ export default async function Dashboard() {
               </svg>
               Upload Video
             </button>
+            <Link href="/dashboard/drills" className="btn btn-accent text-white">
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+              </svg>
+              Drill Library
+            </Link>
           </div>
 
           {/* Stats Overview Cards */}
@@ -85,7 +83,7 @@ export default async function Dashboard() {
           </div>
           <label className="modal-backdrop" htmlFor="quick-entry-modal">Close</label>
         </div>
-      </main>
+      </div>
     </LiveAPIProvider>
   );
 }
