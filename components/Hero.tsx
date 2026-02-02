@@ -7,7 +7,7 @@ const Hero = () => {
     <section className="max-w-7xl mx-auto bg-base-100 flex flex-col lg:flex-row items-center justify-center gap-16 lg:gap-20 px-8 py-8 lg:py-20">
       <div className="flex flex-col gap-10 lg:gap-14 items-center justify-center text-center lg:text-left lg:items-start">
         <h1 className="font-extrabold text-4xl lg:text-6xl tracking-tight md:-mb-4 flex flex-col gap-3 items-center">
-          <span className="relative">StatTrack Pro</span>
+          <span className="relative">AthleteTrack Pro</span>
           <span className="whitespace-nowrap relative">
             <span className="mr-3 sm:mr-4 md:mr-5">The Ultimate</span>
             <span className="relative whitespace-nowrap">
@@ -17,11 +17,11 @@ const Hero = () => {
           </span>
         </h1>
         <p className="text-lg opacity-80 leading-relaxed">
-          StatTrack Pro empowers athletes, parents, and coaches to build professional recruiting profiles
+          AthleteTrack Pro empowers athletes, parents, and coaches to build professional recruiting profiles
           with advanced analytics and AI insights.
         </p>
         <a
-          href="https://stattrackpro.com"
+          href="https://athletetrackpro.com"
           className="btn btn-primary btn-wide"
         >
           Get {config.appName}
@@ -32,7 +32,7 @@ const Hero = () => {
       <div className="lg:w-full">
         <Image
           src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=2072&auto=format&fit=crop"
-          alt="FeNAgO product demo"
+          alt="AthleteTrack Pro product demo"
           className="w-full"
           priority={true}
           width={500}

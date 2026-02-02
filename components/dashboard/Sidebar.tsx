@@ -104,7 +104,7 @@ export default function Sidebar() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
           </svg>
         </button>
-        <span className="font-bold text-lg">StatTrack Pro</span>
+        <span className="font-bold text-lg">AthleteTrack Pro</span>
         <div className="w-8" /> {/* spacer for centering */}
       </div>
 
@@ -133,7 +133,7 @@ export default function Sidebar() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
             </div>
-            <span className="font-extrabold text-lg">StatTrack Pro</span>
+            <span className="font-extrabold text-lg">AthleteTrack Pro</span>
           </Link>
           <button
             className="btn btn-ghost btn-sm btn-square lg:hidden"

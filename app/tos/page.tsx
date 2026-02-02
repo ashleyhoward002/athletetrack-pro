@@ -12,14 +12,14 @@ import config from "@/config";
 // You are an excellent lawyer.
 
 // I need your help to write a simple Terms & Services for my website. Here is some context:
-// - Website: https://stattrackpro.com
-// - Name: StatTrack Pro
-// - Contact information: support@stattrackpro.com
+// - Website: https://athletetrackpro.com
+// - Name: AthleteTrack Pro
+// - Contact information: support@athletetrackpro.com
 // - Description: A Next.js agentic SaaS boilerplate to help entrepreneurs build AI-powered applications more efficiently
 // - Ownership: when buying a package, users can download code to create apps. 
 // - User data collected: name, email and payment information
 // - Non-personal data collection: web cookies
-// - Link to privacy-policy: https://fenago.com/privacy-policy
+// - Link to privacy-policy: https://athletetrackpro.com/privacy-policy
 // - Governing Law: France
 // - Updates to the Terms: users will be updated by email
 
@@ -59,21 +59,21 @@ const TOS = () => {
         >
           {`Last Updated: May 5, 2025
 
-Welcome to FeNAgO!
+Welcome to AthleteTrack Pro!
 
-These Terms of Service ("Terms") govern your use of the FeNAgO website at https://fenago.com ("Website") and the services provided by FeNAgO. By using our Website and services, you agree to these Terms.
+These Terms of Service ("Terms") govern your use of the AthleteTrack Pro website at https://athletetrackpro.com ("Website") and the services provided by AthleteTrack Pro. By using our Website and services, you agree to these Terms.
 
-1. Description of FeNAgO
+1. Description of AthleteTrack Pro
 
-FeNAgO is a platform that offers a Next.js agentic SaaS boilerplate to assist entrepreneurs in building AI-powered applications more efficiently.
+AthleteTrack Pro is a platform that offers a Next.js agentic SaaS boilerplate to assist entrepreneurs in building AI-powered applications more efficiently.
 
 2. Ownership and Usage Rights
 
-When you purchase a package from FeNAgO, you gain the right to download and use the code provided for creating applications. You own the code you create but do not have the right to resell it. We offer a full refund within 7 days of purchase, as specified in our refund policy.
+When you purchase a package from AthleteTrack Pro, you gain the right to download and use the code provided for creating applications. You own the code you create but do not have the right to resell it. We offer a full refund within 7 days of purchase, as specified in our refund policy.
 
 3. User Data and Privacy
 
-We collect and store user data, including name, email, and payment information, as necessary to provide our services. For details on how we handle your data, please refer to our Privacy Policy at https://fenago.com/privacy-policy.
+We collect and store user data, including name, email, and payment information, as necessary to provide our services. For details on how we handle your data, please refer to our Privacy Policy at https://athletetrackpro.com/privacy-policy.
 
 4. Non-Personal Data Collection
 
@@ -87,9 +87,9 @@ These Terms are governed by the laws of France.
 
 We may update these Terms from time to time. Users will be notified of any changes via email.
 
-For any questions or concerns regarding these Terms of Service, please contact us at support@fenago.com.
+For any questions or concerns regarding these Terms of Service, please contact us at support@athletetrackpro.com.
 
-Thank you for using FeNAgO!`}
+Thank you for using AthleteTrack Pro!`}
         </pre>
       </div>
     </main>

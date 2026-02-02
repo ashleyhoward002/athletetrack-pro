@@ -3,12 +3,12 @@ import { ConfigProps } from "./types/config";
 
 const config = {
   // REQUIRED
-  appName: "StatTrack Pro",
+  appName: "AthleteTrack Pro",
   // REQUIRED: a short description of your app for SEO tags (can be overwritten)
   appDescription:
     "The Strategic Command Center for Your Athlete's Future.",
   // REQUIRED (no https://, not trailing slash at the end, just the naked domain)
-  domainName: "stattrackpro.com",
+  domainName: "athletetrackpro.com",
   crisp: {
     // Crisp website ID. IF YOU DON'T USE CRISP: just remove this => Then add a support email in this config file (resend.supportEmail) otherwise customer support won't work.
     id: "",
@@ -64,11 +64,11 @@ const config = {
   },
   resend: {
     // REQUIRED — Email 'From' field to be used when sending magic login links
-    fromNoReply: `StatTrack Pro <noreply@stattrackpro.com>`,
+    fromNoReply: `AthleteTrack Pro <noreply@athletetrackpro.com>`,
     // REQUIRED — Email 'From' field to be used when sending other emails, like abandoned carts, updates etc..
-    fromAdmin: `Admin at StatTrack Pro <admin@stattrackpro.com>`,
+    fromAdmin: `Admin at AthleteTrack Pro <admin@athletetrackpro.com>`,
     // Email shown to customer if they need support. Leave empty if not needed => if empty, set up Crisp above, otherwise you won't be able to offer customer support."
-    supportEmail: "support@stattrackpro.com",
+    supportEmail: "support@athletetrackpro.com",
   },
   colors: {
     // REQUIRED — The DaisyUI theme to use (added to the main layout.js). Leave blank for default (light & dark mode). If you use any theme other than light/dark, you need to add it in config.tailwind.js in daisyui.themes.

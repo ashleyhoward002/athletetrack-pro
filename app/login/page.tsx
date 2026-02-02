@@ -40,7 +40,7 @@ export default function LoginPage() {
           {/* Logo / Brand */}
           <div className="text-center mb-4">
             <h1 className="text-3xl font-extrabold tracking-tight">
-              StatTrack Pro
+              AthleteTrack Pro
             </h1>
             <p className="text-base-content/60 mt-1 text-sm">
               Sign in to your account

@@ -31,7 +31,7 @@ export default function LandingPage() {
 
           <p className="text-xl md:text-2xl text-blue-100 max-w-3xl mx-auto">
             Stop wrestling with messy spreadsheets and fragmented data.
-            StatTrack Pro centralizes every metric, rank, and video into a single,
+            AthleteTrack Pro centralizes every metric, rank, and video into a single,
             professional platform, giving you the Control and Confidence needed
             to Optimize their future.
           </p>
@@ -137,7 +137,7 @@ export default function LandingPage() {
       <section className="py-24 px-4 bg-white">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-4xl md:text-5xl font-bold text-[#0A192F] mb-8">
-            StatTrack Pro: The Strategic Command Center for Their Athletic Career
+            AthleteTrack Pro: The Strategic Command Center for Their Athletic Career
           </h2>
 
           <div className="space-y-6 text-lg text-gray-700 mb-12">
@@ -152,7 +152,7 @@ export default function LandingPage() {
 
           <div className="grid md:grid-cols-2 gap-8 mb-12">
             <div className="bg-red-50 rounded-xl p-8">
-              <h3 className="font-bold text-red-700 mb-4">Before StatTrack Pro</h3>
+              <h3 className="font-bold text-red-700 mb-4">Before AthleteTrack Pro</h3>
               <ul className="space-y-2 text-left text-gray-700">
                 <li>• Cluttered spreadsheets</li>
                 <li>• Lost in notebooks</li>
@@ -162,7 +162,7 @@ export default function LandingPage() {
               </ul>
             </div>
             <div className="bg-green-50 rounded-xl p-8">
-              <h3 className="font-bold text-green-700 mb-4">After StatTrack Pro</h3>
+              <h3 className="font-bold text-green-700 mb-4">After AthleteTrack Pro</h3>
               <ul className="space-y-2 text-left text-gray-700">
                 <li>• Clean dashboard</li>
                 <li>• Centralized data</li>
@@ -360,7 +360,7 @@ export default function LandingPage() {
                 </li>
               </ul>
               <Link
-                href="mailto:support@stattrackpro.com"
+                href="mailto:support@athletetrackpro.com"
                 className="block w-full py-3 bg-gray-100 hover:bg-gray-200 text-center text-gray-700 font-semibold rounded-lg transition"
               >
                 Schedule Demo
