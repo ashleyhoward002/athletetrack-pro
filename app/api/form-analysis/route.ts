@@ -1,10 +1,9 @@
 export const dynamic = "force-dynamic";
-export const maxDuration = 120;
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
-import { GoogleGenAI, FileState } from "@google/genai";
+import { GoogleGenAI } from "@google/genai";
 import { SportId, getSportConfig } from "@/lib/sports/config";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
@@ -95,7 +94,7 @@ export async function POST(req: NextRequest) {
 
         if (insertError) throw insertError;
 
-        // 3. Download from Storage, upload to Gemini File API, then analyze
+        // 3. Download from Storage and analyze with Gemini (inline base64, fast)
         try {
             const { data: videoBlob, error: downloadError } = await supabase.storage
                 .from("form-videos")
@@ -105,31 +104,8 @@ export async function POST(req: NextRequest) {
                 throw new Error("Failed to download video from storage");
             }
 
-            const uploadedFile = await ai.files.upload({
-                file: new Blob([await videoBlob.arrayBuffer()], { type: mimeType }),
-                config: {
-                    mimeType,
-                    displayName: videoPath.split("/").pop() || "upload.mp4",
-                },
-            });
-
-            // Poll until Gemini has finished processing the video
-            let fileMetadata = await ai.files.get({ name: uploadedFile.name! });
-            const maxWait = 60_000;
-            const pollStart = Date.now();
-            while (
-                fileMetadata.state === FileState.PROCESSING &&
-                Date.now() - pollStart < maxWait
-            ) {
-                await new Promise((r) => setTimeout(r, 2000));
-                fileMetadata = await ai.files.get({ name: uploadedFile.name! });
-            }
-
-            if (fileMetadata.state !== FileState.ACTIVE) {
-                throw new Error(
-                    `Gemini file processing failed or timed out (state: ${fileMetadata.state})`
-                );
-            }
+            const buffer = Buffer.from(await videoBlob.arrayBuffer());
+            const base64Data = buffer.toString("base64");
 
             const result = await ai.models.generateContent({
                 model: "gemini-1.5-flash",
@@ -139,9 +115,9 @@ export async function POST(req: NextRequest) {
                         parts: [
                             { text: analysisTypeDef.promptTemplate },
                             {
-                                fileData: {
-                                    fileUri: fileMetadata.uri!,
+                                inlineData: {
                                     mimeType,
+                                    data: base64Data,
                                 },
                             },
                         ],
@@ -162,9 +138,6 @@ export async function POST(req: NextRequest) {
                     overall_score: feedback.overall_score || null,
                 })
                 .eq("id", analysis.id);
-
-            // Clean up the uploaded file from Gemini (fire-and-forget)
-            ai.files.delete({ name: uploadedFile.name! }).catch(() => {});
 
             return NextResponse.json({
                 analysis: {

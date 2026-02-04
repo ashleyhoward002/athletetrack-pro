@@ -48,6 +48,11 @@ export default function FormAnalysisPage() {
             return;
         }
 
+        if (selectedFile.size > 20 * 1024 * 1024) {
+            toast.error("Video must be under 20MB. Try a shorter clip.");
+            return;
+        }
+
         setUploading(true);
         try {
             // Upload video directly to Supabase Storage from client
