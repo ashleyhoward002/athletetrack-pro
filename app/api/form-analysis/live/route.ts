@@ -1,15 +1,16 @@
 export const dynamic = "force-dynamic";
-export const maxDuration = 120; // Allow up to 2 minutes for video processing
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
-import { GoogleGenAI, FileState } from "@google/genai";
+import { GoogleGenAI } from "@google/genai";
 import { SportId, getSportConfig } from "@/lib/sports/config";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 
-// POST: Process a live coaching session recording (video already uploaded to Storage by client)
+// POST: Process a live coaching session (video already uploaded to Storage by client)
+// Uses the real-time coaching transcript to generate the summary analysis,
+// which is fast (text-only) and avoids Vercel serverless function timeouts.
 export async function POST(req: NextRequest) {
     try {
         const cookieStore = cookies();
@@ -68,64 +69,32 @@ export async function POST(req: NextRequest) {
 
         if (insertError) throw insertError;
 
-        // 3. Download video from Storage, upload to Gemini File API, then generate summary
+        // 3. Generate summary from the coaching transcript (text-only, fast)
+        // The live session already analyzed form in real-time. We summarize
+        // that coaching feedback into the structured format.
         try {
-            // Download the video from Supabase Storage
-            const { data: videoBlob, error: downloadError } = await supabase.storage
-                .from("form-videos")
-                .download(videoPath);
+            const transcriptText = sessionTranscript
+                .map((entry: { timestamp: number; text: string }) => {
+                    const mins = Math.floor(entry.timestamp / 60000);
+                    const secs = Math.floor((entry.timestamp % 60000) / 1000);
+                    return `[${mins}:${String(secs).padStart(2, "0")}] ${entry.text}`;
+                })
+                .join("\n");
 
-            if (downloadError || !videoBlob) {
-                throw new Error("Failed to download video from storage");
-            }
+            const summaryPrompt = `You are an expert ${config.name.toLowerCase()} coach. A live coaching session just ended where an AI coach provided real-time feedback on an athlete's ${analysisTypeDef.label.toLowerCase()} for ${Math.floor(sessionDuration / 60)} minutes.
 
-            // Upload to Gemini's File API (handles large files)
-            const uploadedFile = await ai.files.upload({
-                file: new Blob([await videoBlob.arrayBuffer()], { type: "video/webm" }),
-                config: {
-                    mimeType: "video/webm",
-                    displayName: `live-session-${Date.now()}.webm`,
-                },
-            });
+Below is the timestamped transcript of all coaching feedback given during the session:
 
-            // Poll until Gemini has finished processing the video
-            let fileMetadata = await ai.files.get({ name: uploadedFile.name! });
-            const maxWait = 60_000; // 60 second timeout
-            const pollStart = Date.now();
-            while (
-                fileMetadata.state === FileState.PROCESSING &&
-                Date.now() - pollStart < maxWait
-            ) {
-                await new Promise((r) => setTimeout(r, 2000));
-                fileMetadata = await ai.files.get({ name: uploadedFile.name! });
-            }
+${transcriptText || "(No coaching feedback was recorded during this session)"}
 
-            if (fileMetadata.state !== FileState.ACTIVE) {
-                throw new Error(
-                    `Gemini file processing failed or timed out (state: ${fileMetadata.state})`
-                );
-            }
+Based on this coaching transcript, provide a comprehensive summary analysis. Consider the progression of feedback - did the athlete improve during the session? What were the recurring themes?
 
-            const summaryPrompt = `This is a recorded live coaching session. The athlete was practicing their ${analysisTypeDef.label.toLowerCase()} for ${Math.floor(sessionDuration / 60)} minutes.
-
-${analysisTypeDef.promptTemplate}`;
+Return your analysis as JSON with this exact structure:
+{"overall_score": <1-100>, "strengths": ["..."], "improvements": ["..."], "detailed_analysis": "...", "drill_recommendations": ["..."]}`;
 
             const result = await ai.models.generateContent({
                 model: "gemini-1.5-flash",
-                contents: [
-                    {
-                        role: "user",
-                        parts: [
-                            { text: summaryPrompt },
-                            {
-                                fileData: {
-                                    fileUri: fileMetadata.uri!,
-                                    mimeType: "video/webm",
-                                },
-                            },
-                        ],
-                    },
-                ],
+                contents: summaryPrompt,
             });
 
             const responseText = result.text || "";
@@ -141,9 +110,6 @@ ${analysisTypeDef.promptTemplate}`;
                     overall_score: feedback.overall_score || null,
                 })
                 .eq("id", analysis.id);
-
-            // Clean up the uploaded file from Gemini (fire-and-forget)
-            ai.files.delete({ name: uploadedFile.name! }).catch(() => {});
 
             return NextResponse.json({
                 analysis: {
