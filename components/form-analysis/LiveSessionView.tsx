@@ -5,6 +5,7 @@ import Link from "next/link";
 import { SportId, getSportConfig } from "@/lib/sports/config";
 import { useLiveAPIContext } from "@/components/ai/LiveAPIContext";
 import { LiveServerContent } from "@google/genai";
+import { createClient } from "@/utils/supabase/client";
 import toast from "react-hot-toast";
 import SportAnalysisSelector from "./SportAnalysisSelector";
 import WebcamPreview from "./WebcamPreview";
@@ -186,16 +187,32 @@ export default function LiveSessionView() {
 
             const sessionDuration = Math.floor((Date.now() - sessionStartRef.current) / 1000);
 
-            const formData = new FormData();
-            formData.append("video", blob, `live-session-${Date.now()}.webm`);
-            formData.append("sport", sport);
-            formData.append("analysis_type", analysisType);
-            formData.append("session_duration_seconds", String(sessionDuration));
-            formData.append("session_transcript", JSON.stringify(feedbackCards));
+            // Upload video directly to Supabase Storage from the client
+            // (avoids Next.js API route body size limits)
+            const supabase = createClient();
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) throw new Error("Not authenticated");
 
+            const timestamp = Date.now();
+            const storagePath = `${user.id}/live-${timestamp}.webm`;
+
+            const { error: uploadError } = await supabase.storage
+                .from("form-videos")
+                .upload(storagePath, blob, { contentType: "video/webm" });
+
+            if (uploadError) throw uploadError;
+
+            // Send only metadata to API route (no large file in request body)
             const res = await fetch("/api/form-analysis/live", {
                 method: "POST",
-                body: formData,
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    video_path: storagePath,
+                    sport,
+                    analysis_type: analysisType,
+                    session_duration_seconds: sessionDuration,
+                    session_transcript: feedbackCards,
+                }),
             });
 
             if (!res.ok) throw new Error("Failed to save session");

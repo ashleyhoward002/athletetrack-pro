@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { SportId, getSportConfig } from "@/lib/sports/config";
+import { createClient } from "@/utils/supabase/client";
 import toast from "react-hot-toast";
 import SportAnalysisSelector from "@/components/form-analysis/SportAnalysisSelector";
 import AnalysisHistoryGrid from "@/components/form-analysis/AnalysisHistoryGrid";
@@ -49,14 +50,30 @@ export default function FormAnalysisPage() {
 
         setUploading(true);
         try {
-            const formData = new FormData();
-            formData.append("video", selectedFile);
-            formData.append("sport", sport);
-            formData.append("analysis_type", analysisType);
+            // Upload video directly to Supabase Storage from client
+            const supabase = createClient();
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) throw new Error("Not authenticated");
 
+            const timestamp = Date.now();
+            const storagePath = `${user.id}/${timestamp}-${selectedFile.name}`;
+
+            const { error: uploadError } = await supabase.storage
+                .from("form-videos")
+                .upload(storagePath, selectedFile, { contentType: selectedFile.type });
+
+            if (uploadError) throw uploadError;
+
+            // Send only metadata to API route
             const res = await fetch("/api/form-analysis", {
                 method: "POST",
-                body: formData,
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    video_path: storagePath,
+                    sport,
+                    analysis_type: analysisType,
+                    mime_type: selectedFile.type,
+                }),
             });
 
             if (!res.ok) throw new Error("Upload failed");

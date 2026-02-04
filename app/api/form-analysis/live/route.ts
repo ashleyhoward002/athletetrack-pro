@@ -9,7 +9,7 @@ import { SportId, getSportConfig } from "@/lib/sports/config";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 
-// POST: Save a live coaching session recording and generate summary analysis
+// POST: Process a live coaching session recording (video already uploaded to Storage by client)
 export async function POST(req: NextRequest) {
     try {
         const cookieStore = cookies();
@@ -21,27 +21,20 @@ export async function POST(req: NextRequest) {
         }
         const userId = session.user.id;
 
-        const formData = await req.formData();
-        const file = formData.get("video") as File;
-        const sport = (formData.get("sport") as SportId) || "basketball";
-        const analysisType = (formData.get("analysis_type") as string) || "";
-        const sessionDuration = parseInt(formData.get("session_duration_seconds") as string) || 0;
-        const transcriptRaw = formData.get("session_transcript") as string;
+        const body = await req.json();
+        const videoPath = body.video_path as string;
+        const sport = (body.sport as SportId) || "basketball";
+        const analysisType = (body.analysis_type as string) || "";
+        const sessionDuration = parseInt(body.session_duration_seconds) || 0;
+        const sessionTranscript = Array.isArray(body.session_transcript) ? body.session_transcript : [];
 
-        let sessionTranscript = [];
-        try {
-            sessionTranscript = JSON.parse(transcriptRaw || "[]");
-        } catch {
-            sessionTranscript = [];
+        if (!videoPath) {
+            return NextResponse.json({ error: "video_path is required" }, { status: 400 });
         }
 
-        if (!file) {
-            return NextResponse.json({ error: "Video file is required" }, { status: 400 });
-        }
-
-        // Validate file size (100MB max for live sessions which may be longer)
-        if (file.size > 100 * 1024 * 1024) {
-            return NextResponse.json({ error: "File too large. Max 100MB." }, { status: 400 });
+        // Verify the file belongs to this user
+        if (!videoPath.startsWith(`${userId}/`)) {
+            return NextResponse.json({ error: "Unauthorized file access" }, { status: 403 });
         }
 
         const config = getSportConfig(sport);
@@ -50,20 +43,10 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Invalid analysis type" }, { status: 400 });
         }
 
-        // 1. Upload recorded session to Supabase Storage
-        const timestamp = Date.now();
-        const filePath = `${userId}/live-${timestamp}.webm`;
-        const buffer = Buffer.from(await file.arrayBuffer());
-
-        const { error: uploadError } = await supabase.storage
-            .from("form-videos")
-            .upload(filePath, buffer, { contentType: "video/webm" });
-
-        if (uploadError) throw uploadError;
-
+        // 1. Get the video URL from Storage (already uploaded by client)
         const { data: urlData } = supabase.storage
             .from("form-videos")
-            .getPublicUrl(filePath);
+            .getPublicUrl(videoPath);
 
         const videoUrl = urlData.publicUrl;
 
@@ -85,14 +68,23 @@ export async function POST(req: NextRequest) {
 
         if (insertError) throw insertError;
 
-        // 3. Upload video to Gemini File API, then generate summary analysis
+        // 3. Download video from Storage, upload to Gemini File API, then generate summary
         try {
-            // Upload to Gemini's File API (handles large files, unlike inline base64)
+            // Download the video from Supabase Storage
+            const { data: videoBlob, error: downloadError } = await supabase.storage
+                .from("form-videos")
+                .download(videoPath);
+
+            if (downloadError || !videoBlob) {
+                throw new Error("Failed to download video from storage");
+            }
+
+            // Upload to Gemini's File API (handles large files)
             const uploadedFile = await ai.files.upload({
-                file: new Blob([buffer], { type: "video/webm" }),
+                file: new Blob([await videoBlob.arrayBuffer()], { type: "video/webm" }),
                 config: {
                     mimeType: "video/webm",
-                    displayName: `live-session-${timestamp}.webm`,
+                    displayName: `live-session-${Date.now()}.webm`,
                 },
             });
 

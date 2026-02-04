@@ -40,7 +40,7 @@ export async function GET(req: NextRequest) {
     }
 }
 
-// POST upload video and analyze
+// POST: Process uploaded video (video already uploaded to Storage by client)
 export async function POST(req: NextRequest) {
     try {
         const cookieStore = cookies();
@@ -52,18 +52,19 @@ export async function POST(req: NextRequest) {
         }
         const userId = session.user.id;
 
-        const formData = await req.formData();
-        const file = formData.get("video") as File;
-        const sport = (formData.get("sport") as SportId) || "basketball";
-        const analysisType = (formData.get("analysis_type") as string) || "";
+        const body = await req.json();
+        const videoPath = body.video_path as string;
+        const sport = (body.sport as SportId) || "basketball";
+        const analysisType = (body.analysis_type as string) || "";
+        const mimeType = (body.mime_type as string) || "video/mp4";
 
-        if (!file) {
-            return NextResponse.json({ error: "Video file is required" }, { status: 400 });
+        if (!videoPath) {
+            return NextResponse.json({ error: "video_path is required" }, { status: 400 });
         }
 
-        // Validate file size (50MB max)
-        if (file.size > 50 * 1024 * 1024) {
-            return NextResponse.json({ error: "File too large. Max 50MB." }, { status: 400 });
+        // Verify the file belongs to this user
+        if (!videoPath.startsWith(`${userId}/`)) {
+            return NextResponse.json({ error: "Unauthorized file access" }, { status: 403 });
         }
 
         const config = getSportConfig(sport);
@@ -72,20 +73,10 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Invalid analysis type" }, { status: 400 });
         }
 
-        // 1. Upload to Supabase Storage
-        const timestamp = Date.now();
-        const filePath = `${userId}/${timestamp}-${file.name}`;
-        const buffer = Buffer.from(await file.arrayBuffer());
-
-        const { error: uploadError } = await supabase.storage
-            .from("form-videos")
-            .upload(filePath, buffer, { contentType: file.type });
-
-        if (uploadError) throw uploadError;
-
+        // 1. Get the video URL from Storage (already uploaded by client)
         const { data: urlData } = supabase.storage
             .from("form-videos")
-            .getPublicUrl(filePath);
+            .getPublicUrl(videoPath);
 
         const videoUrl = urlData.publicUrl;
 
@@ -104,13 +95,21 @@ export async function POST(req: NextRequest) {
 
         if (insertError) throw insertError;
 
-        // 3. Upload video to Gemini File API, then analyze
+        // 3. Download from Storage, upload to Gemini File API, then analyze
         try {
+            const { data: videoBlob, error: downloadError } = await supabase.storage
+                .from("form-videos")
+                .download(videoPath);
+
+            if (downloadError || !videoBlob) {
+                throw new Error("Failed to download video from storage");
+            }
+
             const uploadedFile = await ai.files.upload({
-                file: new Blob([buffer], { type: file.type }),
+                file: new Blob([await videoBlob.arrayBuffer()], { type: mimeType }),
                 config: {
-                    mimeType: file.type,
-                    displayName: `upload-${timestamp}-${file.name}`,
+                    mimeType,
+                    displayName: videoPath.split("/").pop() || "upload.mp4",
                 },
             });
 
@@ -142,7 +141,7 @@ export async function POST(req: NextRequest) {
                             {
                                 fileData: {
                                     fileUri: fileMetadata.uri!,
-                                    mimeType: file.type,
+                                    mimeType,
                                 },
                             },
                         ],
