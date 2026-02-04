@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
         }
 
         const body = await req.json();
-        const { name, category, difficulty, description, video_url } = body;
+        const { name, category, difficulty, description, video_url, duration_minutes, sets, reps } = body;
 
         // Basic validation
         if (!name || !category || !difficulty) {
@@ -65,7 +65,12 @@ export async function POST(req: NextRequest) {
 
         const { data, error } = await supabase
             .from("drills")
-            .insert([{ name, category, difficulty, description, video_url, sport }])
+            .insert([{
+                name, category, difficulty, description, video_url, sport,
+                duration_minutes: duration_minutes || 10,
+                sets: sets || 3,
+                reps: reps || 10,
+            }])
             .select();
 
         if (error) {

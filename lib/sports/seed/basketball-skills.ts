@@ -1,0 +1,58 @@
+export const basketballSkillTrees = [
+    {
+        name: "Ball Handling",
+        description: "Master dribbling fundamentals through advanced moves",
+        icon: "🏀",
+        display_order: 0,
+        nodes: [
+            { name: "Basic Dribble", description: "Maintain a controlled dribble with either hand while stationary", level: 1, xp_required: 100, icon: "👋", display_order: 0 },
+            { name: "Crossover", description: "Quick change of direction by bouncing the ball from one hand to the other", level: 1, xp_required: 150, icon: "↔️", display_order: 1 },
+            { name: "Behind-the-Back", description: "Wrap the dribble behind your back to switch hands while protecting the ball", level: 2, xp_required: 250, icon: "🔄", display_order: 2 },
+            { name: "Between-the-Legs", description: "Dribble through your legs to change direction and protect from defenders", level: 2, xp_required: 250, icon: "🦵", display_order: 3 },
+            { name: "Hesitation Move", description: "Fake a stop to freeze the defender, then accelerate past them", level: 2, xp_required: 300, icon: "⏸️", display_order: 4 },
+            { name: "Combo Moves", description: "Chain together multiple dribble moves in sequence to break down defenders", level: 3, xp_required: 500, icon: "⚡", display_order: 5 },
+        ],
+    },
+    {
+        name: "Shooting",
+        description: "Develop consistent shooting form from every spot on the court",
+        icon: "🎯",
+        display_order: 1,
+        nodes: [
+            { name: "Layups", description: "Finish at the rim with both hands using proper footwork", level: 1, xp_required: 100, icon: "🏃", display_order: 0 },
+            { name: "Free Throws", description: "Consistent free throw shooting with proper routine and mechanics", level: 1, xp_required: 150, icon: "🎪", display_order: 1 },
+            { name: "Mid-Range", description: "Pull-up and catch-and-shoot jumpers from the elbow and mid-post", level: 2, xp_required: 250, icon: "📏", display_order: 2 },
+            { name: "Three-Pointers", description: "Consistent shooting from behind the arc with proper form", level: 2, xp_required: 300, icon: "3️⃣", display_order: 3 },
+            { name: "Off-the-Dribble", description: "Create your own shot off the bounce with pull-ups and step-backs", level: 3, xp_required: 400, icon: "🔥", display_order: 4 },
+            { name: "Contested Shots", description: "Maintain shooting form and accuracy with a hand in your face", level: 3, xp_required: 500, icon: "💪", display_order: 5 },
+        ],
+    },
+    {
+        name: "Defense",
+        description: "Lock down your opponent with elite defensive fundamentals",
+        icon: "🛡️",
+        display_order: 2,
+        nodes: [
+            { name: "Defensive Stance", description: "Low, wide stance with active hands ready to react", level: 1, xp_required: 100, icon: "🧎", display_order: 0 },
+            { name: "Lateral Slides", description: "Quick side-to-side movement to stay in front of the ball handler", level: 1, xp_required: 150, icon: "👟", display_order: 1 },
+            { name: "Closeouts", description: "Sprint to the shooter with controlled deceleration and high hands", level: 2, xp_required: 250, icon: "🏃‍♂️", display_order: 2 },
+            { name: "Help Defense", description: "Rotate to help teammates and recover to your assignment", level: 2, xp_required: 300, icon: "🤝", display_order: 3 },
+            { name: "Shot Blocking", description: "Time your jumps to contest and block shots at the rim", level: 3, xp_required: 400, icon: "✋", display_order: 4 },
+            { name: "Steal Techniques", description: "Active hands, passing lane deflections, and on-ball strips", level: 3, xp_required: 500, icon: "🦊", display_order: 5 },
+        ],
+    },
+    {
+        name: "Passing",
+        description: "Develop elite court vision and passing accuracy",
+        icon: "🎯",
+        display_order: 3,
+        nodes: [
+            { name: "Chest Pass", description: "Two-hand pass from the chest with proper snap and accuracy", level: 1, xp_required: 100, icon: "➡️", display_order: 0 },
+            { name: "Bounce Pass", description: "Pass that bounces once before reaching your teammate", level: 1, xp_required: 100, icon: "⬇️", display_order: 1 },
+            { name: "Overhead Pass", description: "Two-hand pass from above the head, useful for outlet passes", level: 1, xp_required: 150, icon: "⬆️", display_order: 2 },
+            { name: "One-Hand Push", description: "Quick single-hand pass for faster delivery to open teammates", level: 2, xp_required: 250, icon: "🖐️", display_order: 3 },
+            { name: "No-Look Pass", description: "Misdirect the defense by looking one way while passing another", level: 3, xp_required: 400, icon: "👀", display_order: 4 },
+            { name: "Alley-Oop", description: "Lob pass near the rim for a teammate to catch and finish in the air", level: 3, xp_required: 500, icon: "🪂", display_order: 5 },
+        ],
+    },
+];

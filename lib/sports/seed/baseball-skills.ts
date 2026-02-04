@@ -1,0 +1,58 @@
+export const baseballSkillTrees = [
+    {
+        name: "Batting",
+        description: "Develop a complete approach at the plate from stance to follow-through",
+        icon: "🏏",
+        display_order: 0,
+        nodes: [
+            { name: "Stance & Grip", description: "Proper batting stance, hand positioning, and bat grip", level: 1, xp_required: 100, icon: "🧍", display_order: 0 },
+            { name: "Swing Mechanics", description: "Load, stride, hip rotation, and level swing path", level: 1, xp_required: 150, icon: "🔄", display_order: 1 },
+            { name: "Contact Hitting", description: "Consistent bat-to-ball contact with gap-to-gap approach", level: 2, xp_required: 250, icon: "🎯", display_order: 2 },
+            { name: "Power Hitting", description: "Drive the ball with authority using lower body and hip rotation", level: 2, xp_required: 300, icon: "💥", display_order: 3 },
+            { name: "Opposite Field", description: "Hit to the opposite field with proper timing and approach", level: 3, xp_required: 400, icon: "↗️", display_order: 4 },
+            { name: "Two-Strike Approach", description: "Shorten up and protect the plate with two strikes", level: 3, xp_required: 500, icon: "🛡️", display_order: 5 },
+        ],
+    },
+    {
+        name: "Pitching",
+        description: "Build a complete pitching arsenal from fundamentals to advanced mechanics",
+        icon: "⚡",
+        display_order: 1,
+        nodes: [
+            { name: "Wind-Up Basics", description: "Proper wind-up position, balance, and tempo", level: 1, xp_required: 100, icon: "🧎", display_order: 0 },
+            { name: "Fastball Command", description: "Throw a four-seam fastball with accuracy to both sides of the plate", level: 1, xp_required: 150, icon: "🔥", display_order: 1 },
+            { name: "Changeup", description: "Off-speed pitch that looks like a fastball but arrives slower", level: 2, xp_required: 250, icon: "🐢", display_order: 2 },
+            { name: "Curveball", description: "Breaking ball with 12-6 or 11-5 break to fool hitters", level: 2, xp_required: 300, icon: "🌀", display_order: 3 },
+            { name: "Pitch Sequencing", description: "Set up hitters by mixing speeds, locations, and pitch types", level: 3, xp_required: 400, icon: "🧠", display_order: 4 },
+            { name: "Pitching Under Pressure", description: "Execute pitches in high-leverage situations with runners on base", level: 3, xp_required: 500, icon: "🧊", display_order: 5 },
+        ],
+    },
+    {
+        name: "Fielding",
+        description: "Become a reliable defender at any position",
+        icon: "🧤",
+        display_order: 2,
+        nodes: [
+            { name: "Ready Position", description: "Athletic stance, glove down, weight on balls of feet", level: 1, xp_required: 100, icon: "🏋️", display_order: 0 },
+            { name: "Ground Balls", description: "Field ground balls cleanly with proper glove-to-hand transfer", level: 1, xp_required: 150, icon: "⬇️", display_order: 1 },
+            { name: "Fly Balls", description: "Track and catch fly balls with proper route running", level: 2, xp_required: 250, icon: "⬆️", display_order: 2 },
+            { name: "Throwing Accuracy", description: "Make strong, accurate throws from various positions", level: 2, xp_required: 300, icon: "🎯", display_order: 3 },
+            { name: "Double Play Turns", description: "Quick pivots and transfers for turning double plays", level: 3, xp_required: 400, icon: "2️⃣", display_order: 4 },
+            { name: "Diving Plays", description: "Layout for balls out of reach and recover to make the throw", level: 3, xp_required: 500, icon: "🤸", display_order: 5 },
+        ],
+    },
+    {
+        name: "Base Running",
+        description: "Master smart, aggressive base running",
+        icon: "🏃",
+        display_order: 3,
+        nodes: [
+            { name: "Running Form", description: "Sprint mechanics for maximum speed out of the box and on the bases", level: 1, xp_required: 100, icon: "👟", display_order: 0 },
+            { name: "Lead-Offs", description: "Take aggressive but safe leads from first, second, and third", level: 1, xp_required: 150, icon: "👣", display_order: 1 },
+            { name: "Stealing Second", description: "Read the pitcher, get a good jump, and slide safely into second", level: 2, xp_required: 250, icon: "💨", display_order: 2 },
+            { name: "Rounding Bases", description: "Efficient turns around the bases to take extra bases on hits", level: 2, xp_required: 250, icon: "🔄", display_order: 3 },
+            { name: "Reading the Ball", description: "Make smart decisions on fly balls and line drives as a runner", level: 3, xp_required: 400, icon: "👀", display_order: 4 },
+            { name: "Delayed Steal", description: "Advanced steal technique using deception and timing", level: 3, xp_required: 500, icon: "🦊", display_order: 5 },
+        ],
+    },
+];
