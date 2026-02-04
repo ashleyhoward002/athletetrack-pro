@@ -1,12 +1,13 @@
 export const dynamic = "force-dynamic";
+export const maxDuration = 120; // Allow up to 2 minutes for video processing
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI, FileState } from "@google/genai";
 import { SportId, getSportConfig } from "@/lib/sports/config";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 
 // POST: Save a live coaching session recording and generate summary analysis
 export async function POST(req: NextRequest) {
@@ -84,24 +85,58 @@ export async function POST(req: NextRequest) {
 
         if (insertError) throw insertError;
 
-        // 3. Generate summary analysis with Gemini Vision on the recorded video
+        // 3. Upload video to Gemini File API, then generate summary analysis
         try {
-            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
-            const videoData = {
-                inlineData: {
+            // Upload to Gemini's File API (handles large files, unlike inline base64)
+            const uploadedFile = await ai.files.upload({
+                file: new Blob([buffer], { type: "video/webm" }),
+                config: {
                     mimeType: "video/webm",
-                    data: buffer.toString("base64"),
+                    displayName: `live-session-${timestamp}.webm`,
                 },
-            };
+            });
+
+            // Poll until Gemini has finished processing the video
+            let fileMetadata = await ai.files.get({ name: uploadedFile.name! });
+            const maxWait = 60_000; // 60 second timeout
+            const pollStart = Date.now();
+            while (
+                fileMetadata.state === FileState.PROCESSING &&
+                Date.now() - pollStart < maxWait
+            ) {
+                await new Promise((r) => setTimeout(r, 2000));
+                fileMetadata = await ai.files.get({ name: uploadedFile.name! });
+            }
+
+            if (fileMetadata.state !== FileState.ACTIVE) {
+                throw new Error(
+                    `Gemini file processing failed or timed out (state: ${fileMetadata.state})`
+                );
+            }
 
             const summaryPrompt = `This is a recorded live coaching session. The athlete was practicing their ${analysisTypeDef.label.toLowerCase()} for ${Math.floor(sessionDuration / 60)} minutes.
 
 ${analysisTypeDef.promptTemplate}`;
 
-            const result = await model.generateContent([summaryPrompt, videoData]);
+            const result = await ai.models.generateContent({
+                model: "gemini-1.5-flash",
+                contents: [
+                    {
+                        role: "user",
+                        parts: [
+                            { text: summaryPrompt },
+                            {
+                                fileData: {
+                                    fileUri: fileMetadata.uri!,
+                                    mimeType: "video/webm",
+                                },
+                            },
+                        ],
+                    },
+                ],
+            });
 
-            const responseText = result.response.text();
+            const responseText = result.text || "";
             const cleanText = responseText.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
             const feedback = JSON.parse(cleanText);
 
@@ -115,6 +150,9 @@ ${analysisTypeDef.promptTemplate}`;
                 })
                 .eq("id", analysis.id);
 
+            // Clean up the uploaded file from Gemini (fire-and-forget)
+            ai.files.delete({ name: uploadedFile.name! }).catch(() => {});
+
             return NextResponse.json({
                 analysis: {
                     ...analysis,
@@ -124,7 +162,7 @@ ${analysisTypeDef.promptTemplate}`;
                 },
             }, { status: 201 });
         } catch (aiError) {
-            console.error("Gemini Vision error for live session:", aiError);
+            console.error("Gemini analysis error for live session:", aiError);
 
             // Still save the session even if AI summary fails
             await supabase

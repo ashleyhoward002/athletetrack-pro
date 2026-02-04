@@ -1,12 +1,13 @@
 export const dynamic = "force-dynamic";
+export const maxDuration = 120;
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI, FileState } from "@google/genai";
 import { SportId, getSportConfig } from "@/lib/sports/config";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 
 // GET list of form analyses
 export async function GET(req: NextRequest) {
@@ -103,23 +104,53 @@ export async function POST(req: NextRequest) {
 
         if (insertError) throw insertError;
 
-        // 3. Analyze with Gemini Vision
+        // 3. Upload video to Gemini File API, then analyze
         try {
-            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
-            const videoData = {
-                inlineData: {
+            const uploadedFile = await ai.files.upload({
+                file: new Blob([buffer], { type: file.type }),
+                config: {
                     mimeType: file.type,
-                    data: buffer.toString("base64"),
+                    displayName: `upload-${timestamp}-${file.name}`,
                 },
-            };
+            });
 
-            const result = await model.generateContent([
-                analysisTypeDef.promptTemplate,
-                videoData,
-            ]);
+            // Poll until Gemini has finished processing the video
+            let fileMetadata = await ai.files.get({ name: uploadedFile.name! });
+            const maxWait = 60_000;
+            const pollStart = Date.now();
+            while (
+                fileMetadata.state === FileState.PROCESSING &&
+                Date.now() - pollStart < maxWait
+            ) {
+                await new Promise((r) => setTimeout(r, 2000));
+                fileMetadata = await ai.files.get({ name: uploadedFile.name! });
+            }
 
-            const responseText = result.response.text();
+            if (fileMetadata.state !== FileState.ACTIVE) {
+                throw new Error(
+                    `Gemini file processing failed or timed out (state: ${fileMetadata.state})`
+                );
+            }
+
+            const result = await ai.models.generateContent({
+                model: "gemini-1.5-flash",
+                contents: [
+                    {
+                        role: "user",
+                        parts: [
+                            { text: analysisTypeDef.promptTemplate },
+                            {
+                                fileData: {
+                                    fileUri: fileMetadata.uri!,
+                                    mimeType: file.type,
+                                },
+                            },
+                        ],
+                    },
+                ],
+            });
+
+            const responseText = result.text || "";
             const cleanText = responseText.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
             const feedback = JSON.parse(cleanText);
 
@@ -133,6 +164,9 @@ export async function POST(req: NextRequest) {
                 })
                 .eq("id", analysis.id);
 
+            // Clean up the uploaded file from Gemini (fire-and-forget)
+            ai.files.delete({ name: uploadedFile.name! }).catch(() => {});
+
             return NextResponse.json({
                 analysis: {
                     ...analysis,
@@ -142,7 +176,7 @@ export async function POST(req: NextRequest) {
                 },
             }, { status: 201 });
         } catch (aiError) {
-            console.error("Gemini Vision error:", aiError);
+            console.error("Gemini analysis error:", aiError);
             await supabase
                 .from("form_analyses")
                 .update({ status: "failed" })
