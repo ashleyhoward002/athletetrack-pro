@@ -4,6 +4,10 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { getSportConfig } from "@/lib/sports/config";
+import ScoreDisplay from "@/components/form-analysis/ScoreDisplay";
+import FeedbackPanel from "@/components/form-analysis/FeedbackPanel";
+import DetailedAnalysis from "@/components/form-analysis/DetailedAnalysis";
+import DrillRecommendations from "@/components/form-analysis/DrillRecommendations";
 
 export default function FormAnalysisDetailPage() {
     const params = useParams();
@@ -39,12 +43,6 @@ export default function FormAnalysisDetailPage() {
     const typeDef = config.formAnalysisTypes.find((t) => t.key === analysis.analysis_type);
     const feedback = analysis.ai_feedback;
 
-    const getScoreColor = (score: number) => {
-        if (score >= 80) return "text-success";
-        if (score >= 60) return "text-warning";
-        return "text-error";
-    };
-
     return (
         <main className="min-h-screen p-4 md:p-8 pb-24">
             <div className="max-w-4xl mx-auto space-y-6">
@@ -61,6 +59,9 @@ export default function FormAnalysisDetailPage() {
                         <p className="text-base-content/60">
                             {new Date(analysis.created_at).toLocaleDateString()} &middot;{" "}
                             {config.icon} {config.name}
+                            {analysis.source === "live" && (
+                                <span className="badge badge-sm badge-primary ml-2">Live Session</span>
+                            )}
                         </p>
                     </div>
                 </div>
@@ -76,74 +77,45 @@ export default function FormAnalysisDetailPage() {
                     </div>
                 </div>
 
-                {/* Score */}
-                {analysis.overall_score && (
-                    <div className="card bg-base-200">
-                        <div className="card-body items-center text-center">
-                            <div className={`text-6xl font-bold ${getScoreColor(analysis.overall_score)}`}>
-                                {analysis.overall_score}
-                            </div>
-                            <p className="text-base-content/60">Overall Score</p>
-                        </div>
-                    </div>
-                )}
-
-                {feedback && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {/* Strengths */}
-                        <div className="card bg-success/10 border border-success/30">
-                            <div className="card-body">
-                                <h3 className="card-title text-success">Strengths</h3>
-                                <ul className="space-y-2">
-                                    {feedback.strengths?.map((s: string, i: number) => (
-                                        <li key={i} className="flex gap-2 text-sm">
-                                            <span className="text-success mt-0.5">+</span>
-                                            <span>{s}</span>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                        </div>
-
-                        {/* Improvements */}
-                        <div className="card bg-warning/10 border border-warning/30">
-                            <div className="card-body">
-                                <h3 className="card-title text-warning">Areas to Improve</h3>
-                                <ul className="space-y-2">
-                                    {feedback.improvements?.map((s: string, i: number) => (
-                                        <li key={i} className="flex gap-2 text-sm">
-                                            <span className="text-warning mt-0.5">!</span>
-                                            <span>{s}</span>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* Detailed Analysis */}
-                {feedback?.detailed_analysis && (
+                {/* Live Session Info */}
+                {analysis.source === "live" && analysis.session_duration_seconds && (
                     <div className="card bg-base-200">
                         <div className="card-body">
-                            <h3 className="card-title">Detailed Analysis</h3>
-                            <div className="prose prose-sm max-w-none">
-                                {feedback.detailed_analysis.split("\n").map((p: string, i: number) => (
-                                    <p key={i}>{p}</p>
-                                ))}
-                            </div>
+                            <h3 className="card-title">Session Info</h3>
+                            <p className="text-sm text-base-content/60">
+                                Duration: {Math.floor(analysis.session_duration_seconds / 60)}m {analysis.session_duration_seconds % 60}s
+                            </p>
                         </div>
                     </div>
                 )}
+
+                {/* Score */}
+                {analysis.overall_score && <ScoreDisplay score={analysis.overall_score} />}
+
+                {/* Strengths & Improvements */}
+                {feedback && <FeedbackPanel feedback={feedback} />}
+
+                {/* Detailed Analysis */}
+                {feedback?.detailed_analysis && <DetailedAnalysis text={feedback.detailed_analysis} />}
 
                 {/* Drill Recommendations */}
                 {feedback?.drill_recommendations?.length > 0 && (
+                    <DrillRecommendations drills={feedback.drill_recommendations} />
+                )}
+
+                {/* Live Session Transcript */}
+                {analysis.source === "live" && analysis.session_transcript?.length > 0 && (
                     <div className="card bg-base-200">
                         <div className="card-body">
-                            <h3 className="card-title">Recommended Drills</h3>
-                            <div className="flex flex-wrap gap-2">
-                                {feedback.drill_recommendations.map((d: string, i: number) => (
-                                    <span key={i} className="badge badge-outline badge-primary">{d}</span>
+                            <h3 className="card-title">Live Coaching Transcript</h3>
+                            <div className="space-y-2 max-h-80 overflow-y-auto">
+                                {analysis.session_transcript.map((entry: any, i: number) => (
+                                    <div key={i} className="flex gap-3 text-sm">
+                                        <span className="text-base-content/40 font-mono min-w-[50px]">
+                                            {Math.floor(entry.timestamp / 60000)}:{String(Math.floor((entry.timestamp % 60000) / 1000)).padStart(2, "0")}
+                                        </span>
+                                        <span>{entry.text}</span>
+                                    </div>
                                 ))}
                             </div>
                         </div>

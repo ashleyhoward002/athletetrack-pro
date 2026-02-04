@@ -2,8 +2,11 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { SPORT_LIST, SportId, getSportConfig } from "@/lib/sports/config";
+import { SportId, getSportConfig } from "@/lib/sports/config";
 import toast from "react-hot-toast";
+import SportAnalysisSelector from "@/components/form-analysis/SportAnalysisSelector";
+import AnalysisHistoryGrid from "@/components/form-analysis/AnalysisHistoryGrid";
+import ScoreProgressChart from "@/components/form-analysis/ScoreProgressChart";
 
 export default function FormAnalysisPage() {
     const [analyses, setAnalyses] = useState<any[]>([]);
@@ -74,12 +77,6 @@ export default function FormAnalysisPage() {
         }
     };
 
-    const getScoreColor = (score: number) => {
-        if (score >= 80) return "text-success";
-        if (score >= 60) return "text-warning";
-        return "text-error";
-    };
-
     return (
         <main className="min-h-screen p-4 md:p-8 pb-24">
             <div className="max-w-5xl mx-auto space-y-6">
@@ -97,36 +94,39 @@ export default function FormAnalysisPage() {
                     </div>
                 </div>
 
+                {/* Live Session CTA */}
+                <Link href="/dashboard/form-analysis/live">
+                    <div className="card bg-gradient-to-r from-primary/20 to-secondary/20 border border-primary/30 hover:border-primary/60 transition-all cursor-pointer">
+                        <div className="card-body flex-row items-center gap-4">
+                            <div className="text-4xl">🎥</div>
+                            <div className="flex-1">
+                                <h3 className="card-title">Live Coaching Session</h3>
+                                <p className="text-sm text-base-content/60">
+                                    Get real-time voice and text feedback from your AI coach while you practice. Uses your webcam to analyze form live.
+                                </p>
+                            </div>
+                            <div className="btn btn-primary">
+                                Start Live Session
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </Link>
+
                 {/* Upload Section */}
                 <div className="card bg-base-200">
                     <div className="card-body">
                         <h3 className="card-title">Upload Video for Analysis</h3>
                         <form onSubmit={handleUpload} className="space-y-4">
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div className="form-control">
-                                    <label className="label"><span className="label-text">Sport</span></label>
-                                    <select
-                                        className="select select-bordered"
-                                        value={sport}
-                                        onChange={(e) => setSport(e.target.value as SportId)}
-                                    >
-                                        {SPORT_LIST.map((s) => (
-                                            <option key={s.id} value={s.id}>{s.icon} {s.name}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div className="form-control">
-                                    <label className="label"><span className="label-text">Analysis Type</span></label>
-                                    <select
-                                        className="select select-bordered"
-                                        value={analysisType}
-                                        onChange={(e) => setAnalysisType(e.target.value)}
-                                    >
-                                        {config.formAnalysisTypes.map((t) => (
-                                            <option key={t.key} value={t.key}>{t.label}</option>
-                                        ))}
-                                    </select>
-                                </div>
+                                <SportAnalysisSelector
+                                    sport={sport}
+                                    onSportChange={setSport}
+                                    analysisType={analysisType}
+                                    onAnalysisTypeChange={setAnalysisType}
+                                />
                                 <div className="form-control">
                                     <label className="label"><span className="label-text">Video File</span></label>
                                     <input
@@ -155,56 +155,25 @@ export default function FormAnalysisPage() {
                     </div>
                 </div>
 
+                {/* Score Progress Chart */}
+                {!loading && analyses.length >= 2 && (
+                    <ScoreProgressChart analyses={analyses} />
+                )}
+
                 {/* Analysis History */}
                 <div>
-                    <h2 className="text-xl font-bold mb-3">Analysis History</h2>
-                    {loading ? (
-                        <div className="flex justify-center py-8">
-                            <span className="loading loading-spinner loading-lg" />
-                        </div>
-                    ) : analyses.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {analyses.map((a) => (
-                                <Link key={a.id} href={`/dashboard/form-analysis/${a.id}`}>
-                                    <div className="card bg-base-200 hover:bg-base-300 transition-colors cursor-pointer">
-                                        <div className="card-body p-4">
-                                            <div className="flex justify-between items-start">
-                                                <div>
-                                                    <h3 className="font-bold">
-                                                        {config.formAnalysisTypes.find((t) => t.key === a.analysis_type)?.label || a.analysis_type}
-                                                    </h3>
-                                                    <p className="text-sm text-base-content/60">
-                                                        {new Date(a.created_at).toLocaleDateString()} &middot;{" "}
-                                                        <span className="badge badge-xs">{a.sport}</span>
-                                                    </p>
-                                                </div>
-                                                {a.overall_score ? (
-                                                    <div className={`text-2xl font-bold ${getScoreColor(a.overall_score)}`}>
-                                                        {a.overall_score}
-                                                    </div>
-                                                ) : (
-                                                    <span className={`badge badge-sm ${a.status === "processing" ? "badge-warning" : "badge-error"}`}>
-                                                        {a.status}
-                                                    </span>
-                                                )}
-                                            </div>
-                                            {a.ai_feedback && (
-                                                <div className="mt-2 text-sm">
-                                                    <span className="text-success">{a.ai_feedback.strengths?.length || 0} strengths</span>
-                                                    {" / "}
-                                                    <span className="text-warning">{a.ai_feedback.improvements?.length || 0} areas to improve</span>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                </Link>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="text-center py-12 text-base-content/50">
-                            No analyses yet. Upload your first video above!
-                        </div>
-                    )}
+                    <div className="flex items-center justify-between mb-3">
+                        <h2 className="text-xl font-bold">Analysis History</h2>
+                        {analyses.filter((a) => a.status === "completed").length >= 2 && (
+                            <Link href="/dashboard/form-analysis/compare" className="btn btn-sm btn-ghost">
+                                Compare Analyses
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                </svg>
+                            </Link>
+                        )}
+                    </div>
+                    <AnalysisHistoryGrid analyses={analyses} loading={loading} />
                 </div>
             </div>
         </main>

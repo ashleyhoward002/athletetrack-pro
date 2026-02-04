@@ -1,0 +1,144 @@
+export const dynamic = "force-dynamic";
+
+import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/utils/supabase/server";
+import { cookies } from "next/headers";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import { SportId, getSportConfig } from "@/lib/sports/config";
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
+
+// POST: Save a live coaching session recording and generate summary analysis
+export async function POST(req: NextRequest) {
+    try {
+        const cookieStore = cookies();
+        const supabase = createClient(cookieStore);
+
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+        const userId = session.user.id;
+
+        const formData = await req.formData();
+        const file = formData.get("video") as File;
+        const sport = (formData.get("sport") as SportId) || "basketball";
+        const analysisType = (formData.get("analysis_type") as string) || "";
+        const sessionDuration = parseInt(formData.get("session_duration_seconds") as string) || 0;
+        const transcriptRaw = formData.get("session_transcript") as string;
+
+        let sessionTranscript = [];
+        try {
+            sessionTranscript = JSON.parse(transcriptRaw || "[]");
+        } catch {
+            sessionTranscript = [];
+        }
+
+        if (!file) {
+            return NextResponse.json({ error: "Video file is required" }, { status: 400 });
+        }
+
+        // Validate file size (100MB max for live sessions which may be longer)
+        if (file.size > 100 * 1024 * 1024) {
+            return NextResponse.json({ error: "File too large. Max 100MB." }, { status: 400 });
+        }
+
+        const config = getSportConfig(sport);
+        const analysisTypeDef = config.formAnalysisTypes.find((t) => t.key === analysisType);
+        if (!analysisTypeDef) {
+            return NextResponse.json({ error: "Invalid analysis type" }, { status: 400 });
+        }
+
+        // 1. Upload recorded session to Supabase Storage
+        const timestamp = Date.now();
+        const filePath = `${userId}/live-${timestamp}.webm`;
+        const buffer = Buffer.from(await file.arrayBuffer());
+
+        const { error: uploadError } = await supabase.storage
+            .from("form-videos")
+            .upload(filePath, buffer, { contentType: "video/webm" });
+
+        if (uploadError) throw uploadError;
+
+        const { data: urlData } = supabase.storage
+            .from("form-videos")
+            .getPublicUrl(filePath);
+
+        const videoUrl = urlData.publicUrl;
+
+        // 2. Create record with live session metadata
+        const { data: analysis, error: insertError } = await supabase
+            .from("form_analyses")
+            .insert({
+                user_id: userId,
+                sport,
+                analysis_type: analysisType,
+                video_url: videoUrl,
+                status: "processing",
+                source: "live",
+                session_duration_seconds: sessionDuration,
+                session_transcript: sessionTranscript,
+            })
+            .select()
+            .single();
+
+        if (insertError) throw insertError;
+
+        // 3. Generate summary analysis with Gemini Vision on the recorded video
+        try {
+            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+            const videoData = {
+                inlineData: {
+                    mimeType: "video/webm",
+                    data: buffer.toString("base64"),
+                },
+            };
+
+            const summaryPrompt = `This is a recorded live coaching session. The athlete was practicing their ${analysisTypeDef.label.toLowerCase()} for ${Math.floor(sessionDuration / 60)} minutes.
+
+${analysisTypeDef.promptTemplate}`;
+
+            const result = await model.generateContent([summaryPrompt, videoData]);
+
+            const responseText = result.response.text();
+            const cleanText = responseText.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+            const feedback = JSON.parse(cleanText);
+
+            // 4. Update analysis record with AI feedback
+            await supabase
+                .from("form_analyses")
+                .update({
+                    status: "completed",
+                    ai_feedback: feedback,
+                    overall_score: feedback.overall_score || null,
+                })
+                .eq("id", analysis.id);
+
+            return NextResponse.json({
+                analysis: {
+                    ...analysis,
+                    status: "completed",
+                    ai_feedback: feedback,
+                    overall_score: feedback.overall_score,
+                },
+            }, { status: 201 });
+        } catch (aiError) {
+            console.error("Gemini Vision error for live session:", aiError);
+
+            // Still save the session even if AI summary fails
+            await supabase
+                .from("form_analyses")
+                .update({ status: "failed" })
+                .eq("id", analysis.id);
+
+            return NextResponse.json({
+                analysis: { ...analysis, status: "failed" },
+                error: "AI summary analysis failed, but your session recording was saved.",
+            }, { status: 201 });
+        }
+    } catch (error) {
+        console.error("POST /api/form-analysis/live error:", error);
+        return NextResponse.json({ error: "Failed to save live session" }, { status: 500 });
+    }
+}

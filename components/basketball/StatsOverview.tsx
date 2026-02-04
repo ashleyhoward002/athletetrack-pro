@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { GlassCard } from '@/components/ui/GlassCard';
+import { getSportConfig, sumStats } from '@/lib/sports/config';
 
 interface StatCard {
     label: string;
@@ -13,18 +14,58 @@ interface StatCard {
 
 export default function StatsOverview() {
     const [stats, setStats] = useState<StatCard[]>([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // TODO: Fetch from MongoDB
-        setStats([
-            { label: 'Games Played', value: 12, color: 'primary' },
-            { label: 'PPG', value: '14.3', change: '+2.3', trend: 'up', color: 'success' },
-            { label: 'FG%', value: '42%', change: '+3%', trend: 'up', color: 'info' },
-            { label: 'RPG', value: '5.2', change: '-0.5', trend: 'down', color: 'warning' },
-            { label: 'APG', value: '3.1', change: '+1.2', trend: 'up', color: 'accent' },
-            { label: 'FT%', value: '67%', change: '+5%', trend: 'up', color: 'secondary' },
-        ]);
+        fetchStats();
     }, []);
+
+    const fetchStats = async () => {
+        setLoading(true);
+        try {
+            const res = await fetch('/api/games?sport=basketball');
+            const data = await res.json();
+            const games = data.games || [];
+
+            if (games.length === 0) {
+                setStats([]);
+                return;
+            }
+
+            const config = getSportConfig('basketball');
+            const totals = sumStats(games.map((g: any) => ({ stats: g.stats || {} })));
+            const gamesPlayed = games.length;
+
+            const result: StatCard[] = [
+                { label: 'Games Played', value: gamesPlayed, color: 'primary' },
+            ];
+
+            // Compute averages from config
+            for (const card of config.averageCards) {
+                const value = card.compute(totals, gamesPlayed);
+                const formatted = card.format(value);
+                result.push({ label: card.label, value: formatted, color: 'success' });
+            }
+
+            setStats(result);
+        } catch {
+            setStats([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="flex justify-center py-4">
+                <span className="loading loading-spinner loading-sm text-primary" />
+            </div>
+        );
+    }
+
+    if (stats.length === 0) {
+        return <p className="text-sm text-base-content/50">No basketball games logged yet.</p>;
+    }
 
     return (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
