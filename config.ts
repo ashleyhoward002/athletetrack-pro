@@ -18,11 +18,7 @@ const config = {
   stripe: {
     plans: [
       {
-        // TODO: Replace with your actual Stripe price IDs
-        priceId:
-          process.env.NODE_ENV === "development"
-            ? "price_starter_dev"
-            : "price_starter_prod",
+        priceId: "price_1SxpkgP39ltnKcnnA6jBRI0P",
         name: "Starter",
         description: "Perfect for tracking a single athlete",
         price: 10,
@@ -35,11 +31,7 @@ const config = {
         ],
       },
       {
-        // TODO: Replace with your actual Stripe price IDs
-        priceId:
-          process.env.NODE_ENV === "development"
-            ? "price_pro_dev"
-            : "price_pro_prod",
+        priceId: "price_1SxpkxP39ltnKcnnR2euf5pN",
         isFeatured: true,
         name: "Professional",
         description: "For serious multi-sport families",

@@ -1,133 +1,230 @@
 "use client";
 // app/page.tsx - Landing Page
 import Link from 'next/link';
-import Image from 'next/image';
-import { AuroraHero } from '@/components/ui/AuroraHero';
+import { motion } from 'framer-motion';
+import { AthleticHero } from '@/components/ui/AthleticHero';
 import Header from '@/components/Header';
 
 export default function LandingPage() {
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen bg-slate-50">
       <Header />
+
       {/* Hero Section */}
-      <AuroraHero>
-        {/* Trust Badge */}
-        <div className="absolute top-8 left-1/2 transform -translate-x-1/2">
-          <div className="bg-white/10 backdrop-blur-sm rounded-full px-6 py-2 flex items-center gap-2">
-            <span className="text-green-400">✓</span>
-            <span className="text-white text-sm font-medium">Trusted by Strategic Sports Parents & Top College Scouts</span>
-          </div>
-        </div>
+      <AthleticHero>
+        <div className="max-w-6xl mx-auto pt-16 pb-8">
+          {/* Tagline pill */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="flex justify-center mb-8"
+          >
+            <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur border border-slate-200 rounded-full px-5 py-2 shadow-sm">
+              <span className="text-cyan-600 font-semibold text-sm">From Peewee to Prospect</span>
+              <span className="text-slate-400">|</span>
+              <span className="text-slate-600 text-sm">One app for the entire journey</span>
+            </div>
+          </motion.div>
 
-        <div className="max-w-5xl mx-auto text-center space-y-8 pt-20">
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-white leading-tight">
-            Eliminate Data Anxiety.
-            <br />
-            Transform Your Child's
-            <br />
-            Talent into a Professional
-            <br />
-            Recruiting Profile.
-          </h1>
+          {/* Main headline - emotional transformation */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="text-center mb-8"
+          >
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold leading-[1.1] tracking-tight mb-6">
+              <span className="text-slate-800">Stop being the </span>
+              <span className="text-red-500 line-through decoration-red-400/50">admin</span>
+              <span className="text-slate-800">.</span>
+              <br />
+              <span className="text-slate-800">Go back to being the </span>
+              <span className="bg-gradient-to-r from-cyan-500 to-emerald-500 bg-clip-text text-transparent">fan</span>
+              <span className="text-slate-800">.</span>
+            </h1>
+            <p className="text-xl md:text-2xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
+              No more messy spreadsheets. No more scattered videos. No more data anxiety.
+              <br className="hidden md:block" />
+              <span className="font-medium text-slate-700">AthleteTrack Pro</span> organizes everything so you can focus on what matters—watching them play.
+            </p>
+          </motion.div>
 
-          <p className="text-xl md:text-2xl text-blue-100 max-w-3xl mx-auto">
-            Stop wrestling with messy spreadsheets and fragmented data.
-            AthleteTrack Pro centralizes every metric, rank, and video into a single,
-            professional platform, giving you the Control and Confidence needed
-            to Optimize their future.
-          </p>
+          {/* CTA Buttons */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="flex flex-col sm:flex-row gap-4 justify-center mb-12"
+          >
+            <Link
+              href="/signup"
+              className="group px-8 py-4 bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-600 hover:to-emerald-600 text-white font-bold text-lg rounded-xl shadow-lg shadow-cyan-500/25 transform transition-all hover:scale-105 hover:shadow-xl hover:shadow-cyan-500/30 text-center"
+            >
+              Start Free for 30 Days
+              <span className="inline-block ml-2 group-hover:translate-x-1 transition-transform">&rarr;</span>
+            </Link>
+            <Link
+              href="#demo"
+              className="px-8 py-4 bg-white border-2 border-slate-200 hover:border-slate-300 text-slate-700 font-semibold text-lg rounded-xl transition hover:bg-slate-50 text-center"
+            >
+              See How It Works
+            </Link>
+          </motion.div>
 
-          {/* Interactive Demo Preview */}
-          <div className="relative mx-auto max-w-4xl mt-12 mb-8">
-            <div className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-white/5 rounded-lg p-4">
-                  <p className="text-sm text-blue-200 mb-2">Interactive Demo Preview</p>
-                  <div className="bg-gradient-to-r from-red-500/20 to-orange-500/20 rounded p-3">
-                    <p className="text-white text-xs">❌ Messy Spreadsheet</p>
+          {/* Trust indicators */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.5 }}
+            className="flex flex-wrap justify-center gap-6 text-sm text-slate-500 mb-16"
+          >
+            <span className="flex items-center gap-2">
+              <svg className="w-5 h-5 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+              </svg>
+              No credit card required
+            </span>
+            <span className="flex items-center gap-2">
+              <svg className="w-5 h-5 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+              </svg>
+              Setup in 5 minutes
+            </span>
+            <span className="flex items-center gap-2">
+              <svg className="w-5 h-5 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+              </svg>
+              Works for all sports
+            </span>
+          </motion.div>
+
+          {/* Visual comparison - Before/After */}
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.4 }}
+            className="max-w-4xl mx-auto"
+          >
+            <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
+              <div className="grid md:grid-cols-2">
+                {/* Before */}
+                <div className="p-8 border-b md:border-b-0 md:border-r border-slate-100">
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="w-3 h-3 rounded-full bg-red-400"></div>
+                    <span className="text-sm font-medium text-red-600">Before</span>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3 text-slate-600">
+                      <span className="text-red-400">✕</span>
+                      <span>Spreadsheets everywhere</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-slate-600">
+                      <span className="text-red-400">✕</span>
+                      <span>4,000 videos, no organization</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-slate-600">
+                      <span className="text-red-400">✕</span>
+                      <span>"Storage full" on your phone</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-slate-600">
+                      <span className="text-red-400">✕</span>
+                      <span>Embarrassing PDFs to scouts</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-slate-600">
+                      <span className="text-red-400">✕</span>
+                      <span>Constant data anxiety</span>
+                    </div>
                   </div>
                 </div>
-                <div className="bg-white/5 rounded-lg p-4">
-                  <p className="text-sm text-green-300 mb-2">Recruiter Snapshot Generator</p>
-                  <div className="bg-gradient-to-r from-green-500/20 to-blue-500/20 rounded p-3">
-                    <p className="text-white text-xs">✓ Professional Profile</p>
+
+                {/* After */}
+                <div className="p-8 bg-gradient-to-br from-emerald-50/50 to-cyan-50/50">
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="w-3 h-3 rounded-full bg-emerald-400"></div>
+                    <span className="text-sm font-medium text-emerald-600">After</span>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3 text-slate-700">
+                      <span className="text-emerald-500">✓</span>
+                      <span>One clean dashboard</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-slate-700">
+                      <span className="text-emerald-500">✓</span>
+                      <span>Videos organized & searchable</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-slate-700">
+                      <span className="text-emerald-500">✓</span>
+                      <span>Unlimited cloud storage</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-slate-700">
+                      <span className="text-emerald-500">✓</span>
+                      <span>Professional recruiting profiles</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-slate-700">
+                      <span className="text-emerald-500">✓</span>
+                      <span>Peace of mind</span>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
+        </div>
+      </AthleticHero>
 
-          {/* Trust Indicators */}
-          <p className="text-sm text-blue-200 mb-4">As seen in:</p>
-          <div className="flex justify-center gap-8 mb-8 opacity-70">
-            {['ESPN', 'MaxPreps', 'NCSA', 'Perfect Game', 'Hudl'].map((brand) => (
-              <div key={brand} className="text-white font-semibold text-lg">{brand}</div>
+      {/* Social Proof Bar */}
+      <section className="py-12 bg-slate-50 border-y border-slate-100">
+        <div className="max-w-6xl mx-auto px-4">
+          <p className="text-center text-sm text-slate-500 mb-6">Trusted by sports parents tracking athletes in</p>
+          <div className="flex justify-center flex-wrap gap-8 md:gap-16 opacity-50">
+            {['Soccer', 'Basketball', 'Baseball', 'Football', 'Volleyball', 'Swimming'].map((sport) => (
+              <span key={sport} className="text-slate-700 font-semibold text-lg">{sport}</span>
             ))}
           </div>
-
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/signup"
-              className="px-8 py-4 bg-[#00BFFF] hover:bg-[#00a6e6] text-white font-bold text-lg rounded-lg shadow-xl transform transition hover:scale-105"
-            >
-              Start Your 30-Day Free Trial
-            </Link>
-            <Link
-              href="/signup"
-              className="px-8 py-4 bg-transparent border-2 border-white/50 hover:border-white text-white font-bold text-lg rounded-lg transition"
-            >
-              See Professional Sample Profile
-            </Link>
-          </div>
-
-          {/* Micro-copy */}
-          <div className="flex flex-wrap justify-center gap-6 text-sm text-blue-200 mt-4">
-            <span className="flex items-center gap-1">
-              <span className="text-green-400">✓</span> No credit card required
-            </span>
-            <span className="flex items-center gap-1">
-              <span className="text-green-400">✓</span> Cancel anytime
-            </span>
-            <span className="flex items-center gap-1">
-              <span className="text-green-400">✓</span> Setup in 5 minutes
-            </span>
-          </div>
         </div>
-      </AuroraHero>
+      </section>
 
-      {/* Problem/Pain Point Section */}
-      <section className="py-24 px-4 bg-gray-50">
+      {/* Pain Point Section */}
+      <section className="py-24 px-4 bg-white">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-bold text-center text-[#0A192F] mb-16">
-            Is Your Child's Future Trapped in a Spreadsheet You Can't Trust?
-          </h2>
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-slate-800 mb-4">
+              Sound familiar?
+            </h2>
+            <p className="text-xl text-slate-600 max-w-2xl mx-auto">
+              You're not alone. Every sports parent knows these struggles.
+            </p>
+          </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-white rounded-xl p-8 shadow-lg">
-              <div className="text-4xl mb-4">📊❌</div>
-              <h3 className="text-xl font-bold text-[#0A192F] mb-3">The Spreadsheet Liability</h3>
-              <p className="text-gray-600">
-                Hours wasted on manual data entry, complex formulas that break,
-                and the constant fear of losing years of progress due to one simple error.
+            <div className="bg-slate-50 rounded-2xl p-8 border border-slate-100">
+              <div className="w-14 h-14 bg-red-100 rounded-xl flex items-center justify-center mb-6">
+                <span className="text-2xl">📊</span>
+              </div>
+              <h3 className="text-xl font-bold text-slate-800 mb-3">The Spreadsheet Nightmare</h3>
+              <p className="text-slate-600">
+                Hours spent on manual data entry. Complex formulas that break. The constant fear of losing years of progress to one accidental delete.
               </p>
             </div>
 
-            <div className="bg-white rounded-xl p-8 shadow-lg">
-              <div className="text-4xl mb-4">🗑️📄</div>
-              <h3 className="text-xl font-bold text-[#0A192F] mb-3">The Unprofessional Presentation</h3>
-              <p className="text-gray-600">
-                Sending college scouts fragmented links, amateur PDFs, or worse—a messy,
-                confusing document that gets immediately dismissed.
+            <div className="bg-slate-50 rounded-2xl p-8 border border-slate-100">
+              <div className="w-14 h-14 bg-amber-100 rounded-xl flex items-center justify-center mb-6">
+                <span className="text-2xl">📱</span>
+              </div>
+              <h3 className="text-xl font-bold text-slate-800 mb-3">The Video Graveyard</h3>
+              <p className="text-slate-600">
+                4,000+ clips buried in your camera roll. "Storage Full" notifications. That amazing goal from last season? Good luck finding it.
               </p>
             </div>
 
-            <div className="bg-white rounded-xl p-8 shadow-lg">
-              <div className="text-4xl mb-4">😰💔</div>
-              <h3 className="text-xl font-bold text-[#0A192F] mb-3">The Anxiety of the Unknown</h3>
-              <p className="text-gray-600">
-                The constant self-doubt and stress of managing a high-stakes recruiting
-                process without a reliable system.
+            <div className="bg-slate-50 rounded-2xl p-8 border border-slate-100">
+              <div className="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center mb-6">
+                <span className="text-2xl">😰</span>
+              </div>
+              <h3 className="text-xl font-bold text-slate-800 mb-3">The Recruitment Anxiety</h3>
+              <p className="text-slate-600">
+                When that scout asks for a profile, what do you send? A messy PDF? Random video links? You only get one chance to make an impression.
               </p>
             </div>
           </div>
@@ -135,118 +232,113 @@ export default function LandingPage() {
       </section>
 
       {/* Solution Section */}
-      <section className="py-24 px-4 bg-white">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl md:text-5xl font-bold text-[#0A192F] mb-8">
-            AthleteTrack Pro: The Strategic Command Center for Their Athletic Career
-          </h2>
-
-          <div className="space-y-6 text-lg text-gray-700 mb-12">
-            <p>
-              You shouldn't have to be a data scientist to manage your child's athletic future.
-              Like you, we understand the strategic mindset needed to succeed.
-            </p>
-            <p className="font-semibold text-[#004D99]">
-              "Data Doesn't Lie. We Just Make Sure It's Heard."
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-8 mb-12">
-            <div className="bg-red-50 rounded-xl p-8">
-              <h3 className="font-bold text-red-700 mb-4">Before AthleteTrack Pro</h3>
-              <ul className="space-y-2 text-left text-gray-700">
-                <li>• Cluttered spreadsheets</li>
-                <li>• Lost in notebooks</li>
-                <li>• #VALUE! errors</li>
-                <li>• Unprofessional presentation</li>
-                <li>• Data anxiety</li>
-              </ul>
-            </div>
-            <div className="bg-green-50 rounded-xl p-8">
-              <h3 className="font-bold text-green-700 mb-4">After AthleteTrack Pro</h3>
-              <ul className="space-y-2 text-left text-gray-700">
-                <li>• Clean dashboard</li>
-                <li>• Centralized data</li>
-                <li>• Automatic calculations</li>
-                <li>• Professional profiles</li>
-                <li>• Strategic control</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="py-24 px-4 bg-gray-50">
+      <section id="demo" className="py-24 px-4 bg-gradient-to-b from-slate-50 to-white">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-center text-[#0A192F] mb-16">
-            Everything You Need to Manage Their Athletic Future
-          </h2>
+          <div className="text-center mb-16">
+            <div className="inline-block bg-cyan-100 text-cyan-700 px-4 py-1 rounded-full text-sm font-medium mb-4">
+              The Solution
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold text-slate-800 mb-4">
+              Your athlete's command center
+            </h2>
+            <p className="text-xl text-slate-600 max-w-2xl mx-auto">
+              Everything in one place. Always organized. Ready when opportunity knocks.
+            </p>
+          </div>
 
           <div className="space-y-20">
             {/* Feature 1 */}
             <div className="grid md:grid-cols-2 gap-12 items-center">
               <div>
-                <h3 className="text-3xl font-bold text-[#0A192F] mb-4">
-                  Professional Profile Generator
-                </h3>
-                <p className="text-gray-600 mb-6">
-                  Instantly generate a clean, shareable "Recruiter Snapshot" PDF or link.
-                  Eliminate the shame of unprofessional documents and ensure your child's
-                  data is presented with Authority.
-                </p>
-                <div className="bg-[#3CB371] text-white px-4 py-2 rounded-lg inline-block">
-                  Generate a 5-page profile in 30 seconds
+                <div className="inline-block bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-sm font-medium mb-4">
+                  Stats Tracking
                 </div>
+                <h3 className="text-3xl font-bold text-slate-800 mb-4">
+                  Every stat. Every season. Zero spreadsheets.
+                </h3>
+                <p className="text-slate-600 mb-6 text-lg">
+                  Log games in seconds. Watch career stats build automatically. See the progression from Peewee to Prospect—all in one beautiful dashboard.
+                </p>
+                <ul className="space-y-2">
+                  <li className="flex items-center gap-2 text-slate-700">
+                    <span className="text-emerald-500">✓</span> Quick post-game entry
+                  </li>
+                  <li className="flex items-center gap-2 text-slate-700">
+                    <span className="text-emerald-500">✓</span> Multi-sport support
+                  </li>
+                  <li className="flex items-center gap-2 text-slate-700">
+                    <span className="text-emerald-500">✓</span> Season comparisons
+                  </li>
+                </ul>
               </div>
-              <div className="bg-gradient-to-br from-blue-100 to-green-100 rounded-xl p-8 h-64 flex items-center justify-center">
+              <div className="bg-gradient-to-br from-emerald-50 to-cyan-50 rounded-2xl p-8 aspect-video flex items-center justify-center border border-emerald-100">
                 <div className="text-center">
-                  <div className="text-6xl mb-4">📄✨</div>
-                  <p className="text-gray-700 font-semibold">Professional PDF Export</p>
+                  <div className="text-6xl mb-4">📈</div>
+                  <p className="text-slate-600 font-medium">Stats Dashboard Preview</p>
                 </div>
               </div>
             </div>
 
             {/* Feature 2 */}
             <div className="grid md:grid-cols-2 gap-12 items-center">
-              <div className="order-2 md:order-1 bg-gradient-to-br from-purple-100 to-blue-100 rounded-xl p-8 h-64 flex items-center justify-center">
+              <div className="order-2 md:order-1 bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-8 aspect-video flex items-center justify-center border border-amber-100">
                 <div className="text-center">
-                  <div className="text-6xl mb-4">📈📊</div>
-                  <p className="text-gray-700 font-semibold">5-Year Trend Analysis</p>
+                  <div className="text-6xl mb-4">🎬</div>
+                  <p className="text-slate-600 font-medium">AI Highlight Reel</p>
                 </div>
               </div>
               <div className="order-1 md:order-2">
-                <h3 className="text-3xl font-bold text-[#0A192F] mb-4">
-                  Longitudinal Performance Tracking
-                </h3>
-                <p className="text-gray-600 mb-6">
-                  Compare current performance against historical data and recruiting benchmarks.
-                  Our interactive charts provide the objective truth you need for strategic control.
-                </p>
-                <div className="bg-[#3CB371] text-white px-4 py-2 rounded-lg inline-block">
-                  Track 5-year trend lines and 15+ custom KPIs
+                <div className="inline-block bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-sm font-medium mb-4">
+                  AI Highlights
                 </div>
+                <h3 className="text-3xl font-bold text-slate-800 mb-4">
+                  AI finds the highlights. You share the glory.
+                </h3>
+                <p className="text-slate-600 mb-6 text-lg">
+                  Upload full game footage. Our AI identifies the best moments—goals, saves, big plays. Get a shareable highlight reel in minutes, not hours.
+                </p>
+                <ul className="space-y-2">
+                  <li className="flex items-center gap-2 text-slate-700">
+                    <span className="text-amber-500">✓</span> Automatic moment detection
+                  </li>
+                  <li className="flex items-center gap-2 text-slate-700">
+                    <span className="text-amber-500">✓</span> One-click highlight reels
+                  </li>
+                  <li className="flex items-center gap-2 text-slate-700">
+                    <span className="text-amber-500">✓</span> Recruitment-ready exports
+                  </li>
+                </ul>
               </div>
             </div>
 
             {/* Feature 3 */}
             <div className="grid md:grid-cols-2 gap-12 items-center">
               <div>
-                <h3 className="text-3xl font-bold text-[#0A192F] mb-4">
-                  Data Integrity & Error Check
-                </h3>
-                <p className="text-gray-600 mb-6">
-                  Stop worrying about #VALUE! errors. Our system actively validates inputs
-                  and flags anomalies, preventing the administrative failures that keep you awake at night.
-                </p>
-                <div className="bg-[#3CB371] text-white px-4 py-2 rounded-lg inline-block">
-                  99.9% Data Accuracy Guarantee
+                <div className="inline-block bg-cyan-100 text-cyan-700 px-3 py-1 rounded-full text-sm font-medium mb-4">
+                  Recruiting Profile
                 </div>
+                <h3 className="text-3xl font-bold text-slate-800 mb-4">
+                  When scouts ask, you're ready.
+                </h3>
+                <p className="text-slate-600 mb-6 text-lg">
+                  Generate a professional athlete profile in seconds. Stats, highlights, achievements—all in a polished format that impresses coaches and opens doors.
+                </p>
+                <ul className="space-y-2">
+                  <li className="flex items-center gap-2 text-slate-700">
+                    <span className="text-cyan-500">✓</span> Professional PDF exports
+                  </li>
+                  <li className="flex items-center gap-2 text-slate-700">
+                    <span className="text-cyan-500">✓</span> Shareable profile links
+                  </li>
+                  <li className="flex items-center gap-2 text-slate-700">
+                    <span className="text-cyan-500">✓</span> Embedded highlight videos
+                  </li>
+                </ul>
               </div>
-              <div className="bg-gradient-to-br from-green-100 to-blue-100 rounded-xl p-8 h-64 flex items-center justify-center">
+              <div className="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-2xl p-8 aspect-video flex items-center justify-center border border-cyan-100">
                 <div className="text-center">
-                  <div className="text-6xl mb-4">✅🛡️</div>
-                  <p className="text-gray-700 font-semibold">Automated Error Checking</p>
+                  <div className="text-6xl mb-4">📄</div>
+                  <p className="text-slate-600 font-medium">Recruiter Snapshot</p>
                 </div>
               </div>
             </div>
@@ -257,114 +349,79 @@ export default function LandingPage() {
       {/* Pricing Section */}
       <section className="py-24 px-4 bg-white">
         <div className="max-w-5xl mx-auto">
-          <h2 className="text-4xl font-bold text-center text-[#0A192F] mb-4">
-            The Strategic Investment in Their Future
-          </h2>
-          <p className="text-center text-gray-600 mb-12">
-            Less than the cost of a single private lesson
-          </p>
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-slate-800 mb-4">
+              Less than a private lesson
+            </h2>
+            <p className="text-xl text-slate-600">
+              Invest in their future. Start free, upgrade when ready.
+            </p>
+          </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {/* Starter */}
-            <div className="bg-white rounded-xl border-2 border-gray-200 p-8">
-              <h3 className="text-2xl font-bold text-[#0A192F] mb-2">Starter</h3>
-              <div className="text-4xl font-bold text-[#004D99] mb-4">
-                $10<span className="text-lg text-gray-500">/month</span>
+            <div className="bg-white rounded-2xl border-2 border-slate-200 p-8 hover:border-slate-300 transition">
+              <h3 className="text-2xl font-bold text-slate-800 mb-2">Starter</h3>
+              <p className="text-slate-600 mb-4">Perfect for one athlete</p>
+              <div className="mb-6">
+                <span className="text-5xl font-bold text-slate-800">$10</span>
+                <span className="text-slate-500">/month</span>
               </div>
-              <ul className="space-y-3 mb-8 text-gray-600">
-                <li className="flex items-start gap-2">
-                  <span className="text-green-500 mt-1">✓</span>
-                  Single Player Profile
+              <ul className="space-y-3 mb-8">
+                <li className="flex items-center gap-2 text-slate-700">
+                  <span className="text-emerald-500">✓</span> Single athlete profile
                 </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-green-500 mt-1">✓</span>
-                  Core Stat Tracking
+                <li className="flex items-center gap-2 text-slate-700">
+                  <span className="text-emerald-500">✓</span> All sports stat tracking
                 </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-green-500 mt-1">✓</span>
-                  Recruiter Snapshot (PDF)
+                <li className="flex items-center gap-2 text-slate-700">
+                  <span className="text-emerald-500">✓</span> Recruiter Snapshot PDF
+                </li>
+                <li className="flex items-center gap-2 text-slate-700">
+                  <span className="text-emerald-500">✓</span> AI Coach access
                 </li>
               </ul>
               <Link
                 href="/signup"
-                className="block w-full py-3 bg-gray-100 hover:bg-gray-200 text-center text-gray-700 font-semibold rounded-lg transition"
+                className="block w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-center font-semibold rounded-xl transition"
               >
                 Start Free Trial
               </Link>
             </div>
 
-            {/* Professional - Most Popular */}
-            <div className="bg-gradient-to-b from-[#004D99] to-[#00BFFF] rounded-xl p-8 text-white transform scale-105 shadow-2xl">
-              <div className="bg-[#3CB371] text-white text-sm px-3 py-1 rounded-full inline-block mb-2">
+            {/* Professional */}
+            <div className="bg-gradient-to-br from-cyan-500 to-emerald-500 rounded-2xl p-8 text-white relative overflow-hidden">
+              <div className="absolute top-4 right-4 bg-white/20 text-white text-xs px-3 py-1 rounded-full font-medium">
                 MOST POPULAR
               </div>
               <h3 className="text-2xl font-bold mb-2">Professional</h3>
-              <div className="text-4xl font-bold mb-4">
-                $15<span className="text-lg opacity-75">/month</span>
+              <p className="text-cyan-100 mb-4">For serious sports families</p>
+              <div className="mb-6">
+                <span className="text-5xl font-bold">$15</span>
+                <span className="text-cyan-100">/month</span>
               </div>
               <ul className="space-y-3 mb-8">
-                <li className="flex items-start gap-2">
-                  <span className="text-[#3CB371] mt-1">✓</span>
-                  Everything in Starter
+                <li className="flex items-center gap-2">
+                  <span className="text-white">✓</span> Everything in Starter
                 </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#3CB371] mt-1">✓</span>
-                  Longitudinal Tracking
+                <li className="flex items-center gap-2">
+                  <span className="text-white">✓</span> Multi-athlete support
                 </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#3CB371] mt-1">✓</span>
-                  Video Integration
+                <li className="flex items-center gap-2">
+                  <span className="text-white">✓</span> Video integration
                 </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#3CB371] mt-1">✓</span>
-                  Custom Ranking Algorithm
+                <li className="flex items-center gap-2">
+                  <span className="text-white">✓</span> AI highlight detection
                 </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#3CB371] mt-1">✓</span>
-                  Priority Support
+                <li className="flex items-center gap-2">
+                  <span className="text-white">✓</span> Priority support
                 </li>
               </ul>
               <Link
                 href="/signup"
-                className="block w-full py-3 bg-white hover:bg-gray-100 text-[#004D99] text-center font-bold rounded-lg transition"
+                className="block w-full py-3 bg-white hover:bg-slate-50 text-cyan-600 text-center font-bold rounded-xl transition"
               >
                 Start Free Trial
-              </Link>
-            </div>
-
-            {/* Enterprise */}
-            <div className="bg-white rounded-xl border-2 border-gray-200 p-8">
-              <h3 className="text-2xl font-bold text-[#0A192F] mb-2">Club/Scout</h3>
-              <div className="text-4xl font-bold text-[#004D99] mb-4">
-                Custom
-              </div>
-              <ul className="space-y-3 mb-8 text-gray-600">
-                <li className="flex items-start gap-2">
-                  <span className="text-green-500 mt-1">✓</span>
-                  Multi-Player Management
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-green-500 mt-1">✓</span>
-                  Dedicated Account Manager
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-green-500 mt-1">✓</span>
-                  API Access
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-green-500 mt-1">✓</span>
-                  Custom Data Feeds
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-green-500 mt-1">✓</span>
-                  Team Analytics
-                </li>
-              </ul>
-              <Link
-                href="mailto:support@athletetrackpro.com"
-                className="block w-full py-3 bg-gray-100 hover:bg-gray-200 text-center text-gray-700 font-semibold rounded-lg transition"
-              >
-                Schedule Demo
               </Link>
             </div>
           </div>
@@ -372,38 +429,46 @@ export default function LandingPage() {
       </section>
 
       {/* Final CTA */}
-      <section className="py-24 px-4 bg-gradient-to-r from-[#0A192F] to-[#008000]">
+      <section className="py-24 px-4 bg-slate-900">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-8">
-            Stop Managing Spreadsheets. Start Managing Opportunity.
+          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+            Stop managing data.
+            <br />
+            <span className="text-cyan-400">Start cheering again.</span>
           </h2>
-          <p className="text-xl text-blue-100 mb-12">
-            Join thousands of strategic parents who have eliminated data anxiety
-            and gained the Control needed to maximize their child's athletic future.
+          <p className="text-xl text-slate-400 mb-10 max-w-2xl mx-auto">
+            Join thousands of sports parents who've traded spreadsheet stress for sideline joy. Your 30-day free trial starts now.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/signup"
-              className="px-8 py-4 bg-[#3CB371] hover:bg-[#2da05e] text-white font-bold text-lg rounded-lg shadow-xl transform transition hover:scale-105"
+              className="px-8 py-4 bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-white font-bold text-lg rounded-xl shadow-lg transform transition hover:scale-105"
             >
-              Start Your Free 30-Day Trial
-            </Link>
-            <Link
-              href="/signup"
-              className="px-8 py-4 bg-transparent border-2 border-white/50 hover:border-white text-white font-bold text-lg rounded-lg transition"
-            >
-              Schedule a Personalized Demo
+              Start Your Free Trial
             </Link>
           </div>
-          <div className="flex flex-wrap justify-center gap-6 text-sm text-blue-200 mt-8">
-            <span>✓ 30-day trial</span>
-            <span>✓ No credit card</span>
-            <span>✓ Cancel anytime</span>
-            <span>✓ Professional-Grade Data</span>
+          <div className="flex flex-wrap justify-center gap-6 text-sm text-slate-500 mt-8">
+            <span>No credit card required</span>
+            <span>•</span>
+            <span>Cancel anytime</span>
+            <span>•</span>
+            <span>Setup in 5 minutes</span>
           </div>
         </div>
       </section>
+
+      {/* Footer */}
+      <footer className="py-12 px-4 bg-slate-950 text-slate-400">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="font-bold text-white">AthleteTrack Pro</div>
+          <div className="flex gap-6 text-sm">
+            <Link href="/tos" className="hover:text-white transition">Terms</Link>
+            <Link href="/privacy" className="hover:text-white transition">Privacy</Link>
+            <a href="mailto:support@athletetrackpro.com" className="hover:text-white transition">Support</a>
+          </div>
+          <div className="text-sm">© 2026 AthleteTrack Pro</div>
+        </div>
+      </footer>
     </main>
   );
 }
-
