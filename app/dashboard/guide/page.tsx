@@ -12,6 +12,7 @@ const tabs = [
   { id: "skills", label: "Skills", icon: "🎯" },
   { id: "form", label: "Form Analysis", icon: "📹" },
   { id: "scout", label: "Scout", icon: "🔍" },
+  { id: "aicoach", label: "AI Coach", icon: "🤖" },
 ];
 
 const validTabs = tabs.map(t => t.id);
@@ -60,6 +61,7 @@ export default function GuidePage() {
           {activeTab === "skills" && <SkillsSection />}
           {activeTab === "form" && <FormAnalysisSection />}
           {activeTab === "scout" && <ScoutSection />}
+          {activeTab === "aicoach" && <AICoachSection />}
         </div>
       </div>
     </main>
@@ -682,6 +684,173 @@ function ScoutSection() {
       <ProTip>
         Scout reports work best with specific names. Include the school or team
         name if the athlete has a common name to get more accurate results.
+      </ProTip>
+    </div>
+  );
+}
+
+// ============ AI COACH SECTION ============
+function AICoachSection() {
+  return (
+    <div className="space-y-6">
+      <SectionHeader
+        title="AI Coach & Knowledge Base"
+        description="Chat with an AI coach that learns from your uploaded training materials."
+      />
+
+      {/* What is RAG */}
+      <div className="card bg-base-200">
+        <div className="card-body">
+          <h3 className="card-title">How the AI Coach Works</h3>
+          <p className="text-base-content/80 mt-2">
+            The AI Coach uses RAG (Retrieval-Augmented Generation) technology. When you upload
+            documents, they're converted into searchable knowledge. When you ask a question,
+            the AI finds relevant information from your documents and uses it to give you
+            personalized, accurate answers.
+          </p>
+          <div className="flex items-center gap-4 mt-4 text-sm">
+            <div className="flex items-center gap-2">
+              <span className="badge badge-primary">1</span>
+              <span>Upload docs</span>
+            </div>
+            <span>→</span>
+            <div className="flex items-center gap-2">
+              <span className="badge badge-primary">2</span>
+              <span>AI learns</span>
+            </div>
+            <span>→</span>
+            <div className="flex items-center gap-2">
+              <span className="badge badge-primary">3</span>
+              <span>Ask questions</span>
+            </div>
+            <span>→</span>
+            <div className="flex items-center gap-2">
+              <span className="badge badge-primary">4</span>
+              <span>Get smart answers</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* What to Upload */}
+      <div className="card bg-base-200">
+        <div className="card-body">
+          <h3 className="card-title">What Should You Upload?</h3>
+          <p className="text-sm text-base-content/70 mb-4">
+            The more relevant content you upload, the smarter your AI coach becomes.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex items-start gap-3 p-3 bg-success/10 rounded-lg">
+              <span className="text-2xl">✅</span>
+              <div>
+                <p className="font-semibold">Great to Upload</p>
+                <ul className="text-sm text-base-content/70 list-disc list-inside">
+                  <li>Coaching manuals & playbooks</li>
+                  <li>Training drill instructions</li>
+                  <li>Sport technique guides</li>
+                  <li>Practice plans & routines</li>
+                  <li>Nutrition & conditioning info</li>
+                </ul>
+              </div>
+            </div>
+            <div className="flex items-start gap-3 p-3 bg-error/10 rounded-lg">
+              <span className="text-2xl">❌</span>
+              <div>
+                <p className="font-semibold">Not Useful</p>
+                <ul className="text-sm text-base-content/70 list-disc list-inside">
+                  <li>Spreadsheets or stats tables</li>
+                  <li>Images or videos (text only)</li>
+                  <li>Very short content (&lt;100 words)</li>
+                  <li>Duplicate documents</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Sample Documents */}
+      <div className="card bg-primary/10 border border-primary/20">
+        <div className="card-body">
+          <h3 className="card-title">Sample Documents to Get Started</h3>
+          <p className="text-base-content/80 mt-2">
+            Download these sample training guides and upload them to test the AI Coach:
+          </p>
+          <div className="flex flex-wrap gap-3 mt-4">
+            <a href="/samples/basketball-fundamentals.txt" download className="btn btn-sm btn-outline">
+              🏀 Basketball Fundamentals
+            </a>
+            <a href="/samples/soccer-skills.txt" download className="btn btn-sm btn-outline">
+              ⚽ Soccer Skills Guide
+            </a>
+            <a href="/samples/strength-conditioning.txt" download className="btn btn-sm btn-outline">
+              💪 Strength & Conditioning
+            </a>
+          </div>
+          <p className="text-xs text-base-content/50 mt-3">
+            Or click "Load Sample Basketball Guide" in the upload widget for instant setup.
+          </p>
+        </div>
+      </div>
+
+      {/* Example Questions */}
+      <div className="card bg-base-200">
+        <div className="card-body">
+          <h3 className="card-title">Example Questions to Ask</h3>
+          <p className="text-sm text-base-content/70 mb-4">
+            After uploading documents, try asking questions like:
+          </p>
+
+          <div className="space-y-2">
+            <div className="p-3 bg-base-300 rounded-lg text-sm">
+              "What's the BEEF method for shooting?"
+            </div>
+            <div className="p-3 bg-base-300 rounded-lg text-sm">
+              "Give me a 10-minute ball handling routine"
+            </div>
+            <div className="p-3 bg-base-300 rounded-lg text-sm">
+              "What are the best drills for improving first touch in soccer?"
+            </div>
+            <div className="p-3 bg-base-300 rounded-lg text-sm">
+              "How should I structure my warm-up before practice?"
+            </div>
+            <div className="p-3 bg-base-300 rounded-lg text-sm">
+              "What are common shooting mistakes to avoid?"
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Tips */}
+      <div className="card bg-base-200">
+        <div className="card-body">
+          <h3 className="card-title">Tips for Best Results</h3>
+
+          <div className="space-y-4 mt-2">
+            <InfoBlock
+              title="Be Specific"
+              description="Ask detailed questions. 'How do I improve my crossover?' works better than 'How do I dribble?'"
+            />
+            <InfoBlock
+              title="Upload Quality Content"
+              description="Well-written coaching materials produce better answers than rough notes or outlines."
+            />
+            <InfoBlock
+              title="Build Your Knowledge Base"
+              description="Upload documents for each sport and skill area you want coaching on."
+            />
+            <InfoBlock
+              title="Keep Context in Mind"
+              description="The AI only knows what you've uploaded. It won't have information from documents you haven't added."
+            />
+          </div>
+        </div>
+      </div>
+
+      <ProTip>
+        Start with one of the sample documents to test the AI Coach, then upload
+        your own coaching materials to personalize the experience for your athlete!
       </ProTip>
     </div>
   );

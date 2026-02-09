@@ -7,6 +7,8 @@ import DocumentUpload from "@/components/ai/DocumentUpload";
 import VoiceConsole from "@/components/ai/VoiceConsole";
 import { LiveAPIProvider } from "@/components/ai/LiveAPIContext";
 import Link from "next/link";
+import SplitText from "@/components/ui/SplitText";
+import ShinyButton from "@/components/ui/ShinyButton";
 
 export const dynamic = "force-dynamic";
 
@@ -18,7 +20,7 @@ export default async function Dashboard() {
           {/* Header Section */}
           <div>
             <h1 className="text-3xl md:text-4xl font-extrabold">
-              Dashboard
+              <SplitText text="Dashboard" animationType="blur" delay={80} />
             </h1>
             <p className="text-base-content/70 mt-1">Track, analyze, and improve your game</p>
           </div>
@@ -43,11 +45,13 @@ export default async function Dashboard() {
               </svg>
               Upload Video
             </button>
-            <Link href="/dashboard/drills" className="btn btn-accent text-white">
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-              </svg>
-              Drill Library
+            <Link href="/dashboard/drills">
+              <ShinyButton variant="gradient" size="md">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+                Drill Library
+              </ShinyButton>
             </Link>
           </div>
 

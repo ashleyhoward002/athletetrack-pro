@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createClient } from "@/utils/supabase/client";
 import toast from "react-hot-toast";
 
@@ -9,20 +9,35 @@ interface Profile {
   full_name: string | null;
   bio: string | null;
   avatar_url: string | null;
+  avatar_color: string | null;
   role: string;
   username: string | null;
 }
 
+const AVATAR_COLORS = [
+  { name: "Indigo", value: "6366f1" },
+  { name: "Blue", value: "3b82f6" },
+  { name: "Cyan", value: "06b6d4" },
+  { name: "Emerald", value: "10b981" },
+  { name: "Amber", value: "f59e0b" },
+  { name: "Rose", value: "f43f5e" },
+  { name: "Purple", value: "a855f7" },
+  { name: "Slate", value: "64748b" },
+];
+
 export default function ProfilePage() {
   const supabase = createClient();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [formData, setFormData] = useState({
     full_name: "",
     bio: "",
     avatar_url: "",
+    avatar_color: "6366f1",
   });
 
   useEffect(() => {
@@ -51,6 +66,7 @@ export default function ProfilePage() {
             full_name: data.full_name || "",
             bio: data.bio || "",
             avatar_url: data.avatar_url || "",
+            avatar_color: data.avatar_color || "6366f1",
           });
         }
       } catch (error) {
@@ -63,6 +79,61 @@ export default function ProfilePage() {
 
     fetchProfile();
   }, []);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file");
+      return;
+    }
+
+    // Validate file size (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Image must be less than 2MB");
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+      const filePath = `avatars/${fileName}`;
+
+      // Upload to Supabase Storage
+      const { error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) {
+        // If bucket doesn't exist, create it
+        if (uploadError.message.includes("not found")) {
+          toast.error("Avatar storage not configured. Please contact support.");
+          return;
+        }
+        throw uploadError;
+      }
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from("avatars")
+        .getPublicUrl(filePath);
+
+      setFormData(prev => ({ ...prev, avatar_url: publicUrl }));
+      toast.success("Image uploaded! Click Save to update your profile.");
+    } catch (error) {
+      console.error("Upload error:", error);
+      toast.error("Failed to upload image");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleRemoveAvatar = () => {
+    setFormData(prev => ({ ...prev, avatar_url: "" }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,6 +148,7 @@ export default function ProfilePage() {
           full_name: formData.full_name || null,
           bio: formData.bio || null,
           avatar_url: formData.avatar_url || null,
+          avatar_color: formData.avatar_color,
           updated_at: new Date().toISOString(),
         });
 
@@ -107,6 +179,13 @@ export default function ProfilePage() {
     }));
   };
 
+  const getAvatarUrl = () => {
+    if (formData.avatar_url) return formData.avatar_url;
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(
+      formData.full_name || user?.email || "U"
+    )}&background=${formData.avatar_color}&color=fff&size=80`;
+  };
+
   if (loading) {
     return (
       <div className="p-4 md:p-8">
@@ -132,22 +211,21 @@ export default function ProfilePage() {
         {/* Profile Card */}
         <div className="card bg-base-100 shadow-xl">
           <div className="card-body">
-            {/* Avatar Preview */}
-            <div className="flex items-center gap-4 mb-6">
-              <div className="avatar">
-                <div className="w-20 h-20 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-                  <img
-                    src={
-                      formData.avatar_url ||
-                      `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                        formData.full_name || user?.email || "U"
-                      )}&background=6366f1&color=fff&size=80`
-                    }
-                    alt="Avatar"
-                  />
+            {/* Avatar Section */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6">
+              <div className="relative">
+                <div className="avatar">
+                  <div className="w-24 h-24 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+                    <img src={getAvatarUrl()} alt="Avatar" />
+                  </div>
                 </div>
+                {uploading && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full">
+                    <span className="loading loading-spinner loading-md text-white"></span>
+                  </div>
+                )}
               </div>
-              <div>
+              <div className="flex-1">
                 <p className="font-semibold text-lg">
                   {formData.full_name || user?.email?.split("@")[0] || "User"}
                 </p>
@@ -155,8 +233,67 @@ export default function ProfilePage() {
                 <div className="badge badge-primary badge-sm mt-1 capitalize">
                   {profile?.role || "member"}
                 </div>
+                <div className="flex gap-2 mt-3">
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileUpload}
+                    accept="image/*"
+                    className="hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                    className="btn btn-sm btn-outline"
+                  >
+                    <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    Upload Photo
+                  </button>
+                  {formData.avatar_url && (
+                    <button
+                      type="button"
+                      onClick={handleRemoveAvatar}
+                      className="btn btn-sm btn-ghost text-error"
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
+
+            {/* Avatar Color Picker (only shown when no custom avatar) */}
+            {!formData.avatar_url && (
+              <div className="form-control mb-4">
+                <label className="label">
+                  <span className="label-text font-medium">Avatar Color</span>
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {AVATAR_COLORS.map((color) => (
+                    <button
+                      key={color.value}
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, avatar_color: color.value }))}
+                      className={`w-10 h-10 rounded-full transition-all ${
+                        formData.avatar_color === color.value
+                          ? "ring-2 ring-offset-2 ring-base-content scale-110"
+                          : "hover:scale-105"
+                      }`}
+                      style={{ backgroundColor: `#${color.value}` }}
+                      title={color.name}
+                    />
+                  ))}
+                </div>
+                <label className="label">
+                  <span className="label-text-alt text-base-content/50">
+                    Choose a color for your generated avatar
+                  </span>
+                </label>
+              </div>
+            )}
 
             {/* Profile Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -190,26 +327,6 @@ export default function ProfilePage() {
                 <label className="label">
                   <span className="label-text-alt text-base-content/50">
                     A short description about you
-                  </span>
-                </label>
-              </div>
-
-              {/* Avatar URL */}
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text font-medium">Avatar URL</span>
-                </label>
-                <input
-                  type="url"
-                  name="avatar_url"
-                  value={formData.avatar_url}
-                  onChange={handleChange}
-                  placeholder="https://example.com/avatar.jpg"
-                  className="input input-bordered w-full"
-                />
-                <label className="label">
-                  <span className="label-text-alt text-base-content/50">
-                    Link to your profile picture
                   </span>
                 </label>
               </div>

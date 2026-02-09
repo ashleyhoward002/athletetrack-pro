@@ -16,7 +16,7 @@ module.exports = {
         appearFromRight: "appearFromRight 300ms ease-in-out",
         wiggle: "wiggle 1.5s ease-in-out infinite",
         popup: "popup 0.25s ease-in-out",
-        shimmer: "shimmer 3s ease-out infinite alternate",
+        shimmer: "shimmer 2s ease-in-out infinite",
         aurora: "aurora 60s linear infinite",
       },
       keyframes: {
@@ -51,9 +51,8 @@ module.exports = {
           "100%": { transform: "scale(1)", opacity: 1 },
         },
         shimmer: {
-          "0%": { backgroundPosition: "0 50%" },
-          "50%": { backgroundPosition: "100% 50%" },
-          "100%": { backgroundPosition: "0% 50%" },
+          "0%": { transform: "translateX(-100%)" },
+          "100%": { transform: "translateX(100%)" },
         },
         aurora: {
           from: {
