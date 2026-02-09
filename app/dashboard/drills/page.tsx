@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { GlassCard } from "@/components/ui/GlassCard";
 import AddDrillForm from "@/components/drills/AddDrillForm";
 import Link from "next/link";
+import HelpIcon from "@/components/ui/HelpIcon";
 
 export const dynamic = "force-dynamic";
 
@@ -36,7 +37,10 @@ export default async function DrillsPage() {
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
                     </Link>
                     <div>
-                        <h1 className="text-4xl font-extrabold text-white">Drill Library</h1>
+                        <div className="flex items-center gap-2">
+                            <h1 className="text-4xl font-extrabold text-white">Drill Library</h1>
+                            <HelpIcon section="drills" tooltip="Learn how to use drills" />
+                        </div>
                         <p className="text-blue-200">Manage and assign training exercises.</p>
                     </div>
                 </div>

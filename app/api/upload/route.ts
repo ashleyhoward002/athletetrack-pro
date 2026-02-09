@@ -3,10 +3,27 @@ export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
-import { GoogleGenerativeAI } from "@google/generative-ai";
 
-// Initialize Gemini
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+
+async function generateEmbedding(text: string, accessToken: string): Promise<number[]> {
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/generate-embeddings`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ text }),
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to generate embedding");
+    }
+
+    const data = await response.json();
+    return data.embedding;
+}
 
 export async function POST(req: NextRequest) {
     try {
@@ -52,12 +69,11 @@ export async function POST(req: NextRequest) {
             chunks.push(textContent.slice(i, i + chunkSize));
         }
 
-        // Generate embeddings and store
-        const model = genAI.getGenerativeModel({ model: "text-embedding-004" });
+        // Generate embeddings using Edge Function and store
+        const accessToken = session.access_token;
 
         for (const chunk of chunks) {
-            const result = await model.embedContent(chunk);
-            const embedding = result.embedding.values;
+            const embedding = await generateEmbedding(chunk, accessToken);
 
             const { error } = await supabase.from("documents").insert({
                 user_id: session.user.id,

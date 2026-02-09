@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 import SportAnalysisSelector from "@/components/form-analysis/SportAnalysisSelector";
 import AnalysisHistoryGrid from "@/components/form-analysis/AnalysisHistoryGrid";
 import ScoreProgressChart from "@/components/form-analysis/ScoreProgressChart";
+import HelpIcon from "@/components/ui/HelpIcon";
 
 export default function FormAnalysisPage() {
     const [analyses, setAnalyses] = useState<any[]>([]);
@@ -109,7 +110,10 @@ export default function FormAnalysisPage() {
                         </svg>
                     </Link>
                     <div>
-                        <h1 className="text-3xl font-extrabold">Form Analysis</h1>
+                        <div className="flex items-center gap-2">
+                            <h1 className="text-3xl font-extrabold">Form Analysis</h1>
+                            <HelpIcon section="form" tooltip="Learn how to use form analysis" />
+                        </div>
                         <p className="text-base-content/60">
                             Upload videos of your technique and get AI-powered feedback on your form.
                         </p>

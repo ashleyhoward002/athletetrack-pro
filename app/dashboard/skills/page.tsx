@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { SPORT_LIST, SportId } from "@/lib/sports/config";
+import HelpIcon from "@/components/ui/HelpIcon";
 
 interface SkillNode {
     id: string;
@@ -91,7 +92,10 @@ export default function SkillsPage() {
         <main className="min-h-screen p-4 md:p-8 pb-24">
             <div className="max-w-5xl mx-auto space-y-6">
                 <div>
-                    <h1 className="text-3xl font-extrabold">Skill Trees</h1>
+                    <div className="flex items-center gap-2">
+                        <h1 className="text-3xl font-extrabold">Skill Trees</h1>
+                        <HelpIcon section="skills" tooltip="Learn how skill trees work" />
+                    </div>
                     <p className="text-base-content/60">
                         Master new skills by completing drills. Unlock advanced techniques as you progress.
                     </p>

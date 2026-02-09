@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { AuroraHero } from "@/components/ui/AuroraHero";
+import HelpIcon from "@/components/ui/HelpIcon";
 
 export default function ScoutPage() {
     const [targetName, setTargetName] = useState("");
@@ -36,9 +37,12 @@ export default function ScoutPage() {
         <div className="min-h-screen bg-[#0A192F] text-white p-8">
             <div className="max-w-4xl mx-auto space-y-8">
                 <div className="text-center space-y-2">
-                    <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-500">
-                        AI Scout Agent
-                    </h1>
+                    <div className="flex items-center justify-center gap-2">
+                        <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-500">
+                            AI Scout Agent
+                        </h1>
+                        <HelpIcon section="scout" tooltip="Learn how to use Scout" />
+                    </div>
                     <p className="text-gray-400">
                         Deploy autonomous agents to analyze rivals and find recruiters.
                     </p>

@@ -23,6 +23,7 @@ import {
   sumStats,
 } from "@/lib/sports/config";
 import StatTooltip from "@/components/ui/StatTooltip";
+import HelpIcon from "@/components/ui/HelpIcon";
 
 type Game = {
   id: string;
@@ -161,7 +162,10 @@ export default function StatsClient() {
     <>
       {/* Header */}
       <div>
-        <h1 className="text-3xl md:text-4xl font-extrabold">Stats</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-3xl md:text-4xl font-extrabold">Stats</h1>
+          <HelpIcon section="stats" tooltip="Learn what stats mean" />
+        </div>
         <p className="text-base-content/70 mt-1">
           Performance analytics across {count} game{count !== 1 && "s"}
         </p>
