@@ -3,8 +3,7 @@ export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
-
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+import { generateEmbedding } from "@/lib/embeddings";
 
 // Sample knowledge base content organized by sport
 const KNOWLEDGE_BASE: Record<string, { filename: string; content: string }> = {
@@ -485,25 +484,6 @@ Sleep for Athletes:
     }
 };
 
-async function generateEmbedding(text: string, accessToken: string): Promise<number[]> {
-    const response = await fetch(`${SUPABASE_URL}/functions/v1/generate-embeddings`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify({ text }),
-    });
-
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Failed to generate embedding");
-    }
-
-    const data = await response.json();
-    return data.embedding;
-}
-
 export async function POST(req: NextRequest) {
     try {
         const cookieStore = cookies();
@@ -515,11 +495,15 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
+        // Check for API key
+        if (!process.env.GEMINI_API_KEY) {
+            return NextResponse.json({ error: "GEMINI_API_KEY not configured" }, { status: 500 });
+        }
+
         // Get selected sports from request body
         const body = await req.json().catch(() => ({}));
         const selectedSports: string[] = body.sports || Object.keys(KNOWLEDGE_BASE);
 
-        const accessToken = session.access_token;
         let documentsAdded = 0;
 
         // Process each selected sport
@@ -537,7 +521,7 @@ export async function POST(req: NextRequest) {
             // Generate embeddings and store each chunk
             for (const chunk of chunks) {
                 try {
-                    const embedding = await generateEmbedding(chunk, accessToken);
+                    const embedding = await generateEmbedding(chunk);
 
                     const { error } = await supabase.from("documents").insert({
                         user_id: session.user.id,

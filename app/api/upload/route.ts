@@ -3,27 +3,7 @@ export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
-
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-
-async function generateEmbedding(text: string, accessToken: string): Promise<number[]> {
-    const response = await fetch(`${SUPABASE_URL}/functions/v1/generate-embeddings`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify({ text }),
-    });
-
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Failed to generate embedding");
-    }
-
-    const data = await response.json();
-    return data.embedding;
-}
+import { generateEmbedding } from "@/lib/embeddings";
 
 export async function POST(req: NextRequest) {
     try {
@@ -34,6 +14,11 @@ export async function POST(req: NextRequest) {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
+        // Check for API key
+        if (!process.env.GEMINI_API_KEY) {
+            return NextResponse.json({ error: "GEMINI_API_KEY not configured" }, { status: 500 });
         }
 
         const formData = await req.formData();
@@ -69,25 +54,31 @@ export async function POST(req: NextRequest) {
             chunks.push(textContent.slice(i, i + chunkSize));
         }
 
-        // Generate embeddings using Edge Function and store
-        const accessToken = session.access_token;
+        // Generate embeddings and store
+        let successCount = 0;
 
         for (const chunk of chunks) {
-            const embedding = await generateEmbedding(chunk, accessToken);
+            try {
+                const embedding = await generateEmbedding(chunk);
 
-            const { error } = await supabase.from("documents").insert({
-                user_id: session.user.id,
-                content: chunk,
-                embedding: embedding,
-                metadata: { filename: file.name, type: file.type }
-            });
+                const { error } = await supabase.from("documents").insert({
+                    user_id: session.user.id,
+                    content: chunk,
+                    embedding: embedding,
+                    metadata: { filename: file.name, type: file.type }
+                });
 
-            if (error) {
-                console.error("Supabase insert error:", error);
+                if (error) {
+                    console.error("Supabase insert error:", error);
+                } else {
+                    successCount++;
+                }
+            } catch (embeddingError) {
+                console.error("Embedding error:", embeddingError);
             }
         }
 
-        return NextResponse.json({ success: true, chunks: chunks.length });
+        return NextResponse.json({ success: true, chunks: successCount });
 
     } catch (error) {
         console.error("Upload error:", error);
