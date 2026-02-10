@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
 
-export type UserRole = "admin" | "member";
+export type UserRole = "admin" | "member" | "coach";
 
 interface UserRoleState {
   role: UserRole | null;
