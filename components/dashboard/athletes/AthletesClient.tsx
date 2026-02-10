@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { createClient } from "@/utils/supabase/client";
 import toast from "react-hot-toast";
 import AthleteModal, { AthleteFormData } from "./AthleteModal";
-import { SportId } from "@/lib/sports/config";
+import { SportId, SPORT_LIST, getSportConfig } from "@/lib/sports/config";
 
 type Athlete = {
   id: string;
@@ -12,6 +12,7 @@ type Athlete = {
   birth_date: string | null;
   position: string | null;
   primary_sport: SportId;
+  sports: SportId[] | null;
   school: string | null;
   team_name: string | null;
   level: string | null;
@@ -66,6 +67,7 @@ export default function AthletesClient() {
       birth_date: form.birth_date || null,
       position: form.position || null,
       primary_sport: form.primary_sport,
+      sports: form.sports || [form.primary_sport],
       school: form.school || null,
       team_name: form.team_name || null,
       level: form.level || null,
@@ -237,6 +239,7 @@ export default function AthletesClient() {
               <tr>
                 <th>#</th>
                 <th>Name</th>
+                <th>Sports</th>
                 <th className="hidden md:table-cell">Position</th>
                 <th className="hidden sm:table-cell">Team</th>
                 <th className="hidden lg:table-cell">School</th>
@@ -264,6 +267,22 @@ export default function AthletesClient() {
                       {[athlete.team_name, athlete.position]
                         .filter(Boolean)
                         .join(" · ")}
+                    </div>
+                  </td>
+                  <td>
+                    <div className="flex flex-wrap gap-1">
+                      {(athlete.sports || [athlete.primary_sport]).map((sport) => {
+                        const config = getSportConfig(sport);
+                        return (
+                          <span
+                            key={sport}
+                            className="badge badge-sm badge-ghost"
+                            title={config.name}
+                          >
+                            {config.icon}
+                          </span>
+                        );
+                      })}
                     </div>
                   </td>
                   <td className="hidden md:table-cell">
@@ -367,6 +386,7 @@ export default function AthletesClient() {
                 birth_date: editingAthlete.birth_date ?? "",
                 position: editingAthlete.position ?? "",
                 primary_sport: editingAthlete.primary_sport ?? "basketball",
+                sports: editingAthlete.sports ?? [editingAthlete.primary_sport ?? "basketball"],
                 school: editingAthlete.school ?? "",
                 team_name: editingAthlete.team_name ?? "",
                 level: editingAthlete.level ?? "",

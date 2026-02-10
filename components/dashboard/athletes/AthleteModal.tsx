@@ -8,6 +8,7 @@ export type AthleteFormData = {
   birth_date: string;
   position: string;
   primary_sport: SportId;
+  sports: SportId[];
   school: string;
   team_name: string;
   level: string;
@@ -28,6 +29,7 @@ const emptyForm: AthleteFormData = {
   birth_date: "",
   position: "",
   primary_sport: DEFAULT_SPORT,
+  sports: [DEFAULT_SPORT],
   school: "",
   team_name: "",
   level: "",
@@ -64,8 +66,34 @@ export default function AthleteModal({
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleSportChange = (sport: SportId) => {
-    setForm((prev) => ({ ...prev, primary_sport: sport, position: "" }));
+  const handleSportToggle = (sport: SportId) => {
+    setForm((prev) => {
+      const currentSports = prev.sports || [];
+      let newSports: SportId[];
+
+      if (currentSports.includes(sport)) {
+        // Remove sport (but keep at least one)
+        if (currentSports.length === 1) return prev;
+        newSports = currentSports.filter((s) => s !== sport);
+      } else {
+        // Add sport
+        newSports = [...currentSports, sport];
+      }
+
+      // Update primary_sport to first in list
+      const newPrimary = newSports[0];
+
+      // Reset position if it's no longer valid
+      const allPositions = getAllPositions(newSports);
+      const positionValid = allPositions.includes(prev.position);
+
+      return {
+        ...prev,
+        sports: newSports,
+        primary_sport: newPrimary,
+        position: positionValid ? prev.position : "",
+      };
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -73,7 +101,16 @@ export default function AthleteModal({
     await onSubmit(form);
   };
 
-  const positions = getSportConfig(form.primary_sport).positions;
+  // Get positions from all selected sports
+  const getAllPositions = (sports: SportId[]): string[] => {
+    const positionSet = new Set<string>();
+    sports.forEach((sport) => {
+      getSportConfig(sport).positions.forEach((pos) => positionSet.add(pos));
+    });
+    return Array.from(positionSet).sort();
+  };
+
+  const positions = getAllPositions(form.sports || [form.primary_sport]);
 
   return (
     <dialog className={`modal ${open ? "modal-open" : ""}`}>
@@ -139,42 +176,65 @@ export default function AthleteModal({
             </div>
           </div>
 
-          {/* Sport + Position */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text font-medium">Primary Sport</span>
-              </label>
-              <select
-                className="select select-bordered w-full"
-                value={form.primary_sport}
-                onChange={(e) => handleSportChange(e.target.value as SportId)}
-              >
-                {SPORT_LIST.map((s) => (
-                  <option key={s.id} value={s.id}>
+          {/* Sports Selection */}
+          <div className="form-control">
+            <label className="label">
+              <span className="label-text font-medium">
+                Sports <span className="text-base-content/50">(select all that apply)</span>
+              </span>
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {SPORT_LIST.map((s) => {
+                const isSelected = (form.sports || []).includes(s.id);
+                return (
+                  <button
+                    key={s.id}
+                    type="button"
+                    onClick={() => handleSportToggle(s.id)}
+                    className={`btn btn-sm ${
+                      isSelected ? "btn-primary" : "btn-outline"
+                    }`}
+                  >
                     {s.icon} {s.name}
-                  </option>
-                ))}
-              </select>
+                    {isSelected && (
+                      <svg
+                        className="w-4 h-4 ml-1"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                    )}
+                  </button>
+                );
+              })}
             </div>
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text font-medium">Position</span>
-              </label>
-              <select
-                name="position"
-                className="select select-bordered w-full"
-                value={form.position}
-                onChange={handleChange}
-              >
-                <option value="">Select...</option>
-                {positions.map((p) => (
-                  <option key={p} value={p}>
-                    {p}
-                  </option>
-                ))}
-              </select>
-            </div>
+          </div>
+
+          {/* Position */}
+          <div className="form-control">
+            <label className="label">
+              <span className="label-text font-medium">Position</span>
+            </label>
+            <select
+              name="position"
+              className="select select-bordered w-full"
+              value={form.position}
+              onChange={handleChange}
+            >
+              <option value="">Select...</option>
+              {positions.map((p) => (
+                <option key={p} value={p}>
+                  {p}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Level + School/Team */}
