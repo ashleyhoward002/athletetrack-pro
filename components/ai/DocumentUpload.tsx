@@ -1,37 +1,43 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
+import { createClient } from "@/utils/supabase/client";
+import { useUserRole } from "@/hooks/useUserRole";
 
-const EXAMPLE_CONTENT = `Basketball Shooting Fundamentals
-
-The BEEF Method for Perfect Shooting Form:
-- Balance: Feet shoulder-width apart, knees slightly bent
-- Eyes: Focus on the back of the rim throughout the shot
-- Elbow: Keep shooting elbow under the ball, forming an "L"
-- Follow-through: Snap wrist down, fingers pointing at the rim
-
-Common Shooting Mistakes to Avoid:
-1. Thumb flicking - Keep guide hand still
-2. Fading away - Jump straight up
-3. Rushing the shot - Take your time, use proper form
-4. Flat arc - Aim for 45-degree arc on release
-
-Practice Drill: Form Shooting
-Start 3 feet from basket, focus purely on form. Make 10 in a row before moving back. Use one hand only to develop muscle memory.
-
-Free Throw Routine:
-1. Take a deep breath at the line
-2. Bounce ball 3 times (or your preferred routine)
-3. Find your target (back of rim)
-4. Bend knees, set elbow
-5. Shoot in one fluid motion
-6. Hold follow-through until ball goes through`;
+const AVAILABLE_SPORTS = [
+    { id: "basketball", label: "Basketball", emoji: "🏀" },
+    { id: "baseball", label: "Baseball", emoji: "⚾" },
+    { id: "soccer", label: "Soccer", emoji: "⚽" },
+    { id: "football", label: "Football", emoji: "🏈" },
+    { id: "tennis", label: "Tennis", emoji: "🎾" },
+    { id: "volleyball", label: "Volleyball", emoji: "🏐" },
+    { id: "conditioning", label: "Conditioning", emoji: "💪" },
+];
 
 export default function DocumentUpload() {
+    const supabase = createClient();
+    const { role, isAdmin } = useUserRole();
     const [file, setFile] = useState<File | null>(null);
     const [uploading, setUploading] = useState(false);
-    const [showExamples, setShowExamples] = useState(false);
+    const [seeding, setSeeding] = useState(false);
+    const [activeTab, setActiveTab] = useState<"upload" | "video" | "playbook">("upload");
+    const [selectedSports, setSelectedSports] = useState<string[]>(["conditioning"]);
+
+    // Video link state
+    const [videoUrl, setVideoUrl] = useState("");
+    const [videoTitle, setVideoTitle] = useState("");
+    const [videoSport, setVideoSport] = useState("basketball");
+    const [videoCategory, setVideoCategory] = useState("");
+    const [savingVideo, setSavingVideo] = useState(false);
+
+    const toggleSport = (sportId: string) => {
+        setSelectedSports(prev =>
+            prev.includes(sportId)
+                ? prev.filter(s => s !== sportId)
+                : [...prev, sportId]
+        );
+    };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) {
@@ -56,8 +62,11 @@ export default function DocumentUpload() {
                 throw new Error("Upload failed");
             }
 
-            toast.success("Document processed and vectorized!");
+            toast.success("Document processed and added to knowledge base!");
             setFile(null);
+            // Reset file input
+            const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+            if (fileInput) fileInput.value = '';
         } catch (error) {
             console.error(error);
             toast.error("Failed to upload document");
@@ -66,26 +75,127 @@ export default function DocumentUpload() {
         }
     };
 
-    const handleUploadSample = async () => {
-        setUploading(true);
+    const handleSeedKnowledgeBase = async () => {
+        if (selectedSports.length === 0) {
+            toast.error("Please select at least one sport");
+            return;
+        }
+
+        setSeeding(true);
         try {
-            const blob = new Blob([EXAMPLE_CONTENT], { type: "text/plain" });
-            const sampleFile = new File([blob], "basketball-shooting-guide.txt", { type: "text/plain" });
-
-            const formData = new FormData();
-            formData.append("file", sampleFile);
-
-            const response = await fetch("/api/upload", {
+            const response = await fetch("/api/seed-knowledge", {
                 method: "POST",
-                body: formData,
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ sports: selectedSports }),
             });
 
-            if (!response.ok) throw new Error("Upload failed");
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.error || "Seeding failed");
+            }
 
-            toast.success("Sample knowledge base loaded!");
-        } catch (error) {
+            const data = await response.json();
+            toast.success(`Knowledge base loaded! Added ${data.documentsAdded} documents.`);
+        } catch (error: any) {
             console.error(error);
-            toast.error("Failed to load sample content");
+            toast.error(error.message || "Failed to seed knowledge base");
+        } finally {
+            setSeeding(false);
+        }
+    };
+
+    const extractYouTubeId = (url: string) => {
+        const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\s]+)/);
+        return match ? match[1] : null;
+    };
+
+    const handleSaveVideo = async () => {
+        if (!videoUrl || !videoTitle) {
+            toast.error("Please enter a title and URL");
+            return;
+        }
+
+        const youtubeId = extractYouTubeId(videoUrl);
+
+        setSavingVideo(true);
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) throw new Error("Not authenticated");
+
+            const { error } = await supabase.from("training_resources").insert({
+                user_id: user.id,
+                title: videoTitle,
+                url: videoUrl,
+                resource_type: "video",
+                sport: videoSport,
+                category: videoCategory || null,
+                thumbnail_url: youtubeId ? `https://img.youtube.com/vi/${youtubeId}/mqdefault.jpg` : null,
+            });
+
+            if (error) throw error;
+
+            toast.success("Training video saved!");
+            setVideoUrl("");
+            setVideoTitle("");
+            setVideoCategory("");
+        } catch (error: any) {
+            console.error(error);
+            toast.error(error.message || "Failed to save video");
+        } finally {
+            setSavingVideo(false);
+        }
+    };
+
+    const handleSavePlaybook = async () => {
+        if (!file) return;
+
+        setUploading(true);
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) throw new Error("Not authenticated");
+
+            // Upload file to storage
+            const fileExt = file.name.split(".").pop();
+            const fileName = `${user.id}/${Date.now()}-${file.name}`;
+
+            const { error: uploadError } = await supabase.storage
+                .from("playbooks")
+                .upload(fileName, file);
+
+            if (uploadError) {
+                if (uploadError.message.includes("not found")) {
+                    toast.error("Playbook storage not configured");
+                    return;
+                }
+                throw uploadError;
+            }
+
+            const { data: { publicUrl } } = supabase.storage
+                .from("playbooks")
+                .getPublicUrl(fileName);
+
+            // Save to training_resources
+            const { error } = await supabase.from("training_resources").insert({
+                user_id: user.id,
+                title: file.name.replace(/\.[^/.]+$/, ""),
+                url: publicUrl,
+                resource_type: "playbook",
+                sport: videoSport,
+                is_public: false,
+            });
+
+            if (error) throw error;
+
+            // Also process for RAG
+            const formData = new FormData();
+            formData.append("file", file);
+            await fetch("/api/upload", { method: "POST", body: formData });
+
+            toast.success("Playbook uploaded and added to knowledge base!");
+            setFile(null);
+        } catch (error: any) {
+            console.error(error);
+            toast.error(error.message || "Failed to upload playbook");
         } finally {
             setUploading(false);
         }
@@ -95,76 +205,228 @@ export default function DocumentUpload() {
         <div className="card bg-base-200 shadow-xl">
             <div className="card-body">
                 <h2 className="card-title flex items-center gap-2">
-                    Knowledge Base Upload
+                    Knowledge Base
                     <span className="badge badge-primary badge-sm">RAG</span>
                 </h2>
 
-                <p className="text-sm opacity-70">
-                    Upload training documents to teach the AI coach about specific techniques,
-                    drills, or strategies. The AI will use this knowledge to answer questions.
-                </p>
-
-                {/* What to Upload */}
-                <div className="bg-base-300/50 rounded-lg p-3 text-sm space-y-2">
-                    <p className="font-semibold">What can you upload?</p>
-                    <ul className="list-disc list-inside text-base-content/70 space-y-1">
-                        <li>Training guides & drill instructions</li>
-                        <li>Coaching manuals & playbooks</li>
-                        <li>Sport-specific technique articles</li>
-                        <li>Practice plans & workout routines</li>
-                    </ul>
-                </div>
-
-                {/* File Upload */}
-                <div className="form-control w-full">
-                    <label className="label">
-                        <span className="label-text">Choose a file (.txt, .pdf, .md)</span>
-                    </label>
-                    <input
-                        type="file"
-                        accept=".txt,.pdf,.md"
-                        onChange={handleFileChange}
-                        className="file-input file-input-bordered w-full"
-                    />
-                </div>
-
-                <div className="flex flex-wrap gap-2 mt-2">
+                {/* Tabs */}
+                <div className="tabs tabs-boxed bg-base-300">
                     <button
-                        className="btn btn-primary flex-1"
-                        onClick={handleUpload}
-                        disabled={!file || uploading}
+                        className={`tab ${activeTab === "upload" ? "tab-active" : ""}`}
+                        onClick={() => setActiveTab("upload")}
                     >
-                        {uploading ? <span className="loading loading-spinner loading-sm"></span> : "Upload & Vectorize"}
+                        Documents
                     </button>
                     <button
-                        className="btn btn-outline btn-sm"
-                        onClick={() => setShowExamples(!showExamples)}
+                        className={`tab ${activeTab === "video" ? "tab-active" : ""}`}
+                        onClick={() => setActiveTab("video")}
                     >
-                        {showExamples ? "Hide" : "Show"} Example
+                        Videos
                     </button>
+                    {(isAdmin || role === "coach") && (
+                        <button
+                            className={`tab ${activeTab === "playbook" ? "tab-active" : ""}`}
+                            onClick={() => setActiveTab("playbook")}
+                        >
+                            Playbooks
+                        </button>
+                    )}
                 </div>
 
-                {/* Quick Start Option */}
-                <div className="divider text-xs opacity-50">OR</div>
+                {/* Document Upload Tab */}
+                {activeTab === "upload" && (
+                    <div className="space-y-3">
+                        <p className="text-sm opacity-70">
+                            Upload training documents to teach the AI coach.
+                        </p>
 
-                <button
-                    className="btn btn-success btn-sm w-full"
-                    onClick={handleUploadSample}
-                    disabled={uploading}
-                >
-                    Load Sample Basketball Guide
-                </button>
-                <p className="text-xs text-center opacity-50">
-                    Adds shooting fundamentals to test the RAG chatbot
-                </p>
+                        <div className="form-control w-full">
+                            <input
+                                type="file"
+                                accept=".txt,.pdf,.md"
+                                onChange={handleFileChange}
+                                className="file-input file-input-bordered file-input-sm w-full"
+                            />
+                        </div>
 
-                {/* Example Content Preview */}
-                {showExamples && (
-                    <div className="mt-3 p-3 bg-base-300 rounded-lg">
-                        <p className="text-xs font-semibold mb-2 opacity-70">Example content format:</p>
-                        <pre className="text-xs whitespace-pre-wrap opacity-80 max-h-40 overflow-y-auto">
-                            {EXAMPLE_CONTENT.slice(0, 500)}...
-                        </pre>
+                        <button
+                            className="btn btn-primary btn-sm w-full"
+                            onClick={handleUpload}
+                            disabled={!file || uploading}
+                        >
+                            {uploading ? (
+                                <span className="loading loading-spinner loading-sm"></span>
+                            ) : (
+                                "Upload & Vectorize"
+                            )}
+                        </button>
+
+                        <div className="divider text-xs opacity-50 my-2">OR LOAD PRE-BUILT GUIDES</div>
+
+                        {/* Sport Selection */}
+                        <div className="flex flex-wrap gap-1.5">
+                            {AVAILABLE_SPORTS.map((sport) => (
+                                <button
+                                    key={sport.id}
+                                    type="button"
+                                    onClick={() => toggleSport(sport.id)}
+                                    className={`btn btn-xs ${
+                                        selectedSports.includes(sport.id)
+                                            ? "btn-primary"
+                                            : "btn-ghost border border-base-300"
+                                    }`}
+                                >
+                                    {sport.emoji} {sport.label}
+                                </button>
+                            ))}
+                        </div>
+
+                        <button
+                            className="btn btn-success btn-sm w-full"
+                            onClick={handleSeedKnowledgeBase}
+                            disabled={seeding || selectedSports.length === 0}
+                        >
+                            {seeding ? (
+                                <>
+                                    <span className="loading loading-spinner loading-sm"></span>
+                                    Loading...
+                                </>
+                            ) : (
+                                <>
+                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                    </svg>
+                                    Load {selectedSports.length} Guide{selectedSports.length !== 1 ? "s" : ""}
+                                </>
+                            )}
+                        </button>
+                        <p className="text-xs text-center opacity-50">
+                            Select your sport(s) above, then click to load
+                        </p>
+                    </div>
+                )}
+
+                {/* Video Links Tab */}
+                {activeTab === "video" && (
+                    <div className="space-y-3">
+                        <p className="text-sm opacity-70">
+                            Save YouTube training videos for quick reference.
+                        </p>
+
+                        <input
+                            type="text"
+                            placeholder="Video title"
+                            value={videoTitle}
+                            onChange={(e) => setVideoTitle(e.target.value)}
+                            className="input input-bordered input-sm w-full"
+                        />
+
+                        <input
+                            type="url"
+                            placeholder="YouTube URL"
+                            value={videoUrl}
+                            onChange={(e) => setVideoUrl(e.target.value)}
+                            className="input input-bordered input-sm w-full"
+                        />
+
+                        <div className="flex gap-2">
+                            <select
+                                value={videoSport}
+                                onChange={(e) => setVideoSport(e.target.value)}
+                                className="select select-bordered select-sm flex-1"
+                            >
+                                <option value="basketball">Basketball</option>
+                                <option value="baseball">Baseball</option>
+                                <option value="soccer">Soccer</option>
+                                <option value="football">Football</option>
+                                <option value="tennis">Tennis</option>
+                                <option value="volleyball">Volleyball</option>
+                            </select>
+                            <input
+                                type="text"
+                                placeholder="Category (optional)"
+                                value={videoCategory}
+                                onChange={(e) => setVideoCategory(e.target.value)}
+                                className="input input-bordered input-sm flex-1"
+                            />
+                        </div>
+
+                        {videoUrl && extractYouTubeId(videoUrl) && (
+                            <div className="relative aspect-video rounded-lg overflow-hidden bg-base-300">
+                                <img
+                                    src={`https://img.youtube.com/vi/${extractYouTubeId(videoUrl)}/mqdefault.jpg`}
+                                    alt="Video thumbnail"
+                                    className="w-full h-full object-cover"
+                                />
+                            </div>
+                        )}
+
+                        <button
+                            className="btn btn-primary btn-sm w-full"
+                            onClick={handleSaveVideo}
+                            disabled={!videoUrl || !videoTitle || savingVideo}
+                        >
+                            {savingVideo ? (
+                                <span className="loading loading-spinner loading-sm"></span>
+                            ) : (
+                                "Save Training Video"
+                            )}
+                        </button>
+                    </div>
+                )}
+
+                {/* Playbook Tab (Coaches/Admins only) */}
+                {activeTab === "playbook" && (isAdmin || role === "coach") && (
+                    <div className="space-y-3">
+                        <p className="text-sm opacity-70">
+                            Upload team playbooks and strategies. These will be private and added to your AI coach's knowledge.
+                        </p>
+
+                        <select
+                            value={videoSport}
+                            onChange={(e) => setVideoSport(e.target.value)}
+                            className="select select-bordered select-sm w-full"
+                        >
+                            <option value="basketball">Basketball</option>
+                            <option value="baseball">Baseball</option>
+                            <option value="soccer">Soccer</option>
+                            <option value="football">Football</option>
+                            <option value="tennis">Tennis</option>
+                            <option value="volleyball">Volleyball</option>
+                        </select>
+
+                        <div className="form-control w-full">
+                            <input
+                                type="file"
+                                accept=".txt,.pdf,.md,.doc,.docx"
+                                onChange={handleFileChange}
+                                className="file-input file-input-bordered file-input-sm w-full"
+                            />
+                        </div>
+
+                        <button
+                            className="btn btn-primary btn-sm w-full"
+                            onClick={handleSavePlaybook}
+                            disabled={!file || uploading}
+                        >
+                            {uploading ? (
+                                <span className="loading loading-spinner loading-sm"></span>
+                            ) : (
+                                <>
+                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                    </svg>
+                                    Upload Playbook
+                                </>
+                            )}
+                        </button>
+
+                        <div className="alert alert-info text-xs py-2">
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>Playbooks are private and only visible to you.</span>
+                        </div>
                     </div>
                 )}
             </div>
