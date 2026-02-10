@@ -27,7 +27,7 @@ export default function VoiceConsole() {
                     {connected ? (
                         <span className="badge badge-success">Live</span>
                     ) : (
-                        <span className="badge badge-ghost">Offline</span>
+                        <span className="badge badge-primary">Ready</span>
                     )}
                 </h2>
 
