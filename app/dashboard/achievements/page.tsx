@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import StreakBanner from "@/components/training/StreakBanner";
 import toast from "react-hot-toast";
+import { SPORT_LIST, SportId } from "@/lib/sports/config";
 
 const RARITY_COLORS: Record<string, string> = {
     common: "border-base-content/20",
@@ -25,6 +26,7 @@ export default function AchievementsPage() {
     const [earnedCount, setEarnedCount] = useState(0);
     const [totalCount, setTotalCount] = useState(0);
     const [loading, setLoading] = useState(true);
+    const [filterSport, setFilterSport] = useState<SportId | "all">("all");
 
     useEffect(() => {
         const fetchData = async () => {
@@ -75,12 +77,35 @@ export default function AchievementsPage() {
                 {/* Streak */}
                 <StreakBanner />
 
+                {/* Sport Filter */}
+                <div className="flex flex-wrap gap-2">
+                    <button
+                        className={`btn btn-sm ${filterSport === "all" ? "btn-primary" : "btn-ghost"}`}
+                        onClick={() => setFilterSport("all")}
+                    >
+                        All Sports
+                    </button>
+                    {SPORT_LIST.map(sport => (
+                        <button
+                            key={sport.id}
+                            className={`btn btn-sm ${filterSport === sport.id ? "btn-primary" : "btn-ghost"}`}
+                            onClick={() => setFilterSport(sport.id)}
+                        >
+                            {sport.icon} {sport.name}
+                        </button>
+                    ))}
+                </div>
+
                 {/* Active Challenges */}
                 <div>
                     <h2 className="text-xl font-bold mb-3">Active Challenges</h2>
-                    {activeChallenges.length > 0 ? (
+                    {(() => {
+                        const filteredActive = filterSport === "all"
+                            ? activeChallenges
+                            : activeChallenges.filter(ac => !ac.challenges?.sport || ac.challenges?.sport === filterSport);
+                        return filteredActive.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {activeChallenges.map((ac) => (
+                            {filteredActive.map((ac) => (
                                 <div key={ac.id} className="card bg-base-200">
                                     <div className="card-body p-4">
                                         <div className="flex justify-between items-start">
@@ -119,13 +144,14 @@ export default function AchievementsPage() {
                                 </div>
                             ))}
                         </div>
-                    ) : (
-                        <div className="card bg-base-200">
-                            <div className="card-body text-center py-8 text-base-content/50">
-                                No active challenges. Complete some drills to earn challenges!
+                        ) : (
+                            <div className="card bg-base-200">
+                                <div className="card-body text-center py-8 text-base-content/50">
+                                    No active challenges{filterSport !== "all" ? ` for ${filterSport}` : ""}. Complete some drills to earn challenges!
+                                </div>
                             </div>
-                        </div>
-                    )}
+                        );
+                    })()}
                 </div>
 
                 {/* Badges */}
@@ -168,26 +194,34 @@ export default function AchievementsPage() {
                 </div>
 
                 {/* Recently Completed Challenges */}
-                {completedChallenges.length > 0 && (
-                    <div>
-                        <h2 className="text-xl font-bold mb-3">Completed Challenges</h2>
-                        <div className="space-y-2">
-                            {completedChallenges.map((ac) => (
-                                <div key={ac.id} className="flex items-center justify-between p-3 bg-success/10 rounded-lg">
-                                    <div>
-                                        <span className="font-medium text-sm">{ac.challenges?.name}</span>
-                                        <span className="text-xs text-base-content/50 ml-2">
-                                            {ac.completed_at && new Date(ac.completed_at).toLocaleDateString()}
+                {(() => {
+                    const filteredCompleted = filterSport === "all"
+                        ? completedChallenges
+                        : completedChallenges.filter(ac => !ac.challenges?.sport || ac.challenges?.sport === filterSport);
+                    return filteredCompleted.length > 0 && (
+                        <div>
+                            <h2 className="text-xl font-bold mb-3">Completed Challenges</h2>
+                            <div className="space-y-2">
+                                {filteredCompleted.map((ac) => (
+                                    <div key={ac.id} className="flex items-center justify-between p-3 bg-success/10 rounded-lg">
+                                        <div>
+                                            <span className="font-medium text-sm">{ac.challenges?.name}</span>
+                                            {ac.challenges?.sport && (
+                                                <span className="badge badge-xs badge-outline ml-2">{ac.challenges.sport}</span>
+                                            )}
+                                            <span className="text-xs text-base-content/50 ml-2">
+                                                {ac.completed_at && new Date(ac.completed_at).toLocaleDateString()}
+                                            </span>
+                                        </div>
+                                        <span className="badge badge-sm badge-success">
+                                            +{ac.challenges?.xp_reward} XP
                                         </span>
                                     </div>
-                                    <span className="badge badge-sm badge-success">
-                                        +{ac.challenges?.xp_reward} XP
-                                    </span>
-                                </div>
-                            ))}
+                                ))}
+                            </div>
                         </div>
-                    </div>
-                )}
+                    );
+                })()}
             </div>
         </main>
     );

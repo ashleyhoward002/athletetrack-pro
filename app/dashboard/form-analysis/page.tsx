@@ -26,6 +26,8 @@ export default function FormAnalysisPage() {
         }
     }, [sport]);
 
+    const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+
     const fetchAnalyses = async () => {
         try {
             const res = await fetch("/api/form-analysis");
@@ -41,6 +43,26 @@ export default function FormAnalysisPage() {
     useEffect(() => {
         fetchAnalyses();
     }, []);
+
+    const handleDeleteRequest = (id: string) => {
+        setDeleteTarget(id);
+    };
+
+    const handleDeleteConfirm = async () => {
+        if (!deleteTarget) return;
+        try {
+            const res = await fetch(`/api/form-analysis?id=${deleteTarget}`, {
+                method: "DELETE",
+            });
+            if (!res.ok) throw new Error("Delete failed");
+            toast.success("Analysis deleted");
+            fetchAnalyses();
+        } catch {
+            toast.error("Failed to delete analysis");
+        } finally {
+            setDeleteTarget(null);
+        }
+    };
 
     const handleUpload = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -199,9 +221,30 @@ export default function FormAnalysisPage() {
                             </Link>
                         )}
                     </div>
-                    <AnalysisHistoryGrid analyses={analyses} loading={loading} />
+                    <AnalysisHistoryGrid analyses={analyses} loading={loading} onDelete={handleDeleteRequest} />
                 </div>
             </div>
+
+            {/* Delete Confirmation Modal */}
+            <dialog className={`modal ${deleteTarget ? "modal-open" : ""}`}>
+                <div className="modal-box max-w-sm">
+                    <h3 className="font-bold text-lg">Delete Analysis</h3>
+                    <p className="py-4 text-base-content/70">
+                        Are you sure you want to delete this analysis? The video will also be removed. This cannot be undone.
+                    </p>
+                    <div className="modal-action">
+                        <button className="btn btn-ghost" onClick={() => setDeleteTarget(null)}>
+                            Cancel
+                        </button>
+                        <button className="btn btn-error" onClick={handleDeleteConfirm}>
+                            Delete
+                        </button>
+                    </div>
+                </div>
+                <form method="dialog" className="modal-backdrop">
+                    <button onClick={() => setDeleteTarget(null)}>close</button>
+                </form>
+            </dialog>
         </main>
     );
 }

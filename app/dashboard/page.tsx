@@ -9,6 +9,7 @@ import { LiveAPIProvider } from "@/components/ai/LiveAPIContext";
 import Link from "next/link";
 import SplitText from "@/components/ui/SplitText";
 import ShinyButton from "@/components/ui/ShinyButton";
+import QuickDrills from "@/components/dashboard/QuickDrills";
 
 export const dynamic = "force-dynamic";
 
@@ -70,8 +71,9 @@ export default async function Dashboard() {
               <RecentGames />
             </div>
 
-            {/* Right Column: AI Coach */}
+            {/* Right Column: AI Coach & Drills */}
             <div className="lg:col-span-1 space-y-6">
+              <QuickDrills />
               <VoiceConsole />
               <RagChat />
             </div>

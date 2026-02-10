@@ -164,3 +164,62 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Failed to analyze form" }, { status: 500 });
     }
 }
+
+// DELETE: Remove form analysis and associated video
+export async function DELETE(req: NextRequest) {
+    try {
+        const cookieStore = cookies();
+        const supabase = createClient(cookieStore);
+
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
+        const id = req.nextUrl.searchParams.get("id");
+        if (!id) {
+            return NextResponse.json({ error: "Missing id parameter" }, { status: 400 });
+        }
+
+        // First get the analysis to find the video path
+        const { data: analysis, error: fetchError } = await supabase
+            .from("form_analyses")
+            .select("video_url")
+            .eq("id", id)
+            .eq("user_id", session.user.id)
+            .single();
+
+        if (fetchError || !analysis) {
+            return NextResponse.json({ error: "Analysis not found" }, { status: 404 });
+        }
+
+        // Extract storage path from video URL and delete from storage
+        if (analysis.video_url) {
+            try {
+                const url = new URL(analysis.video_url);
+                const pathMatch = url.pathname.match(/\/form-videos\/(.+)/);
+                if (pathMatch) {
+                    const storagePath = decodeURIComponent(pathMatch[1]);
+                    await supabase.storage.from("form-videos").remove([storagePath]);
+                }
+            } catch (storageError) {
+                console.error("Failed to delete video from storage:", storageError);
+                // Continue with database deletion even if storage deletion fails
+            }
+        }
+
+        // Delete the analysis record
+        const { error: deleteError } = await supabase
+            .from("form_analyses")
+            .delete()
+            .eq("id", id)
+            .eq("user_id", session.user.id);
+
+        if (deleteError) throw deleteError;
+
+        return NextResponse.json({ success: true });
+    } catch (error) {
+        console.error("DELETE /api/form-analysis error:", error);
+        return NextResponse.json({ error: "Failed to delete analysis" }, { status: 500 });
+    }
+}

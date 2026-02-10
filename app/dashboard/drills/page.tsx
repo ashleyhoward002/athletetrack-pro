@@ -57,6 +57,7 @@ export default function DrillsPage() {
     const [deleteTarget, setDeleteTarget] = useState<Drill | null>(null);
     const [filterSport, setFilterSport] = useState<SportId | "all">("all");
     const [formData, setFormData] = useState<DrillFormData>(emptyForm);
+    const [startingDrill, setStartingDrill] = useState<string | null>(null);
 
     const fetchDrills = useCallback(async () => {
         setLoading(true);
@@ -143,6 +144,40 @@ export default function DrillsPage() {
             toast.error(error.message || "Error loading sample drills");
         } finally {
             setSeeding(false);
+        }
+    };
+
+    const handleStartDrill = async (drill: Drill) => {
+        setStartingDrill(drill.id);
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) {
+                toast.error("Not authenticated");
+                return;
+            }
+
+            // Log drill completion
+            const { error } = await supabase.from("drill_completions").insert({
+                user_id: user.id,
+                drill_id: drill.id,
+                completed_at: new Date().toISOString(),
+                xp_earned: 25, // Default XP
+            });
+
+            if (error) throw error;
+
+            toast.success(
+                <div>
+                    <div className="font-bold">Drill Started!</div>
+                    <div className="text-sm">{drill.name} - {drill.sets} sets x {drill.reps} reps</div>
+                </div>,
+                { duration: 4000 }
+            );
+        } catch (error) {
+            console.error("Failed to start drill:", error);
+            toast.error("Failed to log drill");
+        } finally {
+            setStartingDrill(null);
         }
     };
 
@@ -294,39 +329,55 @@ export default function DrillsPage() {
                                     <span>{drill.reps} reps</span>
                                 </div>
 
-                                <div className="flex justify-between items-center">
-                                    {drill.video_url ? (
-                                        <a
-                                            href={drill.video_url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="text-primary text-sm flex items-center gap-1 hover:underline"
-                                        >
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                                                <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" />
-                                            </svg>
-                                            Watch Video
-                                        </a>
-                                    ) : (
-                                        <span></span>
-                                    )}
-                                    <div className="flex gap-1">
+                                <div className="flex flex-col gap-2">
+                                    <div className="flex justify-between items-center">
                                         <button
-                                            className="btn btn-ghost btn-xs text-white"
-                                            onClick={() => openEdit(drill)}
+                                            className={`btn btn-sm btn-success ${startingDrill === drill.id ? "loading" : ""}`}
+                                            onClick={() => handleStartDrill(drill)}
+                                            disabled={startingDrill === drill.id}
                                         >
-                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                            </svg>
+                                            {startingDrill === drill.id ? "" : (
+                                                <>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+                                                    </svg>
+                                                    Start Drill
+                                                </>
+                                            )}
                                         </button>
-                                        <button
-                                            className="btn btn-ghost btn-xs text-error"
-                                            onClick={() => setDeleteTarget(drill)}
-                                        >
-                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                            </svg>
-                                        </button>
+                                        <div className="flex gap-1">
+                                            {drill.video_url && (
+                                                <a
+                                                    href={drill.video_url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="btn btn-ghost btn-xs text-primary"
+                                                    title="Watch video"
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" />
+                                                    </svg>
+                                                </a>
+                                            )}
+                                            <button
+                                                className="btn btn-ghost btn-xs text-white"
+                                                onClick={() => openEdit(drill)}
+                                                title="Edit drill"
+                                            >
+                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                                </svg>
+                                            </button>
+                                            <button
+                                                className="btn btn-ghost btn-xs text-error"
+                                                onClick={() => setDeleteTarget(drill)}
+                                                title="Delete drill"
+                                            >
+                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                                 {drill.is_curated && (

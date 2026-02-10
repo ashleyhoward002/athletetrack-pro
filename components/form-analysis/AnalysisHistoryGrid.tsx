@@ -5,9 +5,10 @@ import AnalysisHistoryCard from "./AnalysisHistoryCard";
 interface AnalysisHistoryGridProps {
     analyses: any[];
     loading: boolean;
+    onDelete?: (id: string) => void;
 }
 
-export default function AnalysisHistoryGrid({ analyses, loading }: AnalysisHistoryGridProps) {
+export default function AnalysisHistoryGrid({ analyses, loading, onDelete }: AnalysisHistoryGridProps) {
     if (loading) {
         return (
             <div className="flex justify-center py-8">
@@ -27,7 +28,7 @@ export default function AnalysisHistoryGrid({ analyses, loading }: AnalysisHisto
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {analyses.map((a) => (
-                <AnalysisHistoryCard key={a.id} analysis={a} />
+                <AnalysisHistoryCard key={a.id} analysis={a} onDelete={onDelete} />
             ))}
         </div>
     );
