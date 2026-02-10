@@ -38,6 +38,7 @@ export default function ProfilePage() {
     bio: "",
     avatar_url: "",
     avatar_color: "6366f1",
+    role: "member" as "member" | "coach",
   });
 
   useEffect(() => {
@@ -67,6 +68,7 @@ export default function ProfilePage() {
             bio: data.bio || "",
             avatar_url: data.avatar_url || "",
             avatar_color: data.avatar_color || "6366f1",
+            role: data.role === "coach" ? "coach" : "member",
           });
         }
       } catch (error) {
@@ -149,6 +151,7 @@ export default function ProfilePage() {
           bio: formData.bio || null,
           avatar_url: formData.avatar_url || null,
           avatar_color: formData.avatar_color,
+          role: formData.role,
           updated_at: new Date().toISOString(),
         });
 
@@ -231,7 +234,7 @@ export default function ProfilePage() {
                 </p>
                 <p className="text-sm text-base-content/60">{user?.email}</p>
                 <div className="badge badge-primary badge-sm mt-1 capitalize">
-                  {profile?.role || "member"}
+                  {formData.role === "coach" ? "Coach" : "Parent / Athlete"}
                 </div>
                 <div className="flex gap-2 mt-3">
                   <input
@@ -349,20 +352,50 @@ export default function ProfilePage() {
                 </label>
               </div>
 
-              {/* Role (Read-only) */}
+              {/* Role Switcher */}
               <div className="form-control">
                 <label className="label">
-                  <span className="label-text font-medium">Role</span>
+                  <span className="label-text font-medium">Account Type</span>
                 </label>
-                <input
-                  type="text"
-                  value={profile?.role || "member"}
-                  disabled
-                  className="input input-bordered w-full bg-base-200 capitalize"
-                />
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setFormData(prev => ({ ...prev, role: "member" }))}
+                    className={`flex flex-col items-center p-4 rounded-xl border-2 transition-all ${
+                      formData.role === "member"
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-base-300 hover:border-primary/50"
+                    }`}
+                  >
+                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span className="font-semibold mt-2 text-sm">Parent / Athlete</span>
+                    <span className="text-xs text-base-content/60 text-center mt-1">
+                      Track stats & get coaching
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFormData(prev => ({ ...prev, role: "coach" }))}
+                    className={`flex flex-col items-center p-4 rounded-xl border-2 transition-all ${
+                      formData.role === "coach"
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-base-300 hover:border-primary/50"
+                    }`}
+                  >
+                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                    </svg>
+                    <span className="font-semibold mt-2 text-sm">Coach</span>
+                    <span className="text-xs text-base-content/60 text-center mt-1">
+                      Manage teams & playbooks
+                    </span>
+                  </button>
+                </div>
                 <label className="label">
                   <span className="label-text-alt text-base-content/50">
-                    Role is assigned by administrators
+                    Switch between roles anytime - coaches can also track their own kids!
                   </span>
                 </label>
               </div>
