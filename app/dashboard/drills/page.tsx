@@ -22,6 +22,13 @@ type Drill = {
     is_curated: boolean;
 };
 
+type Program = {
+    id: string;
+    name: string;
+    sport: string;
+    status: string;
+};
+
 type DrillFormData = {
     name: string;
     category: string;
@@ -58,6 +65,11 @@ export default function DrillsPage() {
     const [filterSport, setFilterSport] = useState<SportId | "all">("all");
     const [formData, setFormData] = useState<DrillFormData>(emptyForm);
     const [startingDrill, setStartingDrill] = useState<string | null>(null);
+    const [viewingDrill, setViewingDrill] = useState<Drill | null>(null);
+    const [addToProgramDrill, setAddToProgramDrill] = useState<Drill | null>(null);
+    const [programs, setPrograms] = useState<Program[]>([]);
+    const [loadingPrograms, setLoadingPrograms] = useState(false);
+    const [addingToProgram, setAddingToProgram] = useState<string | null>(null);
 
     const fetchDrills = useCallback(async () => {
         setLoading(true);
@@ -178,6 +190,62 @@ export default function DrillsPage() {
             toast.error("Failed to log drill");
         } finally {
             setStartingDrill(null);
+        }
+    };
+
+    const fetchPrograms = async (sport: SportId) => {
+        setLoadingPrograms(true);
+        try {
+            const res = await fetch(`/api/programs?sport=${sport}&status=active`);
+            const data = await res.json();
+            setPrograms(data.programs || []);
+        } catch {
+            setPrograms([]);
+        } finally {
+            setLoadingPrograms(false);
+        }
+    };
+
+    const openAddToProgram = (drill: Drill) => {
+        setAddToProgramDrill(drill);
+        fetchPrograms(drill.sport);
+    };
+
+    const handleAddToProgram = async (programId: string) => {
+        if (!addToProgramDrill) return;
+        setAddingToProgram(programId);
+
+        try {
+            // Fetch the program to get its days
+            const res = await fetch(`/api/programs/${programId}`);
+            if (!res.ok) throw new Error("Failed to fetch program");
+            const data = await res.json();
+            const program = data.program;
+            const days = program.program_days || [];
+
+            if (days.length === 0) {
+                toast.error("This program has no training days. Edit the program first.");
+                return;
+            }
+
+            // Add to the last day (or first non-rest day)
+            const targetDay = days.find((d: any) => !d.rest_day) || days[0];
+
+            const { error } = await supabase.from("program_day_drills").insert({
+                program_day_id: targetDay.id,
+                drill_id: addToProgramDrill.id,
+                order_index: (targetDay.program_day_drills?.length || 0) + 1,
+            });
+
+            if (error) throw error;
+
+            toast.success(`Added "${addToProgramDrill.name}" to ${program.name}!`);
+            setAddToProgramDrill(null);
+        } catch (error) {
+            console.error("Failed to add to program:", error);
+            toast.error("Failed to add drill to program");
+        } finally {
+            setAddingToProgram(null);
         }
     };
 
@@ -341,17 +409,36 @@ export default function DrillsPage() {
                                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                                                         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
                                                     </svg>
-                                                    Start Drill
+                                                    Start
                                                 </>
                                             )}
                                         </button>
                                         <div className="flex gap-1">
+                                            <button
+                                                className="btn btn-ghost btn-xs text-info"
+                                                onClick={() => setViewingDrill(drill)}
+                                                title="View details"
+                                            >
+                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                </svg>
+                                            </button>
+                                            <button
+                                                className="btn btn-ghost btn-xs text-primary"
+                                                onClick={() => openAddToProgram(drill)}
+                                                title="Add to program"
+                                            >
+                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                            </button>
                                             {drill.video_url && (
                                                 <a
                                                     href={drill.video_url}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="btn btn-ghost btn-xs text-primary"
+                                                    className="btn btn-ghost btn-xs text-warning"
                                                     title="Watch video"
                                                 >
                                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -588,6 +675,143 @@ export default function DrillsPage() {
                 </div>
                 <form method="dialog" className="modal-backdrop">
                     <button onClick={() => setDeleteTarget(null)}>close</button>
+                </form>
+            </dialog>
+
+            {/* Drill Detail Modal */}
+            <dialog className={`modal ${viewingDrill ? "modal-open" : ""}`}>
+                <div className="modal-box max-w-2xl bg-base-100">
+                    {viewingDrill && (
+                        <>
+                            <div className="flex justify-between items-start mb-4">
+                                <div>
+                                    <h3 className="font-bold text-2xl">{viewingDrill.name}</h3>
+                                    <div className="flex gap-2 mt-2">
+                                        <span className="badge">{getSportEmoji(viewingDrill.sport)} {viewingDrill.sport}</span>
+                                        <span className="badge">{viewingDrill.category}</span>
+                                        <span className={`badge ${getDifficultyColor(viewingDrill.difficulty)}`}>{viewingDrill.difficulty}</span>
+                                    </div>
+                                </div>
+                                <button className="btn btn-sm btn-circle btn-ghost" onClick={() => setViewingDrill(null)}>✕</button>
+                            </div>
+
+                            <div className="divider"></div>
+
+                            <div className="space-y-4">
+                                <div>
+                                    <h4 className="font-semibold text-sm text-base-content/60 mb-1">Description</h4>
+                                    <p className="text-base-content">{viewingDrill.description}</p>
+                                </div>
+
+                                <div className="grid grid-cols-3 gap-4">
+                                    <div className="bg-base-200 rounded-lg p-4 text-center">
+                                        <div className="text-2xl font-bold text-primary">{viewingDrill.duration_minutes}</div>
+                                        <div className="text-xs text-base-content/60">Minutes</div>
+                                    </div>
+                                    <div className="bg-base-200 rounded-lg p-4 text-center">
+                                        <div className="text-2xl font-bold text-secondary">{viewingDrill.sets}</div>
+                                        <div className="text-xs text-base-content/60">Sets</div>
+                                    </div>
+                                    <div className="bg-base-200 rounded-lg p-4 text-center">
+                                        <div className="text-2xl font-bold text-accent">{viewingDrill.reps}</div>
+                                        <div className="text-xs text-base-content/60">Reps</div>
+                                    </div>
+                                </div>
+
+                                {viewingDrill.video_url && (
+                                    <div>
+                                        <h4 className="font-semibold text-sm text-base-content/60 mb-2">Video Tutorial</h4>
+                                        <a
+                                            href={viewingDrill.video_url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="btn btn-outline btn-primary w-full"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                                <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" />
+                                            </svg>
+                                            Watch Video
+                                        </a>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="modal-action">
+                                <button className="btn btn-ghost" onClick={() => setViewingDrill(null)}>Close</button>
+                                <button
+                                    className="btn btn-primary"
+                                    onClick={() => {
+                                        openAddToProgram(viewingDrill);
+                                        setViewingDrill(null);
+                                    }}
+                                >
+                                    Add to Program
+                                </button>
+                                <button
+                                    className={`btn btn-success ${startingDrill === viewingDrill.id ? "loading" : ""}`}
+                                    onClick={() => handleStartDrill(viewingDrill)}
+                                    disabled={startingDrill === viewingDrill.id}
+                                >
+                                    {startingDrill === viewingDrill.id ? "" : "Start Drill"}
+                                </button>
+                            </div>
+                        </>
+                    )}
+                </div>
+                <form method="dialog" className="modal-backdrop">
+                    <button onClick={() => setViewingDrill(null)}>close</button>
+                </form>
+            </dialog>
+
+            {/* Add to Program Modal */}
+            <dialog className={`modal ${addToProgramDrill ? "modal-open" : ""}`}>
+                <div className="modal-box max-w-md bg-base-100">
+                    <h3 className="font-bold text-lg mb-2">Add to Training Program</h3>
+                    {addToProgramDrill && (
+                        <p className="text-base-content/60 text-sm mb-4">
+                            Add <strong>{addToProgramDrill.name}</strong> to one of your active programs:
+                        </p>
+                    )}
+
+                    {loadingPrograms ? (
+                        <div className="flex justify-center py-8">
+                            <span className="loading loading-spinner loading-md" />
+                        </div>
+                    ) : programs.length === 0 ? (
+                        <div className="text-center py-8">
+                            <p className="text-base-content/60 mb-4">No active training programs found for this sport.</p>
+                            <Link href="/dashboard/training/programs/new" className="btn btn-primary btn-sm">
+                                Create a Program
+                            </Link>
+                        </div>
+                    ) : (
+                        <div className="space-y-2">
+                            {programs.map((program) => (
+                                <button
+                                    key={program.id}
+                                    className={`btn btn-block justify-start ${addingToProgram === program.id ? "loading" : ""}`}
+                                    onClick={() => handleAddToProgram(program.id)}
+                                    disabled={addingToProgram !== null}
+                                >
+                                    {addingToProgram !== program.id && (
+                                        <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                        </svg>
+                                    )}
+                                    {program.name}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+
+                    <div className="modal-action">
+                        <button className="btn btn-ghost" onClick={() => setAddToProgramDrill(null)}>
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+                <form method="dialog" className="modal-backdrop">
+                    <button onClick={() => setAddToProgramDrill(null)}>close</button>
                 </form>
             </dialog>
         </main>
