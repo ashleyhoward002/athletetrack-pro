@@ -3,10 +3,6 @@ export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import { generateEmbedding } from "@/lib/embeddings";
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
 export async function POST(req: NextRequest) {
     try {
@@ -16,10 +12,6 @@ export async function POST(req: NextRequest) {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
-
-        if (!process.env.GEMINI_API_KEY) {
-            return NextResponse.json({ error: "GEMINI_API_KEY not configured" }, { status: 500 });
         }
 
         const { query, sport } = await req.json();
@@ -40,23 +32,6 @@ export async function POST(req: NextRequest) {
             .eq("sport", sportName)
             .limit(10);
 
-        // Try to get uploaded documents if any exist
-        let contextText = "";
-        try {
-            // Generate embedding for the query using the shared embedding function
-            const queryEmbedding = await generateEmbedding(query);
-
-            const { data: documents } = await supabase.rpc("match_documents", {
-                query_embedding: queryEmbedding,
-                match_threshold: 0.5,
-                match_count: 5
-            });
-            contextText = documents?.map((doc: any) => doc.content).join("\n---\n") || "";
-        } catch (embError) {
-            // If embeddings fail, continue without document context
-            console.log("Embedding/document search skipped:", embError);
-        }
-
         // Build stats context from recent games
         let statsContext = "";
         if (recentGames && recentGames.length > 0) {
@@ -70,34 +45,27 @@ export async function POST(req: NextRequest) {
 
         const drillsText = drills?.map((d: any) => `- ${d.name} (${d.category}, ${d.difficulty}): ${d.description}`).join("\n") || "";
 
-        const prompt = `You are an expert ${sportName} coach and analyst helping a youth athlete improve.
-Use the following context to answer the user's question. Be encouraging but honest.
-If providing drill recommendations, mention specific drills from the list when relevant.
+        // Use Supabase Edge Function for AI (no external API key needed in Next.js)
+        const { data, error } = await supabase.functions.invoke("ai-coach", {
+            body: {
+                query,
+                sport: sportName,
+                statsContext,
+                drillsText
+            }
+        });
 
-${contextText ? `Uploaded Documents:\n${contextText}\n` : ""}
-${statsContext ? `\n${statsContext}\n` : ""}
-${drillsText ? `\nAvailable Drills:\n${drillsText}\n` : ""}
-
-User Question: ${query}
-
-Provide a helpful, concise response (2-4 paragraphs max). If recommending drills, explain why they would help.`;
-
-        const chatModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-        const result = await chatModel.generateContent(prompt);
-        const response = result.response;
-
-        if (!response) {
-            return NextResponse.json({ error: "No response from AI model" }, { status: 500 });
+        if (error) {
+            console.error("Edge function error:", error);
+            return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
-        const answer = response.text() || "I apologize, I couldn't generate a response. Please try again.";
-
-        return NextResponse.json({ answer });
+        return NextResponse.json({ answer: data.answer });
 
     } catch (error: any) {
         console.error("Chat error:", error?.message || error);
         return NextResponse.json(
-            { error: error?.message || "Failed to generate answer. Please check your API configuration." },
+            { error: error?.message || "Failed to generate answer." },
             { status: 500 }
         );
     }
