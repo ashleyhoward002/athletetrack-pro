@@ -84,16 +84,20 @@ Provide a helpful, concise response (2-4 paragraphs max). If recommending drills
 
         const chatModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
         const result = await chatModel.generateContent(prompt);
-        const response = await result.response;
+        const response = result.response;
+
+        if (!response) {
+            return NextResponse.json({ error: "No response from AI model" }, { status: 500 });
+        }
 
         const answer = response.text() || "I apologize, I couldn't generate a response. Please try again.";
 
         return NextResponse.json({ answer });
 
-    } catch (error) {
-        console.error("Chat error:", error);
+    } catch (error: any) {
+        console.error("Chat error:", error?.message || error);
         return NextResponse.json(
-            { error: "Failed to generate answer. Please check your API configuration." },
+            { error: error?.message || "Failed to generate answer. Please check your API configuration." },
             { status: 500 }
         );
     }
