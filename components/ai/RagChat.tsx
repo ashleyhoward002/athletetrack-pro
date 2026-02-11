@@ -8,7 +8,11 @@ interface Message {
     content: string;
 }
 
-export default function RagChat() {
+interface RagChatProps {
+    sport?: string;
+}
+
+export default function RagChat({ sport = "basketball" }: RagChatProps) {
     const [messages, setMessages] = useState<Message[]>([
         { role: "assistant", content: "Ask me anything about your uploaded documents or stats!" }
     ]);
@@ -35,7 +39,7 @@ export default function RagChat() {
             const response = await fetch("/api/chat", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ query: userMsg }),
+                body: JSON.stringify({ query: userMsg, sport }),
             });
 
             if (!response.ok) throw new Error("Chat failed");

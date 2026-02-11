@@ -3,9 +3,10 @@ export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import { generateEmbedding } from "@/lib/embeddings";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
 export async function POST(req: NextRequest) {
     try {
@@ -42,20 +43,15 @@ export async function POST(req: NextRequest) {
         // Try to get uploaded documents if any exist
         let contextText = "";
         try {
-            // Generate embedding for the query
-            const embeddingResult = await ai.models.embedContent({
-                model: "text-embedding-004",
-                contents: [{ role: "user", parts: [{ text: query }] }],
-            });
+            // Generate embedding for the query using the shared embedding function
+            const queryEmbedding = await generateEmbedding(query);
 
-            if (embeddingResult.embedding?.values) {
-                const { data: documents } = await supabase.rpc("match_documents", {
-                    query_embedding: embeddingResult.embedding.values,
-                    match_threshold: 0.5,
-                    match_count: 5
-                });
-                contextText = documents?.map((doc: any) => doc.content).join("\n---\n") || "";
-            }
+            const { data: documents } = await supabase.rpc("match_documents", {
+                query_embedding: queryEmbedding,
+                match_threshold: 0.5,
+                match_count: 5
+            });
+            contextText = documents?.map((doc: any) => doc.content).join("\n---\n") || "";
         } catch (embError) {
             // If embeddings fail, continue without document context
             console.log("Embedding/document search skipped:", embError);
@@ -86,12 +82,11 @@ User Question: ${query}
 
 Provide a helpful, concise response (2-4 paragraphs max). If recommending drills, explain why they would help.`;
 
-        const result = await ai.models.generateContent({
-            model: "gemini-1.5-flash",
-            contents: [{ role: "user", parts: [{ text: prompt }] }],
-        });
+        const chatModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const result = await chatModel.generateContent(prompt);
+        const response = await result.response;
 
-        const answer = result.text || "I apologize, I couldn't generate a response. Please try again.";
+        const answer = response.text() || "I apologize, I couldn't generate a response. Please try again.";
 
         return NextResponse.json({ answer });
 
