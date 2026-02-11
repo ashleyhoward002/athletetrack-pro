@@ -34,12 +34,13 @@ export function useUserRole(): UserRoleState {
           .from("profiles")
           .select("role")
           .eq("id", user.id)
-          .single();
+          .maybeSingle();
 
-        if (error && error.code !== "PGRST116") {
+        if (error) {
           console.error("Error fetching role:", error);
         }
 
+        // Default to member if no profile exists
         setRole(data?.role || "member");
       } catch (error) {
         console.error("Error:", error);
