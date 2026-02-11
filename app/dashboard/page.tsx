@@ -2,6 +2,7 @@ import StatsOverview from "@/components/sports/StatsOverview";
 import QuickGameEntry from "@/components/sports/QuickGameEntry";
 import RecentGames from "@/components/sports/RecentGames";
 import ProgressTracking from "@/components/sports/ProgressTracking";
+import PhysicalDevelopment from "@/components/sports/PhysicalDevelopment";
 import RagChat from "@/components/ai/RagChat";
 import DocumentUpload from "@/components/ai/DocumentUpload";
 import VoiceConsole from "@/components/ai/VoiceConsole";
@@ -68,6 +69,7 @@ export default async function Dashboard() {
                 <DocumentUpload />
                 <ProgressTracking />
               </div>
+              <PhysicalDevelopment compact={true} />
               <RecentGames />
             </div>
 
