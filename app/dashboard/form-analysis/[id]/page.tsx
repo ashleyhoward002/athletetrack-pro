@@ -8,6 +8,21 @@ import ScoreDisplay from "@/components/form-analysis/ScoreDisplay";
 import FeedbackPanel from "@/components/form-analysis/FeedbackPanel";
 import DetailedAnalysis from "@/components/form-analysis/DetailedAnalysis";
 import DrillRecommendations from "@/components/form-analysis/DrillRecommendations";
+import VideoWithSkeleton from "@/components/form-analysis/VideoWithSkeleton";
+
+// Extract storage path from Supabase public URL
+function extractVideoPath(videoUrl: string): string | undefined {
+    try {
+        const url = new URL(videoUrl);
+        const pathMatch = url.pathname.match(/\/form-videos\/(.+)/);
+        if (pathMatch) {
+            return decodeURIComponent(pathMatch[1]);
+        }
+    } catch {
+        // Invalid URL
+    }
+    return undefined;
+}
 
 export default function FormAnalysisDetailPage() {
     const params = useParams();
@@ -66,16 +81,22 @@ export default function FormAnalysisDetailPage() {
                     </div>
                 </div>
 
-                {/* Video */}
-                <div className="card bg-base-200">
-                    <div className="card-body">
-                        <video
-                            src={analysis.video_url}
-                            controls
-                            className="w-full rounded-lg max-h-96 object-contain bg-black"
-                        />
+                {/* Video with Skeleton Overlay */}
+                {analysis.video_url && (
+                    <div className="card bg-base-200">
+                        <div className="card-body">
+                            <h3 className="card-title text-sm mb-2">
+                                Video Analysis
+                                <span className="badge badge-secondary badge-sm">AI Skeleton</span>
+                            </h3>
+                            <VideoWithSkeleton
+                                videoUrl={analysis.video_url}
+                                videoPath={extractVideoPath(analysis.video_url)}
+                                sport={analysis.sport}
+                            />
+                        </div>
                     </div>
-                </div>
+                )}
 
                 {/* Live Session Info */}
                 {analysis.source === "live" && analysis.session_duration_seconds && (

@@ -8,6 +8,7 @@ import {
     SPORT_LIST,
     getSportConfig,
 } from '@/lib/sports/config';
+import QuickShareButton from '@/components/highlights/QuickShareButton';
 
 export default function RecentGames() {
     const [games, setGames] = useState<any[]>([]);
@@ -58,9 +59,10 @@ export default function RecentGames() {
                             <tr>
                                 <th>Date</th>
                                 <th>Opponent</th>
-                                {config.tableColumns.slice(0, 6).map((col) => (
+                                {config.tableColumns.slice(0, 5).map((col) => (
                                     <th key={col.key} className="text-right">{col.label}</th>
                                 ))}
+                                <th className="text-center w-12"></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -69,16 +71,23 @@ export default function RecentGames() {
                                     <tr key={game.id}>
                                         <td>{new Date(game.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</td>
                                         <td>{game.opponent}</td>
-                                        {config.tableColumns.slice(0, 6).map((col) => (
+                                        {config.tableColumns.slice(0, 5).map((col) => (
                                             <td key={col.key} className="text-right">
                                                 {col.compute(game.stats || {})}
                                             </td>
                                         ))}
+                                        <td className="text-center">
+                                            <QuickShareButton
+                                                game={game}
+                                                allGames={games}
+                                                variant="icon"
+                                            />
+                                        </td>
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan={2 + config.tableColumns.slice(0, 6).length} className="text-center">
+                                    <td colSpan={3 + config.tableColumns.slice(0, 5).length} className="text-center">
                                         No {config.name.toLowerCase()} games recorded yet
                                     </td>
                                 </tr>

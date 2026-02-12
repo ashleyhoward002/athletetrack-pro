@@ -3,10 +3,8 @@ export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { SportId, getSportConfig } from "@/lib/sports/config";
-
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 
 // POST: Process a live coaching session (video already uploaded to Storage by client)
 // Uses the real-time coaching transcript to generate the summary analysis,
@@ -92,12 +90,11 @@ Based on this coaching transcript, provide a comprehensive summary analysis. Con
 Return your analysis as JSON with this exact structure:
 {"overall_score": <1-100>, "strengths": ["..."], "improvements": ["..."], "detailed_analysis": "...", "drill_recommendations": ["..."]}`;
 
-            const result = await ai.models.generateContent({
-                model: "gemini-1.5-flash",
-                contents: summaryPrompt,
-            });
-
-            const responseText = result.text || "";
+            const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+            const result = await model.generateContent(summaryPrompt);
+            const response = result.response;
+            const responseText = response.text() || "";
             const cleanText = responseText.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
             const feedback = JSON.parse(cleanText);
 

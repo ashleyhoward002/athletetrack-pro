@@ -7,6 +7,7 @@ import Link from "next/link";
 import SplitText from "@/components/ui/SplitText";
 import ShinyButton from "@/components/ui/ShinyButton";
 import QuickDrills from "@/components/dashboard/QuickDrills";
+import UpcomingGames from "@/components/dashboard/UpcomingGames";
 
 export const dynamic = "force-dynamic";
 
@@ -15,11 +16,19 @@ export default async function Dashboard() {
       <div className="p-4 md:p-8 pb-24">
         <div className="max-w-7xl mx-auto space-y-8">
           {/* Header Section */}
-          <div>
-            <h1 className="text-3xl md:text-4xl font-extrabold">
-              <SplitText text="Dashboard" animationType="blur" delay={80} />
-            </h1>
-            <p className="text-base-content/70 mt-1">Track, analyze, and improve your game</p>
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <h1 className="text-3xl md:text-4xl font-extrabold">
+                <SplitText text="Dashboard" animationType="blur" delay={80} />
+              </h1>
+              <p className="text-base-content/70 mt-1">Track, analyze, and improve your game</p>
+            </div>
+            <Link href="/dashboard/parent" className="btn btn-outline btn-sm gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+              Parent View
+            </Link>
           </div>
 
           {/* Quick Actions Bar */}
@@ -50,6 +59,12 @@ export default async function Dashboard() {
                 Drill Library
               </ShinyButton>
             </Link>
+            <Link href="/dashboard/highlights" className="btn btn-accent">
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+              </svg>
+              Share Highlights
+            </Link>
           </div>
 
           {/* Stats Overview Cards */}
@@ -65,8 +80,9 @@ export default async function Dashboard() {
               <RecentGames />
             </div>
 
-            {/* Right Column: Drills */}
+            {/* Right Column: Calendar & Drills */}
             <div className="lg:col-span-1 space-y-6">
+              <UpcomingGames />
               <QuickDrills />
             </div>
           </div>

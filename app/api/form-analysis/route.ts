@@ -3,10 +3,8 @@ export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { SportId, getSportConfig } from "@/lib/sports/config";
-
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 
 // GET list of form analyses
 export async function GET(req: NextRequest) {
@@ -107,25 +105,20 @@ export async function POST(req: NextRequest) {
             const buffer = Buffer.from(await videoBlob.arrayBuffer());
             const base64Data = buffer.toString("base64");
 
-            const result = await ai.models.generateContent({
-                model: "gemini-1.5-flash",
-                contents: [
-                    {
-                        role: "user",
-                        parts: [
-                            { text: analysisTypeDef.promptTemplate },
-                            {
-                                inlineData: {
-                                    mimeType,
-                                    data: base64Data,
-                                },
-                            },
-                        ],
+            const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+            const result = await model.generateContent([
+                analysisTypeDef.promptTemplate,
+                {
+                    inlineData: {
+                        mimeType,
+                        data: base64Data,
                     },
-                ],
-            });
+                },
+            ]);
 
-            const responseText = result.text || "";
+            const response = result.response;
+            const responseText = response.text() || "";
             const cleanText = responseText.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
             const feedback = JSON.parse(cleanText);
 

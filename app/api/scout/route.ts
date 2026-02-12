@@ -3,9 +3,7 @@ export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
-import { GoogleGenAI } from "@google/genai";
-
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export async function POST(req: NextRequest) {
     try {
@@ -53,12 +51,11 @@ Create a JSON response with this structure:
 
 Make the statistics realistic for a competitive amateur/high school level player. Be creative but realistic with the assessment. Return only the JSON, no markdown.`;
 
-        const result = await ai.models.generateContent({
-            model: "gemini-1.5-flash",
-            contents: [{ role: "user", parts: [{ text: prompt }] }],
-        });
-
-        const responseText = result.text || "";
+        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const result = await model.generateContent(prompt);
+        const response = result.response;
+        const responseText = response.text() || "";
         const cleanText = responseText.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
 
         try {

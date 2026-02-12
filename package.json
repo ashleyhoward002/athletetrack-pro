@@ -21,6 +21,7 @@
     "eslint-config-next": "13.4.19",
     "eventemitter3": "^5.0.4",
     "framer-motion": "^12.29.2",
+    "html-to-image": "^1.11.13",
     "lodash": "^4.17.23",
     "next": "^14.1.4",
     "next-sitemap": "^4.2.3",
