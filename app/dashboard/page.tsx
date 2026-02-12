@@ -3,10 +3,6 @@ import QuickGameEntry from "@/components/sports/QuickGameEntry";
 import RecentGames from "@/components/sports/RecentGames";
 import ProgressTracking from "@/components/sports/ProgressTracking";
 import PhysicalDevelopment from "@/components/sports/PhysicalDevelopment";
-import RagChat from "@/components/ai/RagChat";
-import DocumentUpload from "@/components/ai/DocumentUpload";
-import VoiceConsole from "@/components/ai/VoiceConsole";
-import { LiveAPIProvider } from "@/components/ai/LiveAPIContext";
 import Link from "next/link";
 import SplitText from "@/components/ui/SplitText";
 import ShinyButton from "@/components/ui/ShinyButton";
@@ -16,7 +12,6 @@ export const dynamic = "force-dynamic";
 
 export default async function Dashboard() {
   return (
-    <LiveAPIProvider>
       <div className="p-4 md:p-8 pb-24">
         <div className="max-w-7xl mx-auto space-y-8">
           {/* Header Section */}
@@ -62,22 +57,17 @@ export default async function Dashboard() {
 
           {/* Main Content Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left Column: Game Entry & Upload */}
+            {/* Left Column: Game Entry */}
             <div className="lg:col-span-2 space-y-6">
               <QuickGameEntry />
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <DocumentUpload />
-                <ProgressTracking />
-              </div>
+              <ProgressTracking />
               <PhysicalDevelopment compact={true} />
               <RecentGames />
             </div>
 
-            {/* Right Column: AI Coach & Drills */}
+            {/* Right Column: Drills */}
             <div className="lg:col-span-1 space-y-6">
               <QuickDrills />
-              <VoiceConsole />
-              <RagChat />
             </div>
           </div>
         </div>
@@ -92,6 +82,5 @@ export default async function Dashboard() {
           <label className="modal-backdrop" htmlFor="quick-entry-modal">Close</label>
         </div>
       </div>
-    </LiveAPIProvider>
   );
 }
