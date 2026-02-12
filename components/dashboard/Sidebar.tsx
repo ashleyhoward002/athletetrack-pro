@@ -7,7 +7,16 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
-const navItems = [
+// Navigation items with optional role restrictions
+interface NavItem {
+  label: string;
+  href: string;
+  icon: React.ReactNode;
+  roles?: ("member" | "coach")[]; // If undefined, show to all roles
+  badge?: string;
+}
+
+const navItems: NavItem[] = [
   {
     label: "Dashboard",
     href: "/dashboard",
@@ -16,6 +25,28 @@ const navItems = [
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1" />
       </svg>
     ),
+  },
+  {
+    label: "Parent View",
+    href: "/dashboard/parent",
+    icon: (
+      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+      </svg>
+    ),
+    roles: ["member"],
+    badge: "Family",
+  },
+  {
+    label: "Team Management",
+    href: "/dashboard/leaderboard/teams",
+    icon: (
+      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+      </svg>
+    ),
+    roles: ["coach"],
+    badge: "Coach",
   },
   {
     label: "Athletes",
@@ -231,7 +262,13 @@ export default function Sidebar() {
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto py-4 px-3">
           <ul className="menu menu-md gap-1 w-full">
-            {navItems.map((item) => (
+            {navItems
+              .filter((item) => {
+                // Show item if no role restriction or if user's role matches
+                if (!item.roles) return true;
+                return item.roles.includes(userRole as "member" | "coach");
+              })
+              .map((item) => (
               <li key={item.href}>
                 <Link
                   href={item.href}
@@ -244,6 +281,9 @@ export default function Sidebar() {
                 >
                   {item.icon}
                   {item.label}
+                  {item.badge && (
+                    <span className="badge badge-xs badge-primary ml-auto">{item.badge}</span>
+                  )}
                 </Link>
               </li>
             ))}
@@ -270,8 +310,11 @@ export default function Sidebar() {
                   <p className="text-sm font-medium truncate">
                     {user.user_metadata?.full_name || user.email?.split("@")[0]}
                   </p>
-                  {userRole === "admin" && (
-                    <span className="badge badge-primary badge-xs">Admin</span>
+                  {userRole === "coach" && (
+                    <span className="badge badge-secondary badge-xs">Coach</span>
+                  )}
+                  {userRole === "member" && (
+                    <span className="badge badge-accent badge-xs">Parent</span>
                   )}
                 </div>
                 <p className="text-xs text-base-content/50 truncate">
