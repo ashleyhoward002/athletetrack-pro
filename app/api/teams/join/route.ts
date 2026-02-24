@@ -7,7 +7,7 @@ import { cookies } from "next/headers";
 // POST: join a team via invite code
 export async function POST(req: NextRequest) {
     try {
-        const cookieStore = cookies();
+        const cookieStore = await cookies();
         const supabase = createClient(cookieStore);
 
         const { data: { session } } = await supabase.auth.getSession();

@@ -7,6 +7,7 @@ import {
   DEFAULT_SPORT,
   getSportConfig,
   groupStatFields,
+  getCoreStatFields,
   StatFieldDef,
   ComputedStatDef,
 } from "@/lib/sports/config";
@@ -63,6 +64,7 @@ export default function GameModal({
   seasons,
 }: Props) {
   const [form, setForm] = useState<GameFormData>(buildEmptyForm());
+  const [simpleMode, setSimpleMode] = useState(true); // Default to simple mode for new parents
   const isEdit = !!initialData;
 
   useEffect(() => {
@@ -80,7 +82,13 @@ export default function GameModal({
 
   const sport = form.sport;
   const config = getSportConfig(sport);
-  const groups = useMemo(() => groupStatFields(config.statFields), [config]);
+  const displayFields = useMemo(() =>
+    simpleMode ? getCoreStatFields(config.statFields) : config.statFields,
+    [config, simpleMode]
+  );
+  const groups = useMemo(() => groupStatFields(displayFields), [displayFields]);
+  const coreStatCount = getCoreStatFields(config.statFields).length;
+  const totalStatCount = config.statFields.length;
 
   const setField = (name: string, value: string) =>
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -120,7 +128,14 @@ export default function GameModal({
         value={form.stats[field.key] ?? "0"}
         onChange={(e) => setStat(field.key, e.target.value)}
         className="input input-bordered input-sm text-center"
+        placeholder="0"
       />
+      {/* Show inline help in simple mode */}
+      {simpleMode && field.howToTrack && (
+        <p className="text-xs text-base-content/50 mt-1 leading-tight">
+          {field.howToTrack}
+        </p>
+      )}
     </div>
   );
 
@@ -161,7 +176,7 @@ export default function GameModal({
             <label className="label">
               <span className="label-text font-medium">Sport</span>
             </label>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               {SPORT_LIST.map((s) => (
                 <button
                   key={s.id}
@@ -177,6 +192,41 @@ export default function GameModal({
               ))}
             </div>
           </div>
+
+          {/* Simple/Advanced Mode Toggle */}
+          <div className="flex items-center justify-between bg-base-200 rounded-lg p-3">
+            <div>
+              <span className="font-medium text-sm">
+                {simpleMode ? "Simple Mode" : "Advanced Mode"}
+              </span>
+              <p className="text-xs text-base-content/60">
+                {simpleMode
+                  ? `Showing ${coreStatCount} essential stats with helpful tips`
+                  : `Showing all ${totalStatCount} stats for detailed tracking`}
+              </p>
+            </div>
+            <label className="swap swap-flip">
+              <input
+                type="checkbox"
+                checked={!simpleMode}
+                onChange={() => setSimpleMode(!simpleMode)}
+              />
+              <div className="swap-on btn btn-sm btn-ghost">All Stats</div>
+              <div className="swap-off btn btn-sm btn-primary">Simple</div>
+            </label>
+          </div>
+
+          {/* Simple mode intro for first-time users */}
+          {simpleMode && (
+            <div className="alert alert-info py-2">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-current shrink-0 w-5 h-5">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <span className="text-xs">
+                New to tracking? We're showing just the key stats. Don't know a number? Leave it at 0 — you can always update later.
+              </span>
+            </div>
+          )}
 
           {/* Game info */}
           <div className="grid grid-cols-2 gap-4">
@@ -257,7 +307,7 @@ export default function GameModal({
           {Object.entries(groups).map(([groupName, fields]) => (
             <div key={groupName}>
               <div className="divider text-xs my-1">{groupName}</div>
-              <div className="grid grid-cols-5 gap-3">
+              <div className={`grid gap-3 ${simpleMode ? "grid-cols-2 md:grid-cols-3" : "grid-cols-5"}`}>
                 {fields.map((field) => (
                   <StatInput key={field.key} field={field} />
                 ))}

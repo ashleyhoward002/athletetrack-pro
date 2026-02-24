@@ -7,7 +7,7 @@ import { cookies } from "next/headers";
 // GET: team detail with members
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
     try {
-        const cookieStore = cookies();
+        const cookieStore = await cookies();
         const supabase = createClient(cookieStore);
 
         const { data: { session } } = await supabase.auth.getSession();
@@ -51,7 +51,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 // PATCH: update team (owner only)
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
     try {
-        const cookieStore = cookies();
+        const cookieStore = await cookies();
         const supabase = createClient(cookieStore);
 
         const { data: { session } } = await supabase.auth.getSession();
@@ -89,7 +89,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 // DELETE: delete team (owner only)
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
     try {
-        const cookieStore = cookies();
+        const cookieStore = await cookies();
         const supabase = createClient(cookieStore);
 
         const { data: { session } } = await supabase.auth.getSession();

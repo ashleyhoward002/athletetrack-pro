@@ -7,7 +7,7 @@ import { cookies } from "next/headers";
 // GET current streak, XP, and level for the authenticated user
 export async function GET(req: NextRequest) {
     try {
-        const cookieStore = cookies();
+        const cookieStore = await cookies();
         const supabase = createClient(cookieStore);
 
         const { data: { session } } = await supabase.auth.getSession();

@@ -383,8 +383,8 @@ export default function DrillsPage() {
                             <GlassCard key={drill.id} className="hover:scale-[1.02] transition-transform">
                                 <div className="flex justify-between items-start mb-2">
                                     <div className="flex gap-2">
-                                        <span className="badge badge-outline text-white">{getSportEmoji(drill.sport)} {drill.sport}</span>
-                                        <span className="badge badge-outline text-white">{drill.category}</span>
+                                        <span className="badge bg-white/10 border-white/20 text-white">{getSportEmoji(drill.sport)} {drill.sport}</span>
+                                        <span className="badge bg-white/10 border-white/20 text-white">{drill.category}</span>
                                     </div>
                                     <span className={`badge ${getDifficultyColor(drill.difficulty)}`}>{drill.difficulty}</span>
                                 </div>
@@ -469,7 +469,7 @@ export default function DrillsPage() {
                                 </div>
                                 {drill.is_curated && (
                                     <div className="mt-2">
-                                        <span className="badge badge-sm badge-ghost text-white/50">Sample Drill</span>
+                                        <span className="badge badge-sm badge-outline border-blue-400/50 text-blue-200">Sample Drill</span>
                                     </div>
                                 )}
                             </GlassCard>

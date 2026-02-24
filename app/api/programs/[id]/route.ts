@@ -7,7 +7,7 @@ import { cookies } from "next/headers";
 // GET a single program with days and drills
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
     try {
-        const cookieStore = cookies();
+        const cookieStore = await cookies();
         const supabase = createClient(cookieStore);
 
         const { data: { session } } = await supabase.auth.getSession();
@@ -76,7 +76,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 // PUT update a program
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
     try {
-        const cookieStore = cookies();
+        const cookieStore = await cookies();
         const supabase = createClient(cookieStore);
 
         const { data: { session } } = await supabase.auth.getSession();
@@ -113,7 +113,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 // DELETE a program
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
     try {
-        const cookieStore = cookies();
+        const cookieStore = await cookies();
         const supabase = createClient(cookieStore);
 
         const { data: { session } } = await supabase.auth.getSession();

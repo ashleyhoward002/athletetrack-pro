@@ -8,7 +8,7 @@ import { cookies } from "next/headers";
 // This prevents the key from being hardcoded in the client bundle.
 export async function GET() {
     try {
-        const cookieStore = cookies();
+        const cookieStore = await cookies();
         const supabase = createClient(cookieStore);
 
         const { data: { session } } = await supabase.auth.getSession();

@@ -8,7 +8,7 @@ import { CreateSchoolRequest } from "@/types/school";
 // GET: list user's schools
 export async function GET(req: NextRequest) {
   try {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const supabase = createClient(cookieStore);
 
     const {
@@ -68,7 +68,7 @@ export async function GET(req: NextRequest) {
 // POST: create a new school
 export async function POST(req: NextRequest) {
   try {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const supabase = createClient(cookieStore);
 
     const {

@@ -7,7 +7,7 @@ import { cookies } from "next/headers";
 // GET drill completions for the authenticated user
 export async function GET(req: NextRequest) {
     try {
-        const cookieStore = cookies();
+        const cookieStore = await cookies();
         const supabase = createClient(cookieStore);
 
         const { data: { session } } = await supabase.auth.getSession();
@@ -41,7 +41,7 @@ export async function GET(req: NextRequest) {
 // POST record a drill completion
 export async function POST(req: NextRequest) {
     try {
-        const cookieStore = cookies();
+        const cookieStore = await cookies();
         const supabase = createClient(cookieStore);
 
         const { data: { session } } = await supabase.auth.getSession();

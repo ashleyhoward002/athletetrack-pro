@@ -8,7 +8,7 @@ import { SportId } from "@/lib/sports/config";
 // GET all workout programs for the authenticated user
 export async function GET(req: NextRequest) {
     try {
-        const cookieStore = cookies();
+        const cookieStore = await cookies();
         const supabase = createClient(cookieStore);
 
         const { data: { session } } = await supabase.auth.getSession();
@@ -81,7 +81,7 @@ export async function GET(req: NextRequest) {
 // POST create a new workout program
 export async function POST(req: NextRequest) {
     try {
-        const cookieStore = cookies();
+        const cookieStore = await cookies();
         const supabase = createClient(cookieStore);
 
         const { data: { session } } = await supabase.auth.getSession();

@@ -7,7 +7,7 @@ import { cookies } from "next/headers";
 // POST: Assign daily/weekly challenges to the user
 export async function POST(req: NextRequest) {
     try {
-        const cookieStore = cookies();
+        const cookieStore = await cookies();
         const supabase = createClient(cookieStore);
 
         const { data: { session } } = await supabase.auth.getSession();

@@ -9,7 +9,7 @@ import { SportId, getSportConfig } from "@/lib/sports/config";
 // GET list of form analyses
 export async function GET(req: NextRequest) {
     try {
-        const cookieStore = cookies();
+        const cookieStore = await cookies();
         const supabase = createClient(cookieStore);
 
         const { data: { session } } = await supabase.auth.getSession();
@@ -40,7 +40,7 @@ export async function GET(req: NextRequest) {
 // POST: Process uploaded video (video already uploaded to Storage by client)
 export async function POST(req: NextRequest) {
     try {
-        const cookieStore = cookies();
+        const cookieStore = await cookies();
         const supabase = createClient(cookieStore);
 
         const { data: { session } } = await supabase.auth.getSession();
@@ -161,7 +161,7 @@ export async function POST(req: NextRequest) {
 // DELETE: Remove form analysis and associated video
 export async function DELETE(req: NextRequest) {
     try {
-        const cookieStore = cookies();
+        const cookieStore = await cookies();
         const supabase = createClient(cookieStore);
 
         const { data: { session } } = await supabase.auth.getSession();

@@ -20,7 +20,7 @@ function calculateAge(birthDate: string): number {
 // POST: student (13+) joins via invite code
 export async function POST(req: NextRequest) {
   try {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const supabase = createClient(cookieStore);
 
     const {
@@ -153,7 +153,7 @@ export async function POST(req: NextRequest) {
 // GET: get student's own profile
 export async function GET(req: NextRequest) {
   try {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const supabase = createClient(cookieStore);
 
     const {

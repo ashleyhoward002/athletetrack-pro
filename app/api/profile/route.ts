@@ -7,7 +7,7 @@ import { cookies } from "next/headers";
 // GET the current user's profile
 export async function GET(req: NextRequest) {
     try {
-        const cookieStore = cookies();
+        const cookieStore = await cookies();
         const supabase = createClient(cookieStore);
 
         const { data: { session } } = await supabase.auth.getSession();
@@ -40,7 +40,7 @@ export async function GET(req: NextRequest) {
 // PATCH update the current user's profile
 export async function PATCH(req: NextRequest) {
     try {
-        const cookieStore = cookies();
+        const cookieStore = await cookies();
         const supabase = createClient(cookieStore);
 
         const { data: { session } } = await supabase.auth.getSession();

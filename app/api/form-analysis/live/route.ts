@@ -11,7 +11,7 @@ import { SportId, getSportConfig } from "@/lib/sports/config";
 // which is fast (text-only) and avoids Vercel serverless function timeouts.
 export async function POST(req: NextRequest) {
     try {
-        const cookieStore = cookies();
+        const cookieStore = await cookies();
         const supabase = createClient(cookieStore);
 
         const { data: { session } } = await supabase.auth.getSession();

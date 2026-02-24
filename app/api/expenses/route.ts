@@ -7,7 +7,7 @@ import { cookies } from "next/headers";
 // GET all expenses for the authenticated user
 export async function GET(req: NextRequest) {
     try {
-        const cookieStore = cookies();
+        const cookieStore = await cookies();
         const supabase = createClient(cookieStore);
 
         const { data: { session } } = await supabase.auth.getSession();
@@ -65,7 +65,7 @@ export async function GET(req: NextRequest) {
 // POST create a new expense
 export async function POST(req: NextRequest) {
     try {
-        const cookieStore = cookies();
+        const cookieStore = await cookies();
         const supabase = createClient(cookieStore);
 
         const { data: { session } } = await supabase.auth.getSession();
@@ -105,7 +105,7 @@ export async function POST(req: NextRequest) {
 // DELETE an expense
 export async function DELETE(req: NextRequest) {
     try {
-        const cookieStore = cookies();
+        const cookieStore = await cookies();
         const supabase = createClient(cookieStore);
 
         const { data: { session } } = await supabase.auth.getSession();

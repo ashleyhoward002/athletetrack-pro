@@ -17,6 +17,7 @@ export interface StatFieldDef {
   max?: number;
   description: string;
   howToTrack?: string;
+  isCore?: boolean; // If true, shown in Simple Mode for beginners
 }
 
 export interface ComputedStatDef {
@@ -102,7 +103,7 @@ const basketballConfig: SportConfig = {
   statFields: [
     // Game Info
     { key: "minutes", label: "Minutes", shortLabel: "MIN", type: "integer", group: "Game", description: "Total minutes the player was on the court.", howToTrack: "Use a stopwatch or check the scorebook for substitution times." },
-    { key: "points", label: "Points", shortLabel: "PTS", type: "integer", group: "Game", description: "Total points scored. A regular basket is 2 points, a three-pointer is 3, and a free throw is 1.", howToTrack: "Count from the scoreboard or add up: (FG Made x 2) + (3PT Made x 3) + (FT Made)." },
+    { key: "points", label: "Points", shortLabel: "PTS", type: "integer", group: "Game", description: "Total points scored. A regular basket is 2 points, a three-pointer is 3, and a free throw is 1.", howToTrack: "Count from the scoreboard or add up: (FG Made x 2) + (3PT Made x 3) + (FT Made).", isCore: true },
     // Shooting
     { key: "fg_made", label: "FG Made", shortLabel: "FGM", type: "integer", group: "Shooting", description: "Field goals made — any basket scored from the floor (includes 2-pointers and 3-pointers).", howToTrack: "Mark a tally each time the player's shot goes in." },
     { key: "fg_attempted", label: "FG Attempted", shortLabel: "FGA", type: "integer", group: "Shooting", description: "Total shot attempts from the floor (made + missed, not counting free throws).", howToTrack: "Mark a tally for every shot taken, whether it goes in or not." },
@@ -111,10 +112,10 @@ const basketballConfig: SportConfig = {
     { key: "ft_made", label: "FT Made", shortLabel: "FTM", type: "integer", group: "Shooting", description: "Free throws made — successful shots from the free-throw line after a foul.", howToTrack: "Count each free throw that goes in." },
     { key: "ft_attempted", label: "FT Attempted", shortLabel: "FTA", type: "integer", group: "Shooting", description: "Total free throw attempts (made + missed).", howToTrack: "Count each time the player steps to the line for a free throw." },
     // Rebounds
-    { key: "rebounds_off", label: "Off. Rebounds", shortLabel: "OREB", type: "integer", group: "Rebounds", description: "Offensive rebounds — grabbing the ball after a missed shot by your own team, giving another chance to score.", howToTrack: "Tally when the player grabs a rebound on the opponent's basket end." },
-    { key: "rebounds_def", label: "Def. Rebounds", shortLabel: "DREB", type: "integer", group: "Rebounds", description: "Defensive rebounds — grabbing the ball after a missed shot by the opposing team.", howToTrack: "Tally when the player grabs a rebound on your own basket end." },
+    { key: "rebounds_off", label: "Off. Rebounds", shortLabel: "OREB", type: "integer", group: "Rebounds", description: "Offensive rebounds — grabbing the ball after a missed shot by your own team, giving another chance to score.", howToTrack: "Tally when the player grabs a rebound on the opponent's basket end.", isCore: true },
+    { key: "rebounds_def", label: "Def. Rebounds", shortLabel: "DREB", type: "integer", group: "Rebounds", description: "Defensive rebounds — grabbing the ball after a missed shot by the opposing team.", howToTrack: "Tally when the player grabs a rebound on your own basket end.", isCore: true },
     // Other
-    { key: "assists", label: "Assists", shortLabel: "AST", type: "integer", group: "Other", description: "A pass that directly leads to a teammate scoring a basket.", howToTrack: "Tally when a player's pass leads directly to a made basket." },
+    { key: "assists", label: "Assists", shortLabel: "AST", type: "integer", group: "Other", description: "A pass that directly leads to a teammate scoring a basket.", howToTrack: "Tally when a player's pass leads directly to a made basket.", isCore: true },
     { key: "steals", label: "Steals", shortLabel: "STL", type: "integer", group: "Other", description: "Taking the ball away from an opposing player through a deflection or interception.", howToTrack: "Tally when the player takes the ball from an opponent." },
     { key: "blocks", label: "Blocks", shortLabel: "BLK", type: "integer", group: "Other", description: "Deflecting an opponent's shot attempt, preventing it from reaching the basket.", howToTrack: "Tally when the player swats away an opponent's shot." },
     { key: "turnovers", label: "Turnovers", shortLabel: "TO", type: "integer", group: "Other", description: "Losing possession of the ball to the other team (bad pass, travel, stolen ball, etc.).", howToTrack: "Tally each time the player loses the ball to the other team." },
@@ -321,13 +322,13 @@ const baseballConfig: SportConfig = {
   positions: ["P", "C", "1B", "2B", "3B", "SS", "LF", "CF", "RF", "DH", "UTL"],
   statFields: [
     // Batting
-    { key: "at_bats", label: "At Bats", shortLabel: "AB", type: "integer", group: "Batting", description: "Official plate appearances where the batter puts the ball in play or strikes out. Walks and hit-by-pitches don't count.", howToTrack: "Count each time the batter completes a turn (not including walks, HBP, or sacrifices)." },
-    { key: "hits", label: "Hits", shortLabel: "H", type: "integer", group: "Batting", description: "Times the batter reaches base safely by hitting the ball (singles + doubles + triples + home runs).", howToTrack: "Tally each time the batter hits the ball and reaches base safely." },
+    { key: "at_bats", label: "At Bats", shortLabel: "AB", type: "integer", group: "Batting", description: "Official plate appearances where the batter puts the ball in play or strikes out. Walks and hit-by-pitches don't count.", howToTrack: "Count each time the batter completes a turn (not including walks, HBP, or sacrifices).", isCore: true },
+    { key: "hits", label: "Hits", shortLabel: "H", type: "integer", group: "Batting", description: "Times the batter reaches base safely by hitting the ball (singles + doubles + triples + home runs).", howToTrack: "Tally each time the batter hits the ball and reaches base safely.", isCore: true },
     { key: "singles", label: "Singles", shortLabel: "1B", type: "integer", group: "Batting", description: "Hits where the batter reaches first base.", howToTrack: "Tally when the batter gets a hit and stops at first base." },
     { key: "doubles", label: "Doubles", shortLabel: "2B", type: "integer", group: "Batting", description: "Hits where the batter reaches second base.", howToTrack: "Tally when the batter hits and reaches second base." },
     { key: "triples", label: "Triples", shortLabel: "3B", type: "integer", group: "Batting", description: "Hits where the batter reaches third base.", howToTrack: "Tally when the batter hits and reaches third base." },
-    { key: "home_runs", label: "Home Runs", shortLabel: "HR", type: "integer", group: "Batting", description: "Hits where the batter rounds all bases and scores, usually over the outfield fence.", howToTrack: "Tally when the batter hits the ball over the fence or circles all bases on a hit." },
-    { key: "rbis", label: "RBIs", shortLabel: "RBI", type: "integer", group: "Batting", description: "Runs Batted In — the number of runners who score because of this batter's action.", howToTrack: "Count how many runners cross home plate as a result of the batter's at-bat." },
+    { key: "home_runs", label: "Home Runs", shortLabel: "HR", type: "integer", group: "Batting", description: "Hits where the batter rounds all bases and scores, usually over the outfield fence.", howToTrack: "Tally when the batter hits the ball over the fence or circles all bases on a hit.", isCore: true },
+    { key: "rbis", label: "RBIs", shortLabel: "RBI", type: "integer", group: "Batting", description: "Runs Batted In — the number of runners who score because of this batter's action.", howToTrack: "Count how many runners cross home plate as a result of the batter's at-bat.", isCore: true },
     { key: "walks", label: "Walks", shortLabel: "BB", type: "integer", group: "Batting", description: "Base on balls — the batter reaches first base after 4 balls (pitches outside the strike zone).", howToTrack: "Tally when the umpire awards first base after ball four." },
     { key: "strikeouts", label: "Strikeouts", shortLabel: "SO", type: "integer", group: "Batting", description: "Times the batter is called out after 3 strikes.", howToTrack: "Tally each strikeout called by the umpire." },
     { key: "stolen_bases", label: "Stolen Bases", shortLabel: "SB", type: "integer", group: "Batting", description: "Successfully advancing to the next base while the pitcher is throwing to the batter.", howToTrack: "Tally when a runner advances a base on a steal attempt without the ball being hit." },
@@ -583,8 +584,8 @@ const soccerConfig: SportConfig = {
     // Game
     { key: "minutes_played", label: "Minutes Played", shortLabel: "MIN", type: "integer", group: "Game", description: "Total minutes the player was on the field.", howToTrack: "Note when the player subs in and out; subtract for total time." },
     // Attacking
-    { key: "goals", label: "Goals", shortLabel: "G", type: "integer", group: "Attacking", description: "Times the player scored by getting the ball into the opponent's net.", howToTrack: "Tally each goal the player scores." },
-    { key: "assists", label: "Assists", shortLabel: "A", type: "integer", group: "Attacking", description: "A pass or play that directly sets up a teammate to score a goal.", howToTrack: "Tally when a player's pass leads directly to a goal." },
+    { key: "goals", label: "Goals", shortLabel: "G", type: "integer", group: "Attacking", description: "Times the player scored by getting the ball into the opponent's net.", howToTrack: "Tally each goal the player scores.", isCore: true },
+    { key: "assists", label: "Assists", shortLabel: "A", type: "integer", group: "Attacking", description: "A pass or play that directly sets up a teammate to score a goal.", howToTrack: "Tally when a player's pass leads directly to a goal.", isCore: true },
     { key: "shots", label: "Shots", shortLabel: "SH", type: "integer", group: "Attacking", description: "Any attempt to score, whether on target, off target, or blocked.", howToTrack: "Tally every time the player kicks or heads the ball toward goal." },
     { key: "shots_on_target", label: "Shots on Target", shortLabel: "SOT", type: "integer", group: "Attacking", description: "Shots that would go in if not saved by the goalkeeper or blocked on the line.", howToTrack: "Tally shots that force a save or go in the goal." },
     // Passing
@@ -803,21 +804,21 @@ const footballConfig: SportConfig = {
     // Passing
     { key: "pass_attempts", label: "Pass Attempts", shortLabel: "ATT", type: "integer", group: "Passing", description: "Number of pass attempts thrown.", howToTrack: "Tally every forward pass attempt by the quarterback." },
     { key: "pass_completions", label: "Completions", shortLabel: "CMP", type: "integer", group: "Passing", description: "Passes caught by a receiver.", howToTrack: "Tally each pass that is successfully caught." },
-    { key: "passing_yards", label: "Passing Yards", shortLabel: "YDS", type: "integer", group: "Passing", description: "Total yards gained through completed passes.", howToTrack: "Sum the yardage gained on each completed pass." },
-    { key: "passing_tds", label: "Passing TDs", shortLabel: "TD", type: "integer", group: "Passing", description: "Touchdown passes thrown.", howToTrack: "Tally each pass that results in a touchdown." },
+    { key: "passing_yards", label: "Passing Yards", shortLabel: "YDS", type: "integer", group: "Passing", description: "Total yards gained through completed passes.", howToTrack: "Sum the yardage gained on each completed pass.", isCore: true },
+    { key: "passing_tds", label: "Passing TDs", shortLabel: "TD", type: "integer", group: "Passing", description: "Touchdown passes thrown.", howToTrack: "Tally each pass that results in a touchdown.", isCore: true },
     { key: "interceptions_thrown", label: "Interceptions", shortLabel: "INT", type: "integer", group: "Passing", description: "Passes caught by the opposing defense.", howToTrack: "Tally each pass intercepted by the defense." },
     { key: "sacks_taken", label: "Sacks Taken", shortLabel: "SCK", type: "integer", group: "Passing", description: "Times the quarterback was tackled behind the line of scrimmage.", howToTrack: "Tally each time the QB is tackled before throwing." },
     // Rushing
     { key: "rush_attempts", label: "Rush Attempts", shortLabel: "ATT", type: "integer", group: "Rushing", description: "Number of times the player carried the ball.", howToTrack: "Tally each handoff or QB scramble." },
-    { key: "rushing_yards", label: "Rushing Yards", shortLabel: "YDS", type: "integer", group: "Rushing", description: "Total yards gained on rushing plays.", howToTrack: "Sum the yardage gained on each carry." },
-    { key: "rushing_tds", label: "Rushing TDs", shortLabel: "TD", type: "integer", group: "Rushing", description: "Touchdowns scored by running the ball.", howToTrack: "Tally each rushing touchdown." },
+    { key: "rushing_yards", label: "Rushing Yards", shortLabel: "YDS", type: "integer", group: "Rushing", description: "Total yards gained on rushing plays.", howToTrack: "Sum the yardage gained on each carry.", isCore: true },
+    { key: "rushing_tds", label: "Rushing TDs", shortLabel: "TD", type: "integer", group: "Rushing", description: "Touchdowns scored by running the ball.", howToTrack: "Tally each rushing touchdown.", isCore: true },
     { key: "fumbles", label: "Fumbles", shortLabel: "FUM", type: "integer", group: "Rushing", description: "Times the ball carrier lost possession.", howToTrack: "Tally each time the player drops the ball." },
     { key: "fumbles_lost", label: "Fumbles Lost", shortLabel: "FL", type: "integer", group: "Rushing", description: "Fumbles recovered by the opposing team.", howToTrack: "Tally fumbles that the defense recovers." },
     // Receiving
     { key: "targets", label: "Targets", shortLabel: "TGT", type: "integer", group: "Receiving", description: "Number of times a pass was thrown to this receiver.", howToTrack: "Tally each pass intended for this player." },
-    { key: "receptions", label: "Receptions", shortLabel: "REC", type: "integer", group: "Receiving", description: "Passes successfully caught.", howToTrack: "Tally each pass this player catches." },
-    { key: "receiving_yards", label: "Receiving Yards", shortLabel: "YDS", type: "integer", group: "Receiving", description: "Total yards gained after catching passes.", howToTrack: "Sum yardage gained on each reception." },
-    { key: "receiving_tds", label: "Receiving TDs", shortLabel: "TD", type: "integer", group: "Receiving", description: "Touchdowns scored by catching passes.", howToTrack: "Tally each receiving touchdown." },
+    { key: "receptions", label: "Receptions", shortLabel: "REC", type: "integer", group: "Receiving", description: "Passes successfully caught.", howToTrack: "Tally each pass this player catches.", isCore: true },
+    { key: "receiving_yards", label: "Receiving Yards", shortLabel: "YDS", type: "integer", group: "Receiving", description: "Total yards gained after catching passes.", howToTrack: "Sum yardage gained on each reception.", isCore: true },
+    { key: "receiving_tds", label: "Receiving TDs", shortLabel: "TD", type: "integer", group: "Receiving", description: "Touchdowns scored by catching passes.", howToTrack: "Tally each receiving touchdown.", isCore: true },
     // Defense
     { key: "tackles_solo", label: "Solo Tackles", shortLabel: "SOLO", type: "integer", group: "Defense", description: "Tackles made by this player alone.", howToTrack: "Tally when the player brings down the ball carrier without help." },
     { key: "tackles_assisted", label: "Assisted Tackles", shortLabel: "AST", type: "integer", group: "Defense", description: "Tackles made with help from teammates.", howToTrack: "Tally when the player helps bring down the ball carrier." },
@@ -1043,7 +1044,7 @@ const tennisConfig: SportConfig = {
   positions: ["Singles", "Doubles"],
   statFields: [
     // Serving
-    { key: "aces", label: "Aces", shortLabel: "ACE", type: "integer", group: "Serving", description: "Serves that the opponent cannot touch, resulting in a point.", howToTrack: "Tally each serve that lands in and the opponent doesn't touch." },
+    { key: "aces", label: "Aces", shortLabel: "ACE", type: "integer", group: "Serving", description: "Serves that the opponent cannot touch, resulting in a point.", howToTrack: "Tally each serve that lands in and the opponent doesn't touch.", isCore: true },
     { key: "double_faults", label: "Double Faults", shortLabel: "DF", type: "integer", group: "Serving", description: "Two consecutive serve faults, giving the point to the opponent.", howToTrack: "Tally each time both first and second serves miss." },
     { key: "first_serves_in", label: "1st Serves In", shortLabel: "1st In", type: "integer", group: "Serving", description: "First serves that land in the service box.", howToTrack: "Tally each first serve that lands in." },
     { key: "first_serves_total", label: "1st Serve Attempts", shortLabel: "1st Att", type: "integer", group: "Serving", description: "Total first serve attempts.", howToTrack: "Tally every first serve attempted." },
@@ -1056,16 +1057,16 @@ const tennisConfig: SportConfig = {
     { key: "break_points_converted", label: "Break Pts Converted", shortLabel: "BP Conv", type: "integer", group: "Returning", description: "Break points converted (winning an opponent's service game).", howToTrack: "Tally each break point that results in winning the game." },
     { key: "break_points_faced", label: "Break Pts Faced", shortLabel: "BP Faced", type: "integer", group: "Returning", description: "Break points opportunities you had.", howToTrack: "Tally each break point opportunity." },
     // Rally
-    { key: "winners", label: "Winners", shortLabel: "WIN", type: "integer", group: "Rally", description: "Shots that win the point outright (opponent can't reach it).", howToTrack: "Tally each shot that wins the point without an error." },
+    { key: "winners", label: "Winners", shortLabel: "WIN", type: "integer", group: "Rally", description: "Shots that win the point outright (opponent can't reach it).", howToTrack: "Tally each shot that wins the point without an error.", isCore: true },
     { key: "unforced_errors", label: "Unforced Errors", shortLabel: "UE", type: "integer", group: "Rally", description: "Errors made without pressure from the opponent.", howToTrack: "Tally errors on routine shots without pressure." },
     { key: "forced_errors", label: "Forced Errors", shortLabel: "FE", type: "integer", group: "Rally", description: "Errors caused by good shots from the opponent.", howToTrack: "Tally errors made due to opponent's pressure." },
     { key: "net_points_won", label: "Net Pts Won", shortLabel: "Net Won", type: "integer", group: "Rally", description: "Points won when approaching the net.", howToTrack: "Tally points won when you came to the net." },
     { key: "net_points_played", label: "Net Pts Played", shortLabel: "Net Pld", type: "integer", group: "Rally", description: "Total points where you approached the net.", howToTrack: "Tally all points where you came to the net." },
     // Match
-    { key: "games_won", label: "Games Won", shortLabel: "G Won", type: "integer", group: "Match", description: "Total games won in the match.", howToTrack: "Count games won at the end of each set." },
-    { key: "games_lost", label: "Games Lost", shortLabel: "G Lost", type: "integer", group: "Match", description: "Total games lost in the match.", howToTrack: "Count games lost at the end of each set." },
-    { key: "sets_won", label: "Sets Won", shortLabel: "S Won", type: "integer", group: "Match", description: "Sets won in the match.", howToTrack: "Count sets won." },
-    { key: "sets_lost", label: "Sets Lost", shortLabel: "S Lost", type: "integer", group: "Match", description: "Sets lost in the match.", howToTrack: "Count sets lost." },
+    { key: "games_won", label: "Games Won", shortLabel: "G Won", type: "integer", group: "Match", description: "Total games won in the match.", howToTrack: "Count games won at the end of each set.", isCore: true },
+    { key: "games_lost", label: "Games Lost", shortLabel: "G Lost", type: "integer", group: "Match", description: "Total games lost in the match.", howToTrack: "Count games lost at the end of each set.", isCore: true },
+    { key: "sets_won", label: "Sets Won", shortLabel: "S Won", type: "integer", group: "Match", description: "Sets won in the match.", howToTrack: "Count sets won.", isCore: true },
+    { key: "sets_lost", label: "Sets Lost", shortLabel: "S Lost", type: "integer", group: "Match", description: "Sets lost in the match.", howToTrack: "Count sets lost.", isCore: true },
   ],
   computedStats: [
     {
@@ -1269,11 +1270,11 @@ const volleyballConfig: SportConfig = {
   positions: ["Setter", "Outside Hitter", "Middle Blocker", "Opposite", "Libero", "Defensive Specialist"],
   statFields: [
     // Attacking
-    { key: "kills", label: "Kills", shortLabel: "K", type: "integer", group: "Attacking", description: "Attacks that result in an immediate point (ball hits the floor or opponent's error on the attack).", howToTrack: "Tally each attack that directly wins the point." },
+    { key: "kills", label: "Kills", shortLabel: "K", type: "integer", group: "Attacking", description: "Attacks that result in an immediate point (ball hits the floor or opponent's error on the attack).", howToTrack: "Tally each attack that directly wins the point.", isCore: true },
     { key: "attack_attempts", label: "Attack Attempts", shortLabel: "ATT", type: "integer", group: "Attacking", description: "Total number of attack swings.", howToTrack: "Tally every time the player swings to attack." },
     { key: "attack_errors", label: "Attack Errors", shortLabel: "AE", type: "integer", group: "Attacking", description: "Attacks that go out of bounds, into the net, or are blocked for a point.", howToTrack: "Tally attacks that result in a point for the opponent." },
     // Serving
-    { key: "aces", label: "Service Aces", shortLabel: "SA", type: "integer", group: "Serving", description: "Serves that result in an immediate point.", howToTrack: "Tally serves that hit the floor or cause an unplayable pass." },
+    { key: "aces", label: "Service Aces", shortLabel: "SA", type: "integer", group: "Serving", description: "Serves that result in an immediate point.", howToTrack: "Tally serves that hit the floor or cause an unplayable pass.", isCore: true },
     { key: "serve_attempts", label: "Serve Attempts", shortLabel: "S.ATT", type: "integer", group: "Serving", description: "Total serves attempted.", howToTrack: "Tally every serve." },
     { key: "serve_errors", label: "Serve Errors", shortLabel: "SE", type: "integer", group: "Serving", description: "Serves into the net or out of bounds.", howToTrack: "Tally serves that miss." },
     // Passing/Reception
@@ -1281,17 +1282,17 @@ const volleyballConfig: SportConfig = {
     { key: "reception_errors", label: "Reception Errors", shortLabel: "RE", type: "integer", group: "Passing", description: "Poor passes that result in a point for the opponent.", howToTrack: "Tally passes that lead directly to opponent points." },
     { key: "perfect_passes", label: "Perfect Passes", shortLabel: "PP", type: "integer", group: "Passing", description: "Passes rated as perfect (3-point pass to target).", howToTrack: "Tally passes that reach the setter perfectly in zone." },
     // Setting
-    { key: "assists", label: "Assists", shortLabel: "A", type: "integer", group: "Setting", description: "Sets that directly lead to a kill.", howToTrack: "Tally when your set leads to a teammate's kill." },
+    { key: "assists", label: "Assists", shortLabel: "A", type: "integer", group: "Setting", description: "Sets that directly lead to a kill.", howToTrack: "Tally when your set leads to a teammate's kill.", isCore: true },
     { key: "ball_handling_errors", label: "BH Errors", shortLabel: "BHE", type: "integer", group: "Setting", description: "Double contacts or lifts called on sets.", howToTrack: "Tally setting violations called by the referee." },
     // Blocking
     { key: "blocks_solo", label: "Solo Blocks", shortLabel: "BS", type: "integer", group: "Blocking", description: "Blocks made alone that result in a point.", howToTrack: "Tally blocks where only you touched the ball." },
     { key: "blocks_assisted", label: "Block Assists", shortLabel: "BA", type: "integer", group: "Blocking", description: "Blocks made with teammates that result in a point.", howToTrack: "Tally blocks where multiple players touched the ball." },
     { key: "block_errors", label: "Block Errors", shortLabel: "BE", type: "integer", group: "Blocking", description: "Net violations or touches that result in opponent points.", howToTrack: "Tally net touches and blocking errors." },
     // Defense
-    { key: "digs", label: "Digs", shortLabel: "D", type: "integer", group: "Defense", description: "Successful defensive plays on attacked balls.", howToTrack: "Tally each attack you successfully dig up." },
+    { key: "digs", label: "Digs", shortLabel: "D", type: "integer", group: "Defense", description: "Successful defensive plays on attacked balls.", howToTrack: "Tally each attack you successfully dig up.", isCore: true },
     { key: "dig_errors", label: "Dig Errors", shortLabel: "DE", type: "integer", group: "Defense", description: "Defensive plays that result in a point for the opponent.", howToTrack: "Tally when a ball hits the floor you were trying to dig." },
     // Points
-    { key: "points_scored", label: "Points", shortLabel: "PTS", type: "integer", group: "Points", description: "Total points contributed (kills + aces + blocks).", howToTrack: "Add up kills, aces, and blocks." },
+    { key: "points_scored", label: "Points", shortLabel: "PTS", type: "integer", group: "Points", description: "Total points contributed (kills + aces + blocks).", howToTrack: "Add up kills, aces, and blocks.", isCore: true },
   ],
   computedStats: [
     {
@@ -1530,4 +1531,9 @@ export function groupStatFields(fields: StatFieldDef[]): Record<string, StatFiel
     groups[field.group].push(field);
     return groups;
   }, {} as Record<string, StatFieldDef[]>);
+}
+
+// Filter to only core stats (for Simple Mode)
+export function getCoreStatFields(fields: StatFieldDef[]): StatFieldDef[] {
+  return fields.filter(field => field.isCore === true);
 }

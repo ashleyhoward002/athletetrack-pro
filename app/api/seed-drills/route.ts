@@ -56,7 +56,7 @@ const PRELOADED_DRILLS = [
 
 export async function POST() {
   try {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const supabase = createClient(cookieStore);
 
     const { data: { session } } = await supabase.auth.getSession();

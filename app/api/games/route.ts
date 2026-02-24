@@ -8,7 +8,7 @@ import { SportId, getSportConfig, sumStats } from "@/lib/sports/config";
 // GET all games for the authenticated user
 export async function GET(req: NextRequest) {
     try {
-        const cookieStore = cookies();
+        const cookieStore = await cookies();
         const supabase = createClient(cookieStore);
 
         const { data: { session } } = await supabase.auth.getSession();
@@ -90,7 +90,7 @@ export async function GET(req: NextRequest) {
 // POST create a new game
 export async function POST(req: NextRequest) {
     try {
-        const cookieStore = cookies();
+        const cookieStore = await cookies();
         const supabase = createClient(cookieStore);
 
         const { data: { session } } = await supabase.auth.getSession();

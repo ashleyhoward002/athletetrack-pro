@@ -7,7 +7,7 @@ import { cookies } from "next/headers";
 // GET all scheduled games for the authenticated user
 export async function GET(req: NextRequest) {
     try {
-        const cookieStore = cookies();
+        const cookieStore = await cookies();
         const supabase = createClient(cookieStore);
 
         const { data: { session } } = await supabase.auth.getSession();
@@ -48,7 +48,7 @@ export async function GET(req: NextRequest) {
 // POST create a new scheduled game
 export async function POST(req: NextRequest) {
     try {
-        const cookieStore = cookies();
+        const cookieStore = await cookies();
         const supabase = createClient(cookieStore);
 
         const { data: { session } } = await supabase.auth.getSession();
@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
 // DELETE a scheduled game
 export async function DELETE(req: NextRequest) {
     try {
-        const cookieStore = cookies();
+        const cookieStore = await cookies();
         const supabase = createClient(cookieStore);
 
         const { data: { session } } = await supabase.auth.getSession();
