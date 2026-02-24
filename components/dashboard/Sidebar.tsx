@@ -12,7 +12,7 @@ interface NavItem {
   label: string;
   href: string;
   icon: React.ReactNode;
-  roles?: ("member" | "coach")[]; // If undefined, show to all roles
+  roles?: ("member" | "coach" | "school_admin" | "parent" | "student")[]; // If undefined, show to all roles
   badge?: string;
 }
 
@@ -25,6 +25,28 @@ const navItems: NavItem[] = [
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1" />
       </svg>
     ),
+  },
+  {
+    label: "My Stats",
+    href: "/dashboard/my-stats",
+    icon: (
+      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+      </svg>
+    ),
+    roles: ["parent", "student"],
+    badge: "New",
+  },
+  {
+    label: "School",
+    href: "/dashboard/school",
+    icon: (
+      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+      </svg>
+    ),
+    roles: ["school_admin", "coach"],
+    badge: "Admin",
   },
   {
     label: "Parent View",
@@ -149,6 +171,15 @@ const navItems: NavItem[] = [
     ),
   },
   {
+    label: "Rulebook",
+    href: "/dashboard/rulebook",
+    icon: (
+      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+      </svg>
+    ),
+  },
+  {
     label: "Help & Guide",
     href: "/dashboard/guide",
     icon: (
@@ -266,7 +297,7 @@ export default function Sidebar() {
               .filter((item) => {
                 // Show item if no role restriction or if user's role matches
                 if (!item.roles) return true;
-                return item.roles.includes(userRole as "member" | "coach");
+                return item.roles.includes(userRole as "member" | "coach" | "school_admin" | "parent" | "student");
               })
               .map((item) => (
               <li key={item.href}>
@@ -313,8 +344,17 @@ export default function Sidebar() {
                   {userRole === "coach" && (
                     <span className="badge badge-secondary badge-xs">Coach</span>
                   )}
-                  {userRole === "member" && (
+                  {userRole === "school_admin" && (
+                    <span className="badge badge-primary badge-xs">School Admin</span>
+                  )}
+                  {userRole === "parent" && (
                     <span className="badge badge-accent badge-xs">Parent</span>
+                  )}
+                  {userRole === "student" && (
+                    <span className="badge badge-info badge-xs">Student</span>
+                  )}
+                  {userRole === "member" && (
+                    <span className="badge badge-ghost badge-xs">Member</span>
                   )}
                 </div>
                 <p className="text-xs text-base-content/50 truncate">
