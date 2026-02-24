@@ -52,7 +52,7 @@ Create a JSON response with this structure:
 Make the statistics realistic for a competitive amateur/high school level player. Be creative but realistic with the assessment. Return only the JSON, no markdown.`;
 
         const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
         const result = await model.generateContent(prompt);
         const response = result.response;
         const responseText = response.text() || "";

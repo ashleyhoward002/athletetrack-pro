@@ -38,7 +38,7 @@ export function useLiveAPI(options: LiveClientOptions): UseLiveAPIResults {
     const client = useMemo(() => new GenAILiveClient(options), [options]);
     const audioStreamerRef = useRef<AudioStreamer | null>(null);
 
-    const [model, setModel] = useState<string>("models/gemini-2.0-flash-exp");
+    const [model, setModel] = useState<string>("models/gemini-2.5-flash");
     const [config, setConfig] = useState<LiveConnectConfig>({
         responseModalities: ["audio" as any],
         speechConfig: {
