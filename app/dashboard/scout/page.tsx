@@ -55,7 +55,7 @@ export default function ScoutPage() {
                         <HelpIcon section="scout" tooltip="Learn how to use Scout" />
                     </div>
                     <p className="text-gray-400">
-                        Analyze athletes from your database with AI-powered insights
+                        Search your database or the web for athlete stats and AI-powered insights
                     </p>
                 </div>
 
@@ -96,7 +96,7 @@ export default function ScoutPage() {
                         </div>
                         <label className="label">
                             <span className="label-text-alt text-gray-500">
-                                Searches your recorded athletes and analyzes their real game stats
+                                First searches your database, then searches the web for public stats if not found
                             </span>
                         </label>
                     </div>
@@ -144,13 +144,23 @@ export default function ScoutPage() {
                                         Real Data
                                     </div>
                                 )}
+                                {report.source === "web" && (
+                                    <div className="badge badge-outline badge-sm text-blue-400 border-blue-400">
+                                        Web Data
+                                    </div>
+                                )}
                             </div>
                         </GlassCard>
 
                         {/* Not Found or No Games State */}
-                        {(report.status === "Not Found" || report.status === "No Games") && (
+                        {(report.status === "Not Found" || report.status === "No Games" || report.status === "Not Found Online" || report.status === "Search Error" || report.status === "Parse Error") && (
                             <GlassCard className="p-6 border-l-4 border-l-yellow-500">
                                 <p className="text-gray-300">{report.notes}</p>
+                                {report.status === "Not Found" && (
+                                    <p className="text-sm text-gray-500 mt-3">
+                                        Tip: Web search is enabled - the athlete may not have public stats available yet.
+                                    </p>
+                                )}
                             </GlassCard>
                         )}
 
@@ -216,6 +226,47 @@ export default function ScoutPage() {
                                     </GlassCard>
                                 </div>
 
+                                {/* Achievements & Recruiting (Web Only) */}
+                                {report.source === "web" && (report.achievements?.length > 0 || report.recruiting || report.recentGames?.length > 0) && (
+                                    <div className="grid md:grid-cols-2 gap-6">
+                                        {report.achievements?.length > 0 && (
+                                            <GlassCard className="p-6 border-l-4 border-l-yellow-500">
+                                                <h3 className="text-xl font-bold mb-4">Achievements</h3>
+                                                <ul className="space-y-2">
+                                                    {report.achievements.map((a: string, i: number) => (
+                                                        <li key={i} className="text-gray-300 text-sm flex items-start gap-2">
+                                                            <span className="text-yellow-400">🏆</span> {a}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </GlassCard>
+                                        )}
+
+                                        {(report.recruiting || report.recentGames?.length > 0) && (
+                                            <GlassCard className="p-6 border-l-4 border-l-blue-500">
+                                                {report.recruiting && (
+                                                    <div className="mb-4">
+                                                        <h3 className="text-xl font-bold mb-2">Recruiting Status</h3>
+                                                        <p className="text-gray-300 text-sm">{report.recruiting}</p>
+                                                    </div>
+                                                )}
+                                                {report.recentGames?.length > 0 && (
+                                                    <div>
+                                                        <h4 className="text-sm font-semibold text-blue-400 mb-2">Notable Performances</h4>
+                                                        <ul className="space-y-1">
+                                                            {report.recentGames.map((g: string, i: number) => (
+                                                                <li key={i} className="text-gray-300 text-sm flex items-start gap-2">
+                                                                    <span className="text-blue-400">📊</span> {g}
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                )}
+                                            </GlassCard>
+                                        )}
+                                    </div>
+                                )}
+
                                 {/* Scouting Summary */}
                                 {report.notes && (
                                     <GlassCard className="p-6 border-l-4 border-l-purple-500">
@@ -230,6 +281,30 @@ export default function ScoutPage() {
                                             </div>
                                         )}
                                     </GlassCard>
+                                )}
+
+                                {/* Sources & Disclaimer (Web Only) */}
+                                {report.source === "web" && (
+                                    <div className="space-y-4">
+                                        {report.sources?.length > 0 && (
+                                            <div className="text-sm text-gray-500">
+                                                <span className="font-semibold">Sources:</span>{" "}
+                                                {report.sources.join(", ")}
+                                            </div>
+                                        )}
+                                        {report.disclaimer && (
+                                            <div className="p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+                                                <p className="text-yellow-400 text-sm">
+                                                    ⚠️ {report.disclaimer}
+                                                </p>
+                                            </div>
+                                        )}
+                                        {report.lastUpdated && (
+                                            <div className="text-xs text-gray-600 text-center">
+                                                Information as of: {report.lastUpdated}
+                                            </div>
+                                        )}
+                                    </div>
                                 )}
                             </>
                         )}

@@ -53,6 +53,7 @@ export async function POST(req: NextRequest) {
         const body = await req.json();
         const targetName = body.target_name as string;
         const sport = body.sport as string || "basketball";
+        const searchWeb = body.search_web !== false; // Default to true
 
         if (!targetName) {
             return NextResponse.json({ error: "target_name is required" }, { status: 400 });
@@ -67,91 +68,257 @@ export async function POST(req: NextRequest) {
 
         if (athleteError) {
             console.error("Athlete search error:", athleteError);
-            return NextResponse.json({ error: "Failed to search athletes" }, { status: 500 });
         }
 
-        // If no athletes found, return a message
-        if (!athletes || athletes.length === 0) {
+        // If athlete found in database, use database stats
+        if (athletes && athletes.length > 0) {
+            return await generateDatabaseReport(athletes, supabase, sport);
+        }
+
+        // If not found in database and web search enabled, search the web
+        if (searchWeb && process.env.GEMINI_API_KEY) {
+            return await generateWebReport(targetName, sport);
+        }
+
+        // No results
+        return NextResponse.json({
+            report: {
+                name: targetName,
+                sport: sport,
+                status: "Not Found",
+                stats: {},
+                strengths: [],
+                weaknesses: [],
+                tendencies: [],
+                notes: `No athlete named "${targetName}" found in your database. Add them to track their stats, or enable web search to find public information.`,
+                source: "none"
+            }
+        });
+
+    } catch (error) {
+        console.error("Scout API error:", error);
+        return NextResponse.json({ error: "Failed to generate scouting report" }, { status: 500 });
+    }
+}
+
+async function generateWebReport(targetName: string, sport: string) {
+    if (!process.env.GEMINI_API_KEY) {
+        return NextResponse.json({
+            report: {
+                name: targetName,
+                sport: sport,
+                status: "Error",
+                notes: "GEMINI_API_KEY not configured for web search.",
+                source: "web"
+            }
+        });
+    }
+
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+
+    // Use Gemini to search and compile information
+    const searchPrompt = `You are a sports scout researcher. Search for and compile information about the athlete "${targetName}" who plays ${sport}.
+
+Find the following information from public sources (MaxPreps, ESPN, Hudl, news articles, social media, school websites):
+
+1. Full name and any nicknames
+2. Current school/team and previous schools
+3. Position(s) played
+4. Class/Grade or graduation year
+5. Height and weight if available
+6. Key statistics (be specific with numbers - PPG, RPG, APG for basketball, etc.)
+7. Recent notable performances or achievements
+8. Recruiting status, offers, or commitments if applicable
+9. Playing style and strengths
+10. Areas for improvement
+
+If you cannot find information about this specific athlete, say so clearly. Do not make up statistics.
+
+Return your findings in this JSON format:
+{
+    "found": true/false,
+    "name": "Full name",
+    "school": "Current school",
+    "team": "Team name if different",
+    "position": "Position(s)",
+    "classYear": "Grade/Class year",
+    "height": "Height if known",
+    "weight": "Weight if known",
+    "stats": {
+        "PPG": "value or null",
+        "RPG": "value or null",
+        "APG": "value or null",
+        // include relevant stats for the sport
+    },
+    "recentGames": ["Notable game 1", "Notable game 2"],
+    "achievements": ["Achievement 1", "Achievement 2"],
+    "recruiting": "Recruiting status/offers if known",
+    "strengths": ["Strength 1", "Strength 2", "Strength 3"],
+    "weaknesses": ["Area to improve 1", "Area to improve 2"],
+    "tendencies": ["Playing tendency 1", "Playing tendency 2"],
+    "notes": "2-3 sentence scouting summary",
+    "sources": ["Source 1", "Source 2"],
+    "lastUpdated": "When this info is from if known"
+}
+
+Be thorough but only include verified information. Return only valid JSON.`;
+
+    try {
+        const model = genAI.getGenerativeModel({
+            model: "gemini-2.5-flash",
+        });
+
+        const result = await model.generateContent(searchPrompt);
+        const response = result.response;
+        const responseText = response.text() || "";
+        const cleanText = responseText.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+
+        let webData;
+        try {
+            webData = JSON.parse(cleanText);
+        } catch {
             return NextResponse.json({
                 report: {
                     name: targetName,
                     sport: sport,
-                    status: "Not Found",
+                    status: "Parse Error",
+                    notes: "Could not parse web search results. The athlete may not have public stats available.",
+                    source: "web"
+                }
+            });
+        }
+
+        if (!webData.found) {
+            return NextResponse.json({
+                report: {
+                    name: targetName,
+                    sport: sport,
+                    status: "Not Found Online",
                     stats: {},
                     strengths: [],
                     weaknesses: [],
                     tendencies: [],
-                    notes: `No athlete named "${targetName}" found in the database. Try searching for an athlete you've added to the system.`,
-                    source: "database"
+                    notes: webData.notes || `Could not find public information about "${targetName}". They may not have online stats available yet.`,
+                    source: "web"
                 }
             });
         }
 
-        // Use the first matching athlete
-        const athlete = athletes[0] as Athlete;
-
-        // Fetch all games for this athlete
-        const { data: games, error: gamesError } = await supabase
-            .from("games")
-            .select("*")
-            .eq("athlete_id", athlete.id)
-            .order("date", { ascending: false });
-
-        if (gamesError) {
-            console.error("Games fetch error:", gamesError);
-        }
-
-        const gamesList = (games || []) as Game[];
-        const totalGames = gamesList.length;
-
-        if (totalGames === 0) {
-            return NextResponse.json({
-                report: {
-                    name: athlete.name,
-                    sport: athlete.primary_sport || sport,
-                    status: "No Games",
-                    position: athlete.position,
-                    school: athlete.school,
-                    team: athlete.team_name,
-                    jersey: athlete.jersey_number,
-                    stats: {},
-                    strengths: [],
-                    weaknesses: [],
-                    tendencies: [],
-                    notes: `Found ${athlete.name} but no game data recorded yet. Add some games to get a scouting report.`,
-                    source: "database",
-                    gamesAnalyzed: 0
+        // Format stats for display
+        const formattedStats: Record<string, string | number> = {};
+        if (webData.stats) {
+            Object.entries(webData.stats).forEach(([key, value]) => {
+                if (value !== null && value !== undefined && value !== "null") {
+                    formattedStats[key] = String(value);
                 }
             });
         }
+        if (webData.height) formattedStats["Height"] = webData.height;
+        if (webData.weight) formattedStats["Weight"] = webData.weight;
+        if (webData.classYear) formattedStats["Class"] = webData.classYear;
 
-        // Calculate real statistics based on sport
-        const calculatedStats = calculateStats(gamesList, athlete.primary_sport || sport);
+        return NextResponse.json({
+            report: {
+                name: webData.name || targetName,
+                sport: sport,
+                status: "Complete",
+                position: webData.position || null,
+                school: webData.school || null,
+                team: webData.team || null,
+                stats: formattedStats,
+                recentGames: webData.recentGames || [],
+                achievements: webData.achievements || [],
+                recruiting: webData.recruiting || null,
+                strengths: webData.strengths || [],
+                weaknesses: webData.weaknesses || [],
+                tendencies: webData.tendencies || [],
+                notes: webData.notes || "",
+                sources: webData.sources || [],
+                lastUpdated: webData.lastUpdated || null,
+                source: "web",
+                disclaimer: "Stats compiled from public sources. Verify accuracy before making decisions."
+            }
+        });
 
-        // If no Gemini key, return just the raw stats
-        if (!process.env.GEMINI_API_KEY) {
-            return NextResponse.json({
-                report: {
-                    name: athlete.name,
-                    sport: athlete.primary_sport || sport,
-                    status: "Complete",
-                    position: athlete.position,
-                    school: athlete.school,
-                    team: athlete.team_name,
-                    jersey: athlete.jersey_number,
-                    stats: calculatedStats,
-                    strengths: [],
-                    weaknesses: [],
-                    tendencies: [],
-                    notes: "AI analysis unavailable - showing raw statistics only.",
-                    source: "database",
-                    gamesAnalyzed: totalGames
-                }
-            });
-        }
+    } catch (error) {
+        console.error("Web search error:", error);
+        return NextResponse.json({
+            report: {
+                name: targetName,
+                sport: sport,
+                status: "Search Error",
+                notes: "Failed to search for athlete online. Please try again.",
+                source: "web"
+            }
+        });
+    }
+}
 
-        // Use AI to analyze the REAL data
-        const prompt = `You are an expert sports scout analyzing REAL game data. Based on the following actual statistics from ${totalGames} games, provide a professional scouting report.
+async function generateDatabaseReport(athletes: Athlete[], supabase: any, sport: string) {
+    const athlete = athletes[0];
+
+    // Fetch all games for this athlete
+    const { data: games, error: gamesError } = await supabase
+        .from("games")
+        .select("*")
+        .eq("athlete_id", athlete.id)
+        .order("date", { ascending: false });
+
+    if (gamesError) {
+        console.error("Games fetch error:", gamesError);
+    }
+
+    const gamesList = (games || []) as Game[];
+    const totalGames = gamesList.length;
+
+    if (totalGames === 0) {
+        return NextResponse.json({
+            report: {
+                name: athlete.name,
+                sport: athlete.primary_sport || sport,
+                status: "No Games",
+                position: athlete.position,
+                school: athlete.school,
+                team: athlete.team_name,
+                jersey: athlete.jersey_number,
+                stats: {},
+                strengths: [],
+                weaknesses: [],
+                tendencies: [],
+                notes: `Found ${athlete.name} but no game data recorded yet. Add some games to get a scouting report.`,
+                source: "database",
+                gamesAnalyzed: 0
+            }
+        });
+    }
+
+    // Calculate real statistics based on sport
+    const calculatedStats = calculateStats(gamesList, athlete.primary_sport || sport);
+
+    // If no Gemini key, return just the raw stats
+    if (!process.env.GEMINI_API_KEY) {
+        return NextResponse.json({
+            report: {
+                name: athlete.name,
+                sport: athlete.primary_sport || sport,
+                status: "Complete",
+                position: athlete.position,
+                school: athlete.school,
+                team: athlete.team_name,
+                jersey: athlete.jersey_number,
+                stats: calculatedStats,
+                strengths: [],
+                weaknesses: [],
+                tendencies: [],
+                notes: "AI analysis unavailable - showing raw statistics only.",
+                source: "database",
+                gamesAnalyzed: totalGames
+            }
+        });
+    }
+
+    // Use AI to analyze the REAL data
+    const prompt = `You are an expert sports scout analyzing REAL game data. Based on the following actual statistics from ${totalGames} games, provide a professional scouting report.
 
 ATHLETE INFO:
 - Name: ${athlete.name}
@@ -184,52 +351,47 @@ Based on this REAL data, provide analysis in this JSON format:
 
 Be analytical and specific. Reference actual numbers from the data. Return only valid JSON.`;
 
-        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-        const result = await model.generateContent(prompt);
-        const response = result.response;
-        const responseText = response.text() || "";
-        const cleanText = responseText.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const result = await model.generateContent(prompt);
+    const response = result.response;
+    const responseText = response.text() || "";
+    const cleanText = responseText.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
 
-        let aiAnalysis = {
-            strengths: [] as string[],
-            weaknesses: [] as string[],
-            tendencies: [] as string[],
-            notes: "",
-            projectedCeiling: ""
-        };
+    let aiAnalysis = {
+        strengths: [] as string[],
+        weaknesses: [] as string[],
+        tendencies: [] as string[],
+        notes: "",
+        projectedCeiling: ""
+    };
 
-        try {
-            aiAnalysis = JSON.parse(cleanText);
-        } catch {
-            aiAnalysis.notes = "AI analysis parsing failed. Raw stats displayed.";
-        }
-
-        return NextResponse.json({
-            report: {
-                name: athlete.name,
-                sport: athlete.primary_sport || sport,
-                status: "Complete",
-                position: athlete.position,
-                school: athlete.school,
-                team: athlete.team_name,
-                jersey: athlete.jersey_number,
-                stats: calculatedStats,
-                strengths: aiAnalysis.strengths || [],
-                weaknesses: aiAnalysis.weaknesses || [],
-                tendencies: aiAnalysis.tendencies || [],
-                notes: aiAnalysis.notes || "",
-                projectedCeiling: aiAnalysis.projectedCeiling || "",
-                source: "database",
-                gamesAnalyzed: totalGames,
-                matchedAthletes: athletes.map((a: Athlete) => ({ id: a.id, name: a.name }))
-            }
-        });
-
-    } catch (error) {
-        console.error("Scout API error:", error);
-        return NextResponse.json({ error: "Failed to generate scouting report" }, { status: 500 });
+    try {
+        aiAnalysis = JSON.parse(cleanText);
+    } catch {
+        aiAnalysis.notes = "AI analysis parsing failed. Raw stats displayed.";
     }
+
+    return NextResponse.json({
+        report: {
+            name: athlete.name,
+            sport: athlete.primary_sport || sport,
+            status: "Complete",
+            position: athlete.position,
+            school: athlete.school,
+            team: athlete.team_name,
+            jersey: athlete.jersey_number,
+            stats: calculatedStats,
+            strengths: aiAnalysis.strengths || [],
+            weaknesses: aiAnalysis.weaknesses || [],
+            tendencies: aiAnalysis.tendencies || [],
+            notes: aiAnalysis.notes || "",
+            projectedCeiling: aiAnalysis.projectedCeiling || "",
+            source: "database",
+            gamesAnalyzed: totalGames,
+            matchedAthletes: athletes.map((a: Athlete) => ({ id: a.id, name: a.name }))
+        }
+    });
 }
 
 function calculateStats(games: Game[], sport: string): Record<string, string | number> {
