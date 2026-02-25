@@ -7,6 +7,7 @@ import Link from "next/link";
 import HelpIcon from "@/components/ui/HelpIcon";
 import toast from "react-hot-toast";
 import { SPORT_LIST, SportId, getSportConfig } from "@/lib/sports/config";
+import { DrillVideoThumbnail, DrillVideoEmbed, DrillVideoModal } from "@/components/drills/DrillVideoPlayer";
 
 type Drill = {
     id: string;
@@ -70,6 +71,7 @@ export default function DrillsPage() {
     const [programs, setPrograms] = useState<Program[]>([]);
     const [loadingPrograms, setLoadingPrograms] = useState(false);
     const [addingToProgram, setAddingToProgram] = useState<string | null>(null);
+    const [videoModalDrill, setVideoModalDrill] = useState<Drill | null>(null);
 
     const fetchDrills = useCallback(async () => {
         setLoading(true);
@@ -381,6 +383,16 @@ export default function DrillsPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {filteredDrills.map((drill) => (
                             <GlassCard key={drill.id} className="hover:scale-[1.02] transition-transform">
+                                {/* Video Thumbnail */}
+                                {drill.video_url && (
+                                    <div className="mb-3 -mx-4 -mt-4">
+                                        <DrillVideoThumbnail
+                                            videoUrl={drill.video_url}
+                                            className="h-32 rounded-t-xl rounded-b-none"
+                                            onClick={() => setVideoModalDrill(drill)}
+                                        />
+                                    </div>
+                                )}
                                 <div className="flex justify-between items-start mb-2">
                                     <div className="flex gap-2">
                                         <span className="badge bg-white/10 border-white/20 text-white">{getSportEmoji(drill.sport)} {drill.sport}</span>
@@ -434,17 +446,15 @@ export default function DrillsPage() {
                                                 </svg>
                                             </button>
                                             {drill.video_url && (
-                                                <a
-                                                    href={drill.video_url}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
+                                                <button
                                                     className="btn btn-ghost btn-xs text-warning"
-                                                    title="Watch video"
+                                                    onClick={() => setVideoModalDrill(drill)}
+                                                    title="Watch tutorial"
                                                 >
                                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                                                         <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" />
                                                     </svg>
-                                                </a>
+                                                </button>
                                             )}
                                             <button
                                                 className="btn btn-ghost btn-xs text-white"
@@ -721,17 +731,7 @@ export default function DrillsPage() {
                                 {viewingDrill.video_url && (
                                     <div>
                                         <h4 className="font-semibold text-sm text-base-content/60 mb-2">Video Tutorial</h4>
-                                        <a
-                                            href={viewingDrill.video_url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="btn btn-outline btn-primary w-full"
-                                        >
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                                                <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" />
-                                            </svg>
-                                            Watch Video
-                                        </a>
+                                        <DrillVideoEmbed videoUrl={viewingDrill.video_url} />
                                     </div>
                                 )}
                             </div>
@@ -814,6 +814,16 @@ export default function DrillsPage() {
                     <button onClick={() => setAddToProgramDrill(null)}>close</button>
                 </form>
             </dialog>
+
+            {/* Video Modal */}
+            {videoModalDrill && videoModalDrill.video_url && (
+                <DrillVideoModal
+                    videoUrl={videoModalDrill.video_url}
+                    isOpen={true}
+                    onClose={() => setVideoModalDrill(null)}
+                    title={videoModalDrill.name}
+                />
+            )}
         </main>
     );
 }

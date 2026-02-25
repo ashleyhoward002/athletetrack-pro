@@ -5,6 +5,7 @@ import { createClient } from "@/utils/supabase/client";
 import Link from "next/link";
 import { SportId, getSportConfig } from "@/lib/sports/config";
 import toast from "react-hot-toast";
+import { DrillVideoEmbed, DrillVideoModal } from "@/components/drills/DrillVideoPlayer";
 
 type Drill = {
     id: string;
@@ -16,6 +17,7 @@ type Drill = {
     duration_minutes: number;
     sets: number;
     reps: number;
+    video_url: string | null;
 };
 
 export default function QuickDrills() {
@@ -28,6 +30,7 @@ export default function QuickDrills() {
     const [currentSet, setCurrentSet] = useState(1);
     const [completedReps, setCompletedReps] = useState(0);
     const timerRef = useRef<NodeJS.Timeout | null>(null);
+    const [showVideo, setShowVideo] = useState(false);
 
     useEffect(() => {
         const fetchDrills = async () => {
@@ -68,6 +71,7 @@ export default function QuickDrills() {
         setCurrentSet(1);
         setCompletedReps(0);
         setIsRunning(false);
+        setShowVideo(false);
     };
 
     const toggleTimer = () => {
@@ -108,6 +112,7 @@ export default function QuickDrills() {
     const closeDrill = () => {
         setActiveDrill(null);
         setIsRunning(false);
+        setShowVideo(false);
         if (timerRef.current) clearTimeout(timerRef.current);
     };
 
@@ -189,6 +194,33 @@ export default function QuickDrills() {
                         </div>
                     </div>
 
+                    {/* Video Tutorial (if available) */}
+                    {activeDrill.video_url && (
+                        <div className="mb-4">
+                            {showVideo ? (
+                                <div className="space-y-2">
+                                    <DrillVideoEmbed videoUrl={activeDrill.video_url} />
+                                    <button
+                                        className="btn btn-ghost btn-xs w-full"
+                                        onClick={() => setShowVideo(false)}
+                                    >
+                                        Hide Video
+                                    </button>
+                                </div>
+                            ) : (
+                                <button
+                                    className="btn btn-outline btn-primary btn-sm w-full"
+                                    onClick={() => setShowVideo(true)}
+                                >
+                                    <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" />
+                                    </svg>
+                                    Watch Demo First
+                                </button>
+                            )}
+                        </div>
+                    )}
+
                     {/* Description */}
                     <div className="bg-base-300 p-3 rounded-lg mb-4">
                         <p className="text-sm">{activeDrill.description || "Complete the drill with good form!"}</p>
@@ -239,6 +271,13 @@ export default function QuickDrills() {
                                 <div className="flex items-center gap-2">
                                     <span>{getSportEmoji(drill.sport)}</span>
                                     <span className="font-medium truncate">{drill.name}</span>
+                                    {drill.video_url && (
+                                        <span className="text-warning" title="Has tutorial video">
+                                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" />
+                                            </svg>
+                                        </span>
+                                    )}
                                 </div>
                                 <div className="flex gap-2 mt-1">
                                     <span className={`badge badge-xs ${getDifficultyColor(drill.difficulty)}`}>

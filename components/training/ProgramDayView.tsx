@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import DrillCompletionModal from "./DrillCompletionModal";
+import { DrillVideoModal } from "@/components/drills/DrillVideoPlayer";
 
 interface Drill {
     id: string;
@@ -50,6 +51,7 @@ export default function ProgramDayView({
     onDrillCompleted,
 }: ProgramDayViewProps) {
     const [completingDrill, setCompletingDrill] = useState<DayDrill | null>(null);
+    const [videoDrill, setVideoDrill] = useState<Drill | null>(null);
 
     if (day.rest_day) {
         return (
@@ -146,14 +148,27 @@ export default function ProgramDayView({
                                         </div>
                                     </div>
 
-                                    {!completed && (
-                                        <button
-                                            className="btn btn-sm btn-primary"
-                                            onClick={() => setCompletingDrill(dd)}
-                                        >
-                                            Complete
-                                        </button>
-                                    )}
+                                    <div className="flex items-center gap-2">
+                                        {drill.video_url && (
+                                            <button
+                                                className="btn btn-sm btn-ghost text-warning"
+                                                onClick={() => setVideoDrill(drill)}
+                                                title="Watch tutorial"
+                                            >
+                                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" />
+                                                </svg>
+                                            </button>
+                                        )}
+                                        {!completed && (
+                                            <button
+                                                className="btn btn-sm btn-primary"
+                                                onClick={() => setCompletingDrill(dd)}
+                                            >
+                                                Complete
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
                             );
                         })}
@@ -171,6 +186,15 @@ export default function ProgramDayView({
                         onDrillCompleted();
                     }}
                     onClose={() => setCompletingDrill(null)}
+                />
+            )}
+
+            {videoDrill && videoDrill.video_url && (
+                <DrillVideoModal
+                    videoUrl={videoDrill.video_url}
+                    isOpen={true}
+                    onClose={() => setVideoDrill(null)}
+                    title={videoDrill.name}
                 />
             )}
         </>
