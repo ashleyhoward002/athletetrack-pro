@@ -201,6 +201,12 @@ export default function SchoolDashboardPage() {
 
                 <div className="card-actions justify-end mt-4">
                   <Link
+                    href={`/dashboard/school/import?school=${school.id}`}
+                    className="btn btn-ghost btn-sm"
+                  >
+                    Import
+                  </Link>
+                  <Link
                     href={`/dashboard/school/students?school=${school.id}`}
                     className="btn btn-primary btn-sm"
                   >

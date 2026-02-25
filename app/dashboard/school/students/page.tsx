@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import toast from "react-hot-toast";
 import { SchoolStudent, School } from "@/types/school";
 
@@ -148,12 +149,20 @@ export default function StudentsPage() {
             {students.length} student{students.length !== 1 ? "s" : ""} enrolled
           </p>
         </div>
-        <button
-          className="btn btn-primary"
-          onClick={() => setShowAddModal(true)}
-        >
-          Add Student
-        </button>
+        <div className="flex gap-2">
+          <Link
+            href={`/dashboard/school/import?school=${schoolId}`}
+            className="btn btn-outline"
+          >
+            Import
+          </Link>
+          <button
+            className="btn btn-primary"
+            onClick={() => setShowAddModal(true)}
+          >
+            Add Student
+          </button>
+        </div>
       </div>
 
       {students.length === 0 ? (
@@ -161,14 +170,22 @@ export default function StudentsPage() {
           <div className="card-body text-center py-12">
             <h2 className="text-xl font-semibold">No Students Yet</h2>
             <p className="text-base-content/60 mt-2">
-              Add students to start tracking their athletic performance.
+              Add students individually or import your entire roster from a spreadsheet.
             </p>
-            <button
-              className="btn btn-primary mt-4"
-              onClick={() => setShowAddModal(true)}
-            >
-              Add First Student
-            </button>
+            <div className="flex justify-center gap-3 mt-4">
+              <Link
+                href={`/dashboard/school/import?school=${schoolId}`}
+                className="btn btn-outline"
+              >
+                Import Roster
+              </Link>
+              <button
+                className="btn btn-primary"
+                onClick={() => setShowAddModal(true)}
+              >
+                Add Student
+              </button>
+            </div>
           </div>
         </div>
       ) : (
