@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/utils/supabase/client";
 import toast from "react-hot-toast";
-import GameModal, { GameFormData } from "./GameModal";
 import {
   SportId,
   DEFAULT_SPORT,
@@ -26,17 +27,43 @@ type Game = {
 
 type SelectOption = { id: string; label: string };
 
+// Calculate efficiency rating
+function calcEfficiency(stats: Record<string, number>): number {
+  const points = stats.points || 0;
+  const reboundsOff = stats.rebounds_off || 0;
+  const reboundsDef = stats.rebounds_def || 0;
+  const assists = stats.assists || 0;
+  const steals = stats.steals || 0;
+  const blocks = stats.blocks || 0;
+  const turnovers = stats.turnovers || 0;
+  const fgAttempted = stats.fg_attempted || 0;
+  const fgMade = stats.fg_made || 0;
+  const ftAttempted = stats.ft_attempted || 0;
+  const ftMade = stats.ft_made || 0;
+
+  return (
+    points +
+    reboundsOff +
+    reboundsDef +
+    assists +
+    steals +
+    blocks -
+    turnovers -
+    (fgAttempted - fgMade) -
+    (ftAttempted - ftMade)
+  );
+}
+
 export default function GamesClient() {
+  const router = useRouter();
   const supabase = createClient();
   const [games, setGames] = useState<Game[]>([]);
   const [athletes, setAthletes] = useState<SelectOption[]>([]);
   const [seasons, setSeasons] = useState<SelectOption[]>([]);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editingGame, setEditingGame] = useState<Game | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Game | null>(null);
   const [filterAthlete, setFilterAthlete] = useState("");
+  const [filterSeason, setFilterSeason] = useState("");
   const [filterSport, setFilterSport] = useState<SportId | "">("");
 
   const fetchData = useCallback(async () => {
@@ -71,71 +98,6 @@ export default function GamesClient() {
     fetchData();
   }, [fetchData]);
 
-  const handleSubmit = async (form: GameFormData) => {
-    setSaving(true);
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      toast.error("Not authenticated");
-      setSaving(false);
-      return;
-    }
-
-    const numStats: Record<string, number> = {};
-    for (const [k, v] of Object.entries(form.stats)) {
-      numStats[k] = parseFloat(v) || 0;
-    }
-
-    const row: Record<string, any> = {
-      user_id: user.id,
-      athlete_id: form.athlete_id || null,
-      season_id: form.season_id || null,
-      date: form.date,
-      opponent: form.opponent,
-      sport: form.sport,
-      stats: numStats,
-    };
-
-    // Write legacy columns for basketball backward compat
-    if (form.sport === "basketball") {
-      row.minutes = numStats.minutes || 0;
-      row.points = numStats.points || 0;
-      row.fg_made = numStats.fg_made || 0;
-      row.fg_attempted = numStats.fg_attempted || 0;
-      row.three_made = numStats.three_made || 0;
-      row.three_attempted = numStats.three_attempted || 0;
-      row.ft_made = numStats.ft_made || 0;
-      row.ft_attempted = numStats.ft_attempted || 0;
-      row.rebounds_off = numStats.rebounds_off || 0;
-      row.rebounds_def = numStats.rebounds_def || 0;
-      row.assists = numStats.assists || 0;
-      row.steals = numStats.steals || 0;
-      row.blocks = numStats.blocks || 0;
-      row.turnovers = numStats.turnovers || 0;
-      row.fouls = numStats.fouls || 0;
-    }
-
-    if (editingGame) {
-      const { error } = await supabase
-        .from("games")
-        .update(row)
-        .eq("id", editingGame.id);
-      if (error) toast.error(error.message);
-      else toast.success("Game updated");
-    } else {
-      const { error } = await supabase.from("games").insert(row);
-      if (error) toast.error(error.message);
-      else toast.success("Game logged");
-    }
-
-    setSaving(false);
-    setModalOpen(false);
-    setEditingGame(null);
-    fetchData();
-  };
-
   const handleDelete = async () => {
     if (!deleteTarget) return;
     const { error } = await supabase
@@ -148,18 +110,9 @@ export default function GamesClient() {
     fetchData();
   };
 
-  const openAdd = () => {
-    setEditingGame(null);
-    setModalOpen(true);
-  };
-
-  const openEdit = (game: Game) => {
-    setEditingGame(game);
-    setModalOpen(true);
-  };
-
   const filtered = games.filter((g) => {
     if (filterAthlete && g.athlete_id !== filterAthlete) return false;
+    if (filterSeason && g.season_id !== filterSeason) return false;
     if (filterSport && g.sport !== filterSport) return false;
     return true;
   });
@@ -171,23 +124,6 @@ export default function GamesClient() {
       year: "numeric",
     });
 
-  const gameToFormData = (game: Game): GameFormData => {
-    const sport = game.sport || DEFAULT_SPORT;
-    const config = getSportConfig(sport);
-    const stats: Record<string, string> = {};
-    for (const field of config.statFields) {
-      stats[field.key] = String(game.stats?.[field.key] ?? 0);
-    }
-    return {
-      athlete_id: game.athlete_id ?? "",
-      season_id: game.season_id ?? "",
-      date: game.date,
-      opponent: game.opponent,
-      sport,
-      stats,
-    };
-  };
-
   return (
     <>
       {/* Header */}
@@ -198,66 +134,90 @@ export default function GamesClient() {
             {games.length} game{games.length !== 1 && "s"} recorded
           </p>
         </div>
-        <button className="btn btn-primary" onClick={openAdd}>
-          <svg
-            className="w-5 h-5 mr-1"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 4v16m8-8H4"
-            />
-          </svg>
-          Log Game
-        </button>
+        <div className="flex gap-2">
+          <Link href="/dashboard/games/stats" className="btn btn-ghost">
+            <svg
+              className="w-5 h-5 mr-1"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+              />
+            </svg>
+            Stats
+          </Link>
+          <Link href="/dashboard/games/new" className="btn btn-primary">
+            <svg
+              className="w-5 h-5 mr-1"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 4v16m8-8H4"
+              />
+            </svg>
+            Log Game
+          </Link>
+        </div>
       </div>
 
       {/* Filters */}
-      <div className="flex gap-4 flex-wrap">
-        {/* Sport filter */}
-        <div className="flex gap-2 flex-wrap">
+      <div className="flex gap-4 flex-wrap items-center">
+        {/* Athlete filter dropdown */}
+        <select
+          className="select select-bordered select-sm"
+          value={filterAthlete}
+          onChange={(e) => setFilterAthlete(e.target.value)}
+        >
+          <option value="">All Athletes</option>
+          {athletes.map((a) => (
+            <option key={a.id} value={a.id}>
+              {a.label}
+            </option>
+          ))}
+        </select>
+
+        {/* Season filter dropdown */}
+        <select
+          className="select select-bordered select-sm"
+          value={filterSeason}
+          onChange={(e) => setFilterSeason(e.target.value)}
+        >
+          <option value="">All Seasons</option>
+          {seasons.map((s) => (
+            <option key={s.id} value={s.id}>
+              {s.label}
+            </option>
+          ))}
+        </select>
+
+        {/* Sport filter buttons */}
+        <div className="flex gap-1 flex-wrap">
           <button
-            className={`btn btn-sm ${!filterSport ? "btn-primary" : "btn-ghost"}`}
+            className={`btn btn-xs ${!filterSport ? "btn-primary" : "btn-ghost"}`}
             onClick={() => setFilterSport("")}
           >
-            All Sports
+            All
           </button>
           {SPORT_LIST.map((s) => (
             <button
               key={s.id}
-              className={`btn btn-sm ${filterSport === s.id ? "btn-primary" : "btn-ghost"}`}
+              className={`btn btn-xs ${filterSport === s.id ? "btn-primary" : "btn-ghost"}`}
               onClick={() => setFilterSport(s.id)}
             >
-              {s.icon} {s.name}
+              {s.icon}
             </button>
           ))}
         </div>
-
-        {/* Athlete filter */}
-        {athletes.length > 1 && (
-          <div className="flex gap-2 flex-wrap">
-            <span className="self-center text-xs text-base-content/50">|</span>
-            <button
-              className={`btn btn-sm ${!filterAthlete ? "btn-primary" : "btn-ghost"}`}
-              onClick={() => setFilterAthlete("")}
-            >
-              All Athletes
-            </button>
-            {athletes.map((a) => (
-              <button
-                key={a.id}
-                className={`btn btn-sm ${filterAthlete === a.id ? "btn-primary" : "btn-ghost"}`}
-                onClick={() => setFilterAthlete(a.id)}
-              >
-                {a.label}
-              </button>
-            ))}
-          </div>
-        )}
       </div>
 
       {/* Loading */}
@@ -290,13 +250,12 @@ export default function GamesClient() {
                 ? "Add an athlete first, then log their games here."
                 : "Log your first game to start tracking performance."}
             </p>
-            <button
-              className="btn btn-primary mt-4"
-              onClick={openAdd}
-              disabled={athletes.length === 0}
+            <Link
+              href="/dashboard/games/new"
+              className={`btn btn-primary mt-4 ${athletes.length === 0 ? "btn-disabled" : ""}`}
             >
               Log First Game
-            </button>
+            </Link>
           </div>
         </div>
       )}
@@ -308,11 +267,17 @@ export default function GamesClient() {
             const sport = game.sport || DEFAULT_SPORT;
             const config = getSportConfig(sport);
             const stats = game.stats || {};
+            const totalRebounds = (stats.rebounds_off || 0) + (stats.rebounds_def || 0);
+            const fgPct = stats.fg_attempted > 0
+              ? ((stats.fg_made / stats.fg_attempted) * 100).toFixed(0) + "%"
+              : "-";
+            const efficiency = calcEfficiency(stats);
 
             return (
               <div
                 key={game.id}
-                className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow"
+                className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                onClick={() => router.push(`/dashboard/games/${game.id}`)}
               >
                 <div className="card-body p-4">
                   <div className="flex flex-col sm:flex-row sm:items-center gap-3">
@@ -341,25 +306,35 @@ export default function GamesClient() {
                       </div>
                     </div>
 
-                    {/* Middle: key stats from tableColumns (first 4) */}
+                    {/* Middle: key stats */}
                     <div className="flex gap-4 text-center flex-wrap">
-                      {config.tableColumns.slice(0, 5).map((col) => (
-                        <div key={col.key}>
-                          <div className="text-lg font-bold leading-none">
-                            {col.compute(stats)}
-                          </div>
-                          <div className="text-[10px] text-base-content/50 uppercase tracking-wider">
-                            {col.label}
-                          </div>
-                        </div>
-                      ))}
+                      <div>
+                        <div className="text-lg font-bold leading-none">{stats.points || 0}</div>
+                        <div className="text-[10px] text-base-content/50 uppercase tracking-wider">PTS</div>
+                      </div>
+                      <div>
+                        <div className="text-lg font-bold leading-none">{totalRebounds}</div>
+                        <div className="text-[10px] text-base-content/50 uppercase tracking-wider">REB</div>
+                      </div>
+                      <div>
+                        <div className="text-lg font-bold leading-none">{stats.assists || 0}</div>
+                        <div className="text-[10px] text-base-content/50 uppercase tracking-wider">AST</div>
+                      </div>
+                      <div>
+                        <div className="text-lg font-bold leading-none">{fgPct}</div>
+                        <div className="text-[10px] text-base-content/50 uppercase tracking-wider">FG%</div>
+                      </div>
+                      <div>
+                        <div className="text-lg font-bold leading-none">{efficiency}</div>
+                        <div className="text-[10px] text-base-content/50 uppercase tracking-wider">EFF</div>
+                      </div>
                     </div>
 
                     {/* Right: actions */}
-                    <div className="flex gap-1 sm:flex-col">
-                      <button
+                    <div className="flex gap-1 sm:flex-col" onClick={(e) => e.stopPropagation()}>
+                      <Link
+                        href={`/dashboard/games/new?id=${game.id}`}
                         className="btn btn-ghost btn-xs"
-                        onClick={() => openEdit(game)}
                       >
                         <svg
                           className="w-4 h-4"
@@ -374,7 +349,7 @@ export default function GamesClient() {
                             d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
                           />
                         </svg>
-                      </button>
+                      </Link>
                       <button
                         className="btn btn-ghost btn-xs text-error"
                         onClick={() => setDeleteTarget(game)}
@@ -408,20 +383,6 @@ export default function GamesClient() {
           No games match the current filters.
         </div>
       )}
-
-      {/* Add/Edit Modal */}
-      <GameModal
-        open={modalOpen}
-        onClose={() => {
-          setModalOpen(false);
-          setEditingGame(null);
-        }}
-        onSubmit={handleSubmit}
-        loading={saving}
-        athletes={athletes}
-        seasons={seasons}
-        initialData={editingGame ? gameToFormData(editingGame) : null}
-      />
 
       {/* Delete Confirmation */}
       <dialog className={`modal ${deleteTarget ? "modal-open" : ""}`}>

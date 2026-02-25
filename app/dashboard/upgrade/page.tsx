@@ -106,11 +106,13 @@ export default function UpgradePage() {
               <div
                 key={plan.tier}
                 className={`relative rounded-2xl p-6 transition-all ${
-                  isFeatured ? "ring-2 shadow-lg" : "border border-slate-200"
+                  isFeatured ? "shadow-lg" : "border border-slate-200"
                 }`}
                 style={{
                   backgroundColor: "white",
-                  ringColor: isFeatured ? colors.electricOrange : undefined,
+                  boxShadow: isFeatured
+                    ? `0 0 0 2px ${colors.electricOrange}, 0 10px 15px -3px rgba(0, 0, 0, 0.1)`
+                    : undefined,
                 }}
               >
                 {/* Most Popular Badge */}

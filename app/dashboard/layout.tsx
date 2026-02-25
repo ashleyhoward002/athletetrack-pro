@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import Sidebar from "@/components/dashboard/Sidebar";
+import QuickStatEntry from "@/components/dashboard/games/QuickStatEntry";
 
 export default async function LayoutPrivate({
   children,
@@ -26,6 +27,7 @@ export default async function LayoutPrivate({
       <main className="flex-1 overflow-y-auto">
         {children}
       </main>
+      <QuickStatEntry />
     </div>
   );
 }
