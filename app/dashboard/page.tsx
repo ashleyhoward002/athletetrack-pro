@@ -7,6 +7,7 @@ import SplitText from "@/components/ui/SplitText";
 import QuickDrills from "@/components/dashboard/QuickDrills";
 import UpcomingGames from "@/components/dashboard/UpcomingGames";
 import RoleBasedActions, { RoleBadge } from "@/components/dashboard/RoleBasedActions";
+import VideoUploadCTA from "@/components/dashboard/VideoUploadCTA";
 
 export const dynamic = "force-dynamic";
 
@@ -32,6 +33,9 @@ export default async function Dashboard() {
 
           {/* Stats Overview Cards */}
           <StatsOverview />
+
+          {/* Video Upload CTA */}
+          <VideoUploadCTA />
 
           {/* Main Content Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

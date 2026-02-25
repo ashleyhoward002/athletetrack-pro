@@ -61,7 +61,7 @@ export default function LandingPage() {
               href="/signup"
               className="group px-8 py-4 bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-600 hover:to-emerald-600 text-white font-bold text-lg rounded-xl shadow-lg shadow-cyan-500/25 transform transition-all hover:scale-105 hover:shadow-xl hover:shadow-cyan-500/30 text-center"
             >
-              Start Free for 30 Days
+              Start 14-Day Free Trial
               <span className="inline-block ml-2 group-hover:translate-x-1 transition-transform">&rarr;</span>
             </Link>
             <Link
@@ -347,83 +347,152 @@ export default function LandingPage() {
       </section>
 
       {/* Pricing Section */}
-      <section className="py-24 px-4 bg-white">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-slate-800 mb-4">
+      <section className="py-24 px-4" style={{ backgroundColor: '#0F1B2D' }}>
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <p className="font-semibold mb-4 text-sm uppercase tracking-wider" style={{ color: '#00B4D8' }}>
+              Simple, Transparent Pricing
+            </p>
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
               Less than a private lesson
             </h2>
-            <p className="text-xl text-slate-600">
+            <p className="text-xl text-slate-400">
               Invest in their future. Start free, upgrade when ready.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          {/* Pricing Cards */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
             {/* Starter */}
-            <div className="bg-white rounded-2xl border-2 border-slate-200 p-8 hover:border-slate-300 transition">
-              <h3 className="text-2xl font-bold text-slate-800 mb-2">Starter</h3>
-              <p className="text-slate-600 mb-4">Perfect for one athlete</p>
+            <div className="rounded-2xl p-6 border border-white/10 hover:scale-[1.02] transition-all" style={{ backgroundColor: '#1E293B' }}>
+              <h3 className="text-xl font-bold text-white mb-2">Starter</h3>
+              <p className="text-sm text-slate-400 mb-6">Perfect for tracking a single athlete</p>
               <div className="mb-6">
-                <span className="text-5xl font-bold text-slate-800">$10</span>
-                <span className="text-slate-500">/month</span>
+                <span className="text-4xl font-bold text-white">$9.99</span>
+                <span className="text-slate-400">/mo</span>
+                <p className="text-sm text-slate-400 mt-1">or $89/year</p>
+                <p className="text-sm mt-1" style={{ color: '#10B981' }}>14-day free trial</p>
               </div>
               <ul className="space-y-3 mb-8">
-                <li className="flex items-center gap-2 text-slate-700">
-                  <span className="text-emerald-500">✓</span> Single athlete profile
-                </li>
-                <li className="flex items-center gap-2 text-slate-700">
-                  <span className="text-emerald-500">✓</span> All sports stat tracking
-                </li>
-                <li className="flex items-center gap-2 text-slate-700">
-                  <span className="text-emerald-500">✓</span> Recruiter Snapshot PDF
-                </li>
-                <li className="flex items-center gap-2 text-slate-700">
-                  <span className="text-emerald-500">✓</span> AI Coach access
-                </li>
+                {['1 athlete', 'All sports stat tracking', 'AI Coach tips', 'Recruiter Snapshot PDF', 'Phone video upload'].map((feature) => (
+                  <li key={feature} className="flex items-center gap-2 text-sm text-slate-300">
+                    <span style={{ color: '#10B981' }}>✓</span> {feature}
+                  </li>
+                ))}
               </ul>
-              <Link
-                href="/signup"
-                className="block w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-center font-semibold rounded-xl transition"
-              >
+              <Link href="/signup?plan=starter" className="block w-full py-3 text-center font-semibold rounded-xl transition hover:opacity-90" style={{ backgroundColor: '#00B4D8', color: 'white' }}>
                 Start Free Trial
               </Link>
             </div>
 
-            {/* Professional */}
-            <div className="bg-gradient-to-br from-cyan-500 to-emerald-500 rounded-2xl p-8 text-white relative overflow-hidden">
-              <div className="absolute top-4 right-4 bg-white/20 text-white text-xs px-3 py-1 rounded-full font-medium">
-                MOST POPULAR
+            {/* Pro - Featured */}
+            <div className="relative rounded-2xl p-6 lg:scale-105 lg:-my-4 shadow-2xl" style={{ backgroundColor: '#FF6B35' }}>
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wide" style={{ backgroundColor: '#0F1B2D', color: '#FF6B35' }}>
+                Most Popular
               </div>
-              <h3 className="text-2xl font-bold mb-2">Professional</h3>
-              <p className="text-cyan-100 mb-4">For serious sports families</p>
+              <h3 className="text-xl font-bold text-white mb-2">Pro</h3>
+              <p className="text-sm text-white/80 mb-6">For serious multi-sport families</p>
               <div className="mb-6">
-                <span className="text-5xl font-bold">$15</span>
-                <span className="text-cyan-100">/month</span>
+                <span className="text-4xl font-bold text-white">$14.99</span>
+                <span className="text-white/80">/mo</span>
+                <p className="text-sm text-white/80 mt-1">or $139/year</p>
+                <p className="text-sm text-white/90 mt-1">14-day free trial</p>
               </div>
               <ul className="space-y-3 mb-8">
-                <li className="flex items-center gap-2">
-                  <span className="text-white">✓</span> Everything in Starter
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="text-white">✓</span> Multi-athlete support
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="text-white">✓</span> Video integration
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="text-white">✓</span> AI highlight detection
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="text-white">✓</span> Priority support
-                </li>
+                {[
+                  'Up to 4 athletes included',
+                  '+$2.99/mo per additional athlete',
+                  'Everything in Starter PLUS:',
+                  'Veo/video import',
+                  'AI shot form analysis',
+                  'AI highlight detection',
+                  'Recruiting profile builder',
+                  'Priority support'
+                ].map((feature) => (
+                  <li key={feature} className="flex items-center gap-2 text-sm text-white">
+                    <span>✓</span> {feature}
+                  </li>
+                ))}
               </ul>
-              <Link
-                href="/signup"
-                className="block w-full py-3 bg-white hover:bg-slate-50 text-cyan-600 text-center font-bold rounded-xl transition"
-              >
+              <Link href="/signup?plan=pro" className="block w-full py-3 bg-white hover:bg-slate-100 text-center font-bold rounded-xl transition" style={{ color: '#FF6B35' }}>
                 Start Free Trial
               </Link>
             </div>
+
+            {/* Team */}
+            <div className="rounded-2xl p-6 border border-white/10 hover:scale-[1.02] transition-all" style={{ backgroundColor: '#1E293B' }}>
+              <h3 className="text-xl font-bold text-white mb-2">Team</h3>
+              <p className="text-sm text-slate-400 mb-6">Perfect for coaches and teams</p>
+              <div className="mb-6">
+                <span className="text-4xl font-bold text-white">$29.99</span>
+                <span className="text-slate-400">/mo</span>
+                <p className="text-sm text-slate-400 mt-1">or $249/year</p>
+              </div>
+              <ul className="space-y-3 mb-8">
+                {['Up to 50 players', 'Full roster management', 'Bulk stat entry', 'Game-day scoring', 'Parent sharing portal', 'Performance reports'].map((feature) => (
+                  <li key={feature} className="flex items-center gap-2 text-sm text-slate-300">
+                    <span style={{ color: '#10B981' }}>✓</span> {feature}
+                  </li>
+                ))}
+              </ul>
+              <Link href="/signup?plan=team" className="block w-full py-3 text-center font-semibold rounded-xl transition hover:opacity-90" style={{ backgroundColor: '#00B4D8', color: 'white' }}>
+                Get Started
+              </Link>
+            </div>
+
+            {/* School/Org */}
+            <div className="rounded-2xl p-6 border border-white/10 hover:scale-[1.02] transition-all" style={{ backgroundColor: '#1E293B' }}>
+              <h3 className="text-xl font-bold text-white mb-2">School/Org</h3>
+              <p className="text-sm text-slate-400 mb-6">For schools and organizations</p>
+              <div className="mb-6">
+                <span className="text-3xl font-bold text-white">Custom</span>
+                <p className="text-sm text-slate-400 mt-1">Contact for pricing</p>
+              </div>
+              <ul className="space-y-3 mb-8">
+                {['Unlimited teams', 'Admin dashboard', 'Custom branding', 'Priority onboarding', 'Dedicated support'].map((feature) => (
+                  <li key={feature} className="flex items-center gap-2 text-sm text-slate-300">
+                    <span style={{ color: '#10B981' }}>✓</span> {feature}
+                  </li>
+                ))}
+              </ul>
+              <a href="mailto:sales@athletetrackpro.com?subject=School/Org Pricing Inquiry" className="block w-full py-3 text-center font-semibold rounded-xl transition bg-white/10 hover:bg-white/20 text-white">
+                Contact Sales
+              </a>
+            </div>
+          </div>
+
+          {/* Parent View Free Tier */}
+          <div className="max-w-2xl mx-auto rounded-2xl p-6 text-center mb-12" style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}>
+            <div className="flex items-center justify-center gap-2 mb-3">
+              <span className="text-xs font-semibold px-3 py-1 rounded-full" style={{ backgroundColor: '#10B981', color: '#0F1B2D' }}>FREE</span>
+              <h4 className="text-lg font-bold text-white">Parent View</h4>
+            </div>
+            <p className="text-slate-400 text-sm mb-4">
+              Read-only access when your child's team uses AthleteTrack Pro. View stats, game summaries, and shared highlights at no cost.
+            </p>
+            <Link href="/signup?plan=parent" className="inline-block px-6 py-2 rounded-lg font-medium text-sm transition bg-white/10 hover:bg-white/20 text-white">
+              Join as Parent
+            </Link>
+          </div>
+
+          {/* Growth Loop Tagline */}
+          <div className="text-center">
+            <p className="inline-block px-6 py-3 rounded-full text-sm font-medium" style={{ backgroundColor: 'rgba(0, 180, 216, 0.15)', color: '#00B4D8' }}>
+              Coach subscribes → Parents get free access → Parents upgrade for AI & recruiting tools
+            </p>
+          </div>
+
+          {/* Trust Indicators */}
+          <div className="flex flex-wrap justify-center gap-8 text-sm text-slate-500 mt-10">
+            <span className="flex items-center gap-2">
+              <span style={{ color: '#10B981' }}>✓</span> No credit card for trial
+            </span>
+            <span className="flex items-center gap-2">
+              <span style={{ color: '#10B981' }}>✓</span> Cancel anytime
+            </span>
+            <span className="flex items-center gap-2">
+              <span style={{ color: '#10B981' }}>✓</span> Setup in 5 minutes
+            </span>
           </div>
         </div>
       </section>
@@ -437,7 +506,7 @@ export default function LandingPage() {
             <span className="text-cyan-400">Start cheering again.</span>
           </h2>
           <p className="text-xl text-slate-400 mb-10 max-w-2xl mx-auto">
-            Join thousands of sports parents who've traded spreadsheet stress for sideline joy. Your 30-day free trial starts now.
+            Join thousands of sports parents who've traded spreadsheet stress for sideline joy. Your 14-day free trial starts now.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link

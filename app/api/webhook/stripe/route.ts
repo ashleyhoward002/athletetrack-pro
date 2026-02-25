@@ -43,16 +43,21 @@ export async function POST(req: NextRequest) {
                 const customerId = session?.customer;
                 const priceId = session?.line_items?.data[0]?.price?.id;
                 const userId = session?.client_reference_id;
-                const plan = config.stripe.plans.find((p) => p.priceId === priceId);
+
+                // Find the plan by either monthly or yearly priceId
+                const plan = config.stripe.plans.find(
+                    (p) => p.priceId === priceId || p.yearlyPriceId === priceId
+                );
 
                 if (!userId) break;
 
-                // Update user in Supabase
+                // Update user in Supabase with tier information
                 await supabaseAdmin
                     .from("users")
                     .update({
                         customerId,
                         priceId,
+                        subscriptionTier: plan?.tier || null,
                         hasAccess: true,
                     })
                     .eq("id", userId);
