@@ -1,0 +1,58 @@
+export const tennisSkillTrees = [
+    {
+        name: "Serving",
+        description: "Build a powerful and consistent serve",
+        icon: "🎾",
+        display_order: 0,
+        nodes: [
+            { name: "Service Toss", description: "Consistent ball toss placement for a repeatable motion", level: 1, xp_required: 100, icon: "⬆️", display_order: 0 },
+            { name: "Flat Serve", description: "Power serve with minimal spin aimed at the body or corners", level: 1, xp_required: 150, icon: "💥", display_order: 1 },
+            { name: "Slice Serve", description: "Side-spin serve that curves away from the returner", level: 2, xp_required: 250, icon: "🌀", display_order: 2 },
+            { name: "Kick Serve", description: "Topspin serve that bounces high and kicks into the body", level: 2, xp_required: 300, icon: "📈", display_order: 3 },
+            { name: "Serve Placement", description: "Consistently hit wide, body, and T targets in both boxes", level: 3, xp_required: 400, icon: "🎯", display_order: 4 },
+            { name: "Serve & Volley", description: "Follow your serve to the net and finish the point with a volley", level: 3, xp_required: 500, icon: "⚡", display_order: 5 },
+        ],
+    },
+    {
+        name: "Groundstrokes",
+        description: "Dominate rallies with powerful and consistent groundstrokes",
+        icon: "💪",
+        display_order: 1,
+        nodes: [
+            { name: "Forehand Basics", description: "Proper grip, stance, and follow-through on the forehand", level: 1, xp_required: 100, icon: "➡️", display_order: 0 },
+            { name: "Backhand Basics", description: "Solid one-hand or two-hand backhand with proper form", level: 1, xp_required: 150, icon: "⬅️", display_order: 1 },
+            { name: "Topspin Control", description: "Generate heavy topspin to push opponents behind the baseline", level: 2, xp_required: 250, icon: "🔄", display_order: 2 },
+            { name: "Down-the-Line", description: "Hit accurate shots down the sideline to change rally direction", level: 2, xp_required: 300, icon: "📏", display_order: 3 },
+            { name: "Drop Shots", description: "Disguised short balls that barely clear the net", level: 3, xp_required: 400, icon: "🪶", display_order: 4 },
+            { name: "Inside-Out Forehand", description: "Run around the backhand to hit a dominant forehand crosscourt", level: 3, xp_required: 500, icon: "🔥", display_order: 5 },
+        ],
+    },
+    {
+        name: "Net Game",
+        description: "Finish points at the net with sharp volleys and overheads",
+        icon: "🏐",
+        display_order: 2,
+        nodes: [
+            { name: "Ready Position", description: "Split step and continental grip ready for quick reactions", level: 1, xp_required: 100, icon: "🧎", display_order: 0 },
+            { name: "Punch Volley", description: "Firm wrist, short backswing - redirect the ball with control", level: 1, xp_required: 150, icon: "👊", display_order: 1 },
+            { name: "Drop Volley", description: "Soft touch volley that dies near the net", level: 2, xp_required: 250, icon: "🪶", display_order: 2 },
+            { name: "Overhead Smash", description: "Put away lobs with a powerful overhead", level: 2, xp_required: 300, icon: "⬇️", display_order: 3 },
+            { name: "Approach Shots", description: "Move forward off a short ball to set up a net position", level: 3, xp_required: 400, icon: "🏃", display_order: 4 },
+            { name: "Net Dominance", description: "Control the net with positioning, anticipation, and touch", level: 3, xp_required: 500, icon: "👑", display_order: 5 },
+        ],
+    },
+    {
+        name: "Footwork & Movement",
+        description: "Cover the court efficiently with elite movement patterns",
+        icon: "👟",
+        display_order: 3,
+        nodes: [
+            { name: "Split Step", description: "Time your hop to react explosively in any direction", level: 1, xp_required: 100, icon: "🦘", display_order: 0 },
+            { name: "Lateral Shuffle", description: "Move side to side efficiently while staying balanced", level: 1, xp_required: 150, icon: "↔️", display_order: 1 },
+            { name: "Recovery Steps", description: "Get back to the center of the court after every shot", level: 2, xp_required: 250, icon: "🔙", display_order: 2 },
+            { name: "Open Stance", description: "Hit off an open stance for quicker preparation on wide balls", level: 2, xp_required: 300, icon: "🧘", display_order: 3 },
+            { name: "Sliding", description: "Slide on clay or hard courts to reach wide balls efficiently", level: 3, xp_required: 400, icon: "🛷", display_order: 4 },
+            { name: "Court Coverage", description: "Anticipate shots and move to optimal position before the ball arrives", level: 3, xp_required: 500, icon: "🗺️", display_order: 5 },
+        ],
+    },
+];

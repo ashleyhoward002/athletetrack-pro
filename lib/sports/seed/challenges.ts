@@ -32,6 +32,18 @@ export const challengesSeed: ChallengeSeed[] = [
     { sport: "soccer", name: "Pitch Perfect", description: "Complete 2 passing drills", type: "daily", criteria: { metric: "drill_completions_category", target: 2, timeframe: "day" }, xp_reward: 40 },
     { sport: "soccer", name: "Clinical Finisher", description: "Complete 2 finishing drills", type: "daily", criteria: { metric: "drill_completions_category", target: 2, timeframe: "day" }, xp_reward: 40 },
 
+    // Football daily
+    { sport: "football", name: "Arm Day", description: "Complete 2 passing drills", type: "daily", criteria: { metric: "drill_completions_category", target: 2, timeframe: "day" }, xp_reward: 40 },
+    { sport: "football", name: "Gridiron Grinder", description: "Complete 2 conditioning drills", type: "daily", criteria: { metric: "drill_completions_category", target: 2, timeframe: "day" }, xp_reward: 40 },
+
+    // Tennis daily
+    { sport: "tennis", name: "Serve Session", description: "Complete 2 serving drills", type: "daily", criteria: { metric: "drill_completions_category", target: 2, timeframe: "day" }, xp_reward: 40 },
+    { sport: "tennis", name: "Rally Ready", description: "Complete 2 groundstroke drills", type: "daily", criteria: { metric: "drill_completions_category", target: 2, timeframe: "day" }, xp_reward: 40 },
+
+    // Volleyball daily
+    { sport: "volleyball", name: "Kill Mode", description: "Complete 2 attacking drills", type: "daily", criteria: { metric: "drill_completions_category", target: 2, timeframe: "day" }, xp_reward: 40 },
+    { sport: "volleyball", name: "Wall of Steel", description: "Complete 2 blocking drills", type: "daily", criteria: { metric: "drill_completions_category", target: 2, timeframe: "day" }, xp_reward: 40 },
+
     // Milestone challenges
     { sport: null, name: "First Steps", description: "Complete your first drill", type: "milestone", criteria: { metric: "total_drill_completions", target: 1 }, xp_reward: 50 },
     { sport: null, name: "Getting Warmed Up", description: "Complete 10 total drills", type: "milestone", criteria: { metric: "total_drill_completions", target: 10 }, xp_reward: 100 },

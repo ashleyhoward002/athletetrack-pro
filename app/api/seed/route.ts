@@ -6,6 +6,9 @@ import { cookies } from "next/headers";
 import { basketballSkillTrees } from "@/lib/sports/seed/basketball-skills";
 import { baseballSkillTrees } from "@/lib/sports/seed/baseball-skills";
 import { soccerSkillTrees } from "@/lib/sports/seed/soccer-skills";
+import { footballSkillTrees } from "@/lib/sports/seed/football-skills";
+import { tennisSkillTrees } from "@/lib/sports/seed/tennis-skills";
+import { volleyballSkillTrees } from "@/lib/sports/seed/volleyball-skills";
 import { badgesSeed } from "@/lib/sports/seed/badges";
 import { challengesSeed } from "@/lib/sports/seed/challenges";
 
@@ -26,6 +29,9 @@ export async function POST(req: NextRequest) {
             ...basketballSkillTrees.map((t) => ({ ...t, sport: "basketball" })),
             ...baseballSkillTrees.map((t) => ({ ...t, sport: "baseball" })),
             ...soccerSkillTrees.map((t) => ({ ...t, sport: "soccer" })),
+            ...footballSkillTrees.map((t) => ({ ...t, sport: "football" })),
+            ...tennisSkillTrees.map((t) => ({ ...t, sport: "tennis" })),
+            ...volleyballSkillTrees.map((t) => ({ ...t, sport: "volleyball" })),
         ];
 
         let treesCreated = 0;

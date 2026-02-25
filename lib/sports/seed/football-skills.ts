@@ -1,0 +1,58 @@
+export const footballSkillTrees = [
+    {
+        name: "Passing",
+        description: "Develop quarterback mechanics and decision-making",
+        icon: "🏈",
+        display_order: 0,
+        nodes: [
+            { name: "Grip & Stance", description: "Proper grip on the football and balanced pre-snap stance", level: 1, xp_required: 100, icon: "🤚", display_order: 0 },
+            { name: "3-Step Drop", description: "Quick drop for short routes with a balanced throwing platform", level: 1, xp_required: 150, icon: "👟", display_order: 1 },
+            { name: "5-Step Drop", description: "Deeper drop for intermediate routes with proper depth and timing", level: 2, xp_required: 250, icon: "🦶", display_order: 2 },
+            { name: "Pocket Presence", description: "Feel pressure and slide in the pocket to extend plays", level: 2, xp_required: 300, icon: "👀", display_order: 3 },
+            { name: "Touch Passes", description: "Vary ball trajectory to fit throws into tight windows", level: 3, xp_required: 400, icon: "🎯", display_order: 4 },
+            { name: "Reading Defenses", description: "Pre-snap reads, progression through receivers, and audibles", level: 3, xp_required: 500, icon: "🧠", display_order: 5 },
+        ],
+    },
+    {
+        name: "Rushing",
+        description: "Master ball carrying, vision, and elusiveness",
+        icon: "🏃",
+        display_order: 1,
+        nodes: [
+            { name: "Ball Security", description: "High-and-tight carry to protect the football", level: 1, xp_required: 100, icon: "🔒", display_order: 0 },
+            { name: "North-South Running", description: "Hit the hole hard and get upfield quickly", level: 1, xp_required: 150, icon: "⬆️", display_order: 1 },
+            { name: "Cutback Moves", description: "Plant and change direction to exploit defensive overpursuit", level: 2, xp_required: 250, icon: "↩️", display_order: 2 },
+            { name: "Stiff Arm", description: "Extend the arm to shed tacklers and gain extra yards", level: 2, xp_required: 300, icon: "💪", display_order: 3 },
+            { name: "Spin Move", description: "Rotate through contact to break tackles in the open field", level: 3, xp_required: 400, icon: "🔄", display_order: 4 },
+            { name: "Vision & Patience", description: "Read blocks, find lanes, and time cuts behind the line", level: 3, xp_required: 500, icon: "👁️", display_order: 5 },
+        ],
+    },
+    {
+        name: "Receiving",
+        description: "Become an elite pass catcher and route runner",
+        icon: "🙌",
+        display_order: 2,
+        nodes: [
+            { name: "Catching Fundamentals", description: "Secure catches with proper hand positioning and eye discipline", level: 1, xp_required: 100, icon: "🤲", display_order: 0 },
+            { name: "Route Stems", description: "Run precise route stems at the correct depth", level: 1, xp_required: 150, icon: "📏", display_order: 1 },
+            { name: "Breaking Routes", description: "Sharp cuts on outs, ins, and comebacks to create separation", level: 2, xp_required: 250, icon: "⚡", display_order: 2 },
+            { name: "Contested Catches", description: "Win 50/50 balls with body positioning and strong hands", level: 2, xp_required: 300, icon: "✋", display_order: 3 },
+            { name: "RAC Ability", description: "Run after catch - make defenders miss in the open field", level: 3, xp_required: 400, icon: "🏃‍♂️", display_order: 4 },
+            { name: "Route Tree Mastery", description: "Run the full route tree with deception and precise timing", level: 3, xp_required: 500, icon: "🌳", display_order: 5 },
+        ],
+    },
+    {
+        name: "Defense",
+        description: "Lock down opponents with elite tackling and coverage",
+        icon: "🛡️",
+        display_order: 3,
+        nodes: [
+            { name: "Tackling Form", description: "Head up, wrap arms, drive through - proper form tackling", level: 1, xp_required: 100, icon: "🧎", display_order: 0 },
+            { name: "Pursuit Angles", description: "Take the correct angle to cut off ball carriers", level: 1, xp_required: 150, icon: "📐", display_order: 1 },
+            { name: "Man Coverage", description: "Mirror receivers in man-to-man assignments", level: 2, xp_required: 250, icon: "🪞", display_order: 2 },
+            { name: "Zone Coverage", description: "Read the quarterback's eyes and patrol your zone", level: 2, xp_required: 300, icon: "🗺️", display_order: 3 },
+            { name: "Pass Rush", description: "Win off the edge with speed moves, bull rush, and counter moves", level: 3, xp_required: 400, icon: "💨", display_order: 4 },
+            { name: "Ball Hawking", description: "Create turnovers through interceptions and forced fumbles", level: 3, xp_required: 500, icon: "🦅", display_order: 5 },
+        ],
+    },
+];
