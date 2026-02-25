@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { createClient } from "@/utils/supabase/client";
 import toast from "react-hot-toast";
+import Link from "next/link";
 import AthleteModal, { AthleteFormData } from "./AthleteModal";
 import { SportId, SPORT_LIST, getSportConfig } from "@/lib/sports/config";
 
@@ -261,7 +262,12 @@ export default function AthletesClient() {
                     )}
                   </td>
                   <td>
-                    <div className="font-semibold">{athlete.name}</div>
+                    <Link
+                      href={`/dashboard/athletes/${athlete.id}`}
+                      className="font-semibold hover:text-primary hover:underline cursor-pointer"
+                    >
+                      {athlete.name}
+                    </Link>
                     {/* Show team on mobile where column is hidden */}
                     <div className="text-xs text-base-content/50 sm:hidden">
                       {[athlete.team_name, athlete.position]
