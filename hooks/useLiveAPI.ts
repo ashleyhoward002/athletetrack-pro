@@ -40,7 +40,7 @@ export function useLiveAPI(options: LiveClientOptions): UseLiveAPIResults {
 
     const [model, setModel] = useState<string>("models/gemini-2.5-flash");
     const [config, setConfig] = useState<LiveConnectConfig>({
-        responseModalities: ["audio" as any],
+        responseModalities: ["audio" as any, "text" as any],
         speechConfig: {
             voiceConfig: { prebuiltVoiceConfig: { voiceName: "Aoede" } },
         },
