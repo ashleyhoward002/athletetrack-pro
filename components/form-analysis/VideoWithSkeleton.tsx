@@ -136,13 +136,19 @@ export default function VideoWithSkeleton({
         setAnalysisError(null);
 
         try {
+            // Detect mime type from file extension
+            const extension = videoPath.split('.').pop()?.toLowerCase();
+            const mimeType = extension === "webm" ? "video/webm"
+                           : extension === "mov" ? "video/quicktime"
+                           : "video/mp4";
+
             const response = await fetch("/api/skeleton-analysis", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     video_path: videoPath,
                     sport,
-                    mime_type: "video/mp4",
+                    mime_type: mimeType,
                 }),
             });
 
