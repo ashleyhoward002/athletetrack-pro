@@ -15,22 +15,22 @@ function generateBasketballGame(
   skill: "good" | "avg" | "great"
 ) {
   const ranges = {
-    good: { pts: [12, 22], fgm: [5, 9], fga: [10, 16], tpm: [1, 3], tpa: [3, 7], ftm: [2, 5], fta: [3, 6], oreb: [1, 3], dreb: [3, 7], ast: [3, 7], stl: [1, 3], blk: [0, 2], to: [1, 3], fouls: [1, 3], min: [24, 32] },
-    avg:  { pts: [6, 14], fgm: [3, 6], fga: [8, 14], tpm: [0, 2], tpa: [2, 5], ftm: [1, 3], fta: [2, 4], oreb: [0, 2], dreb: [2, 5], ast: [1, 4], stl: [0, 2], blk: [0, 1], to: [2, 4], fouls: [2, 4], min: [18, 26] },
-    great:{ pts: [18, 30], fgm: [7, 12], fga: [12, 20], tpm: [2, 5], tpa: [4, 8], ftm: [3, 6], fta: [4, 7], oreb: [2, 4], dreb: [5, 10], ast: [4, 9], stl: [2, 4], blk: [1, 3], to: [0, 2], fouls: [1, 2], min: [28, 36] },
+    good: { pts: [12, 22] as const, fgm: [5, 9] as const, fga: [10, 16] as const, tpm: [1, 3] as const, tpa: [3, 7] as const, ftm: [2, 5] as const, fta: [3, 6] as const, oreb: [1, 3] as const, dreb: [3, 7] as const, ast: [3, 7] as const, stl: [1, 3] as const, blk: [0, 2] as const, to: [1, 3] as const, fouls: [1, 3] as const, min: [24, 32] as const },
+    avg:  { pts: [6, 14] as const, fgm: [3, 6] as const, fga: [8, 14] as const, tpm: [0, 2] as const, tpa: [2, 5] as const, ftm: [1, 3] as const, fta: [2, 4] as const, oreb: [0, 2] as const, dreb: [2, 5] as const, ast: [1, 4] as const, stl: [0, 2] as const, blk: [0, 1] as const, to: [2, 4] as const, fouls: [2, 4] as const, min: [18, 26] as const },
+    great:{ pts: [18, 30] as const, fgm: [7, 12] as const, fga: [12, 20] as const, tpm: [2, 5] as const, tpa: [4, 8] as const, ftm: [3, 6] as const, fta: [4, 7] as const, oreb: [2, 4] as const, dreb: [5, 10] as const, ast: [4, 9] as const, stl: [2, 4] as const, blk: [1, 3] as const, to: [0, 2] as const, fouls: [1, 2] as const, min: [28, 36] as const },
   };
   const r = ranges[skill];
 
-  const fg_made = randomBetween(...r.fgm);
-  const fg_attempted = Math.max(fg_made, randomBetween(...r.fga));
-  const three_made = randomBetween(...r.tpm);
-  const three_attempted = Math.max(three_made, randomBetween(...r.tpa));
-  const ft_made = randomBetween(...r.ftm);
-  const ft_attempted = Math.max(ft_made, randomBetween(...r.fta));
+  const fg_made = randomBetween(r.fgm[0], r.fgm[1]);
+  const fg_attempted = Math.max(fg_made, randomBetween(r.fga[0], r.fga[1]));
+  const three_made = randomBetween(r.tpm[0], r.tpm[1]);
+  const three_attempted = Math.max(three_made, randomBetween(r.tpa[0], r.tpa[1]));
+  const ft_made = randomBetween(r.ftm[0], r.ftm[1]);
+  const ft_attempted = Math.max(ft_made, randomBetween(r.fta[0], r.fta[1]));
   const points = (fg_made - three_made) * 2 + three_made * 3 + ft_made;
 
   const stats = {
-    minutes: randomBetween(...r.min),
+    minutes: randomBetween(r.min[0], r.min[1]),
     points,
     fg_made,
     fg_attempted,
@@ -38,13 +38,13 @@ function generateBasketballGame(
     three_attempted,
     ft_made,
     ft_attempted,
-    rebounds_off: randomBetween(...r.oreb),
-    rebounds_def: randomBetween(...r.dreb),
-    assists: randomBetween(...r.ast),
-    steals: randomBetween(...r.stl),
-    blocks: randomBetween(...r.blk),
-    turnovers: randomBetween(...r.to),
-    fouls: randomBetween(...r.fouls),
+    rebounds_off: randomBetween(r.oreb[0], r.oreb[1]),
+    rebounds_def: randomBetween(r.dreb[0], r.dreb[1]),
+    assists: randomBetween(r.ast[0], r.ast[1]),
+    steals: randomBetween(r.stl[0], r.stl[1]),
+    blocks: randomBetween(r.blk[0], r.blk[1]),
+    turnovers: randomBetween(r.to[0], r.to[1]),
+    fouls: randomBetween(r.fouls[0], r.fouls[1]),
   };
 
   return { opponent, date, sport: "basketball", stats };
@@ -56,25 +56,25 @@ function generateSoccerGame(
   skill: "good" | "avg" | "great"
 ) {
   const ranges = {
-    good:  { min: [60, 80], goals: [0, 1], assists: [0, 1], shots: [2, 5], sog: [1, 3], passes: [20, 35], pass_acc: [70, 85], tackles: [2, 5], interceptions: [1, 3], fouls: [0, 2], saves: [0, 0] },
-    avg:   { min: [45, 70], goals: [0, 0], assists: [0, 1], shots: [1, 3], sog: [0, 2], passes: [15, 25], pass_acc: [60, 78], tackles: [1, 4], interceptions: [0, 2], fouls: [1, 3], saves: [0, 0] },
-    great: { min: [75, 90], goals: [1, 3], assists: [1, 2], shots: [3, 7], sog: [2, 5], passes: [30, 50], pass_acc: [78, 92], tackles: [3, 6], interceptions: [2, 4], fouls: [0, 1], saves: [0, 0] },
+    good:  { min: [60, 80] as const, goals: [0, 1] as const, assists: [0, 1] as const, shots: [2, 5] as const, sog: [1, 3] as const, passes: [20, 35] as const, pass_acc: [70, 85] as const, tackles: [2, 5] as const, interceptions: [1, 3] as const, fouls: [0, 2] as const, saves: [0, 0] as const },
+    avg:   { min: [45, 70] as const, goals: [0, 0] as const, assists: [0, 1] as const, shots: [1, 3] as const, sog: [0, 2] as const, passes: [15, 25] as const, pass_acc: [60, 78] as const, tackles: [1, 4] as const, interceptions: [0, 2] as const, fouls: [1, 3] as const, saves: [0, 0] as const },
+    great: { min: [75, 90] as const, goals: [1, 3] as const, assists: [1, 2] as const, shots: [3, 7] as const, sog: [2, 5] as const, passes: [30, 50] as const, pass_acc: [78, 92] as const, tackles: [3, 6] as const, interceptions: [2, 4] as const, fouls: [0, 1] as const, saves: [0, 0] as const },
   };
   const r = ranges[skill];
 
-  const shots_on_goal = randomBetween(...r.sog);
+  const shots_on_goal = randomBetween(r.sog[0], r.sog[1]);
   const stats = {
-    minutes_played: randomBetween(...r.min),
-    goals: randomBetween(...r.goals),
-    assists: randomBetween(...r.assists),
-    shots: Math.max(shots_on_goal, randomBetween(...r.shots)),
+    minutes_played: randomBetween(r.min[0], r.min[1]),
+    goals: randomBetween(r.goals[0], r.goals[1]),
+    assists: randomBetween(r.assists[0], r.assists[1]),
+    shots: Math.max(shots_on_goal, randomBetween(r.shots[0], r.shots[1])),
     shots_on_goal,
-    passes_completed: randomBetween(...r.passes),
-    pass_accuracy: randomBetween(...r.pass_acc),
-    tackles: randomBetween(...r.tackles),
-    interceptions: randomBetween(...r.interceptions),
-    fouls_committed: randomBetween(...r.fouls),
-    saves: randomBetween(...r.saves),
+    passes_completed: randomBetween(r.passes[0], r.passes[1]),
+    pass_accuracy: randomBetween(r.pass_acc[0], r.pass_acc[1]),
+    tackles: randomBetween(r.tackles[0], r.tackles[1]),
+    interceptions: randomBetween(r.interceptions[0], r.interceptions[1]),
+    fouls_committed: randomBetween(r.fouls[0], r.fouls[1]),
+    saves: randomBetween(r.saves[0], r.saves[1]),
   };
 
   return { opponent, date, sport: "soccer", stats };
