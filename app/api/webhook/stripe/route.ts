@@ -66,7 +66,31 @@ export async function POST(req: NextRequest) {
             }
 
             case "customer.subscription.updated": {
-                // subscription updated code here
+                const subscription = data.object as Stripe.Subscription;
+                const customerId = subscription.customer as string;
+                const priceId = subscription.items.data[0]?.price?.id;
+                const status = subscription.status;
+
+                // Find the plan by either monthly or yearly priceId
+                const plan = config.stripe.plans.find(
+                    (p) => p.priceId === priceId || p.yearlyPriceId === priceId
+                );
+
+                // Determine access based on subscription status
+                // active = paying customer, trialing = in free trial
+                const hasAccess = ["active", "trialing"].includes(status);
+
+                // Update user in Supabase with new subscription info
+                await supabaseAdmin
+                    .from("users")
+                    .update({
+                        priceId,
+                        subscriptionTier: plan?.tier || null,
+                        hasAccess,
+                        subscriptionStatus: status,
+                    })
+                    .eq("customerId", customerId);
+
                 break;
             }
 

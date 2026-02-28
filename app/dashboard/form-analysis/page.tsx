@@ -9,6 +9,7 @@ import SportAnalysisSelector from "@/components/form-analysis/SportAnalysisSelec
 import AnalysisHistoryGrid from "@/components/form-analysis/AnalysisHistoryGrid";
 import ScoreProgressChart from "@/components/form-analysis/ScoreProgressChart";
 import HelpIcon from "@/components/ui/HelpIcon";
+import { FeatureGate } from "@/components/FeatureGate";
 
 type VideoSource = "upload" | "youtube";
 
@@ -213,6 +214,7 @@ export default function FormAnalysisPage() {
                     </div>
                 </div>
 
+                <FeatureGate feature="formAnalysis">
                 {/* Live Session CTA */}
                 <Link href="/dashboard/form-analysis/live">
                     <div className="card bg-gradient-to-r from-primary/20 to-secondary/20 border border-primary/30 hover:border-primary/60 transition-all cursor-pointer">
@@ -365,6 +367,7 @@ export default function FormAnalysisPage() {
                     </div>
                     <AnalysisHistoryGrid analyses={analyses} loading={loading} onDelete={handleDeleteRequest} />
                 </div>
+                </FeatureGate>
             </div>
 
             {/* Delete Confirmation Modal */}
