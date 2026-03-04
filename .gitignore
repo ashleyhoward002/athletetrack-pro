@@ -1,3 +1,4 @@
+
 # dependencies
 node_modules
 /.pnp
@@ -39,3 +40,12 @@ nul
 *.tsbuildinfo
 next-env.d.ts
 ASSIGNMENT_WRITEUP.md
+
+# dev scaffolding and internal files
+.claude/
+DevDocs/
+DevPlanDocs/
+backup/
+DEMO_NOTES.md
+git-push.bat
+git-push.sh
