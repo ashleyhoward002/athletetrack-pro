@@ -6,7 +6,7 @@
 // and display configurations. Every component reads from here.
 // ============================================================
 
-export type SportId = "basketball" | "baseball" | "soccer" | "football" | "tennis" | "volleyball";
+export type SportId = "basketball" | "baseball" | "soccer" | "football" | "tennis" | "volleyball" | "boxing";
 
 export interface StatFieldDef {
   key: string;
@@ -1496,6 +1496,260 @@ Return your analysis as JSON with this exact structure:
 };
 
 // ============================================================
+// BOXING
+// ============================================================
+// Training-first: a "game" row for boxing is a TRAINING SESSION
+// (bag work, mitts, roadwork, sparring), not a bout. Coach ratings
+// (1-10) track form over time; bout results are a minimal optional
+// group so competition tracking can be expanded later.
+// ============================================================
+const BOXING_FORM_KEYS = [
+  "coach_stance",
+  "coach_guard",
+  "coach_footwork",
+  "coach_jab",
+  "coach_power_punches",
+  "coach_defense",
+];
+
+// Average of the coach ratings that were actually entered (> 0) in one session
+const boxingSessionFormAvg = (s: Record<string, number>): number => {
+  const rated = BOXING_FORM_KEYS.map((k) => s[k] || 0).filter((v) => v > 0);
+  return rated.length > 0 ? rated.reduce((a, b) => a + b, 0) / rated.length : 0;
+};
+
+// Total training rounds in one session
+const boxingSessionRounds = (s: Record<string, number>): number =>
+  (s.shadowboxing_rounds || 0) + (s.heavy_bag_rounds || 0) + (s.mitt_rounds || 0) + (s.sparring_rounds || 0);
+
+// Skill rating (0-100) from summed coach ratings across sessions.
+// Note: stats are summed across sessions, so unrated sessions pull the average down.
+const boxingRatingFromKeys = (keys: string[]) => (stats: Record<string, number>, gameCount: number): number => {
+  if (gameCount === 0) return 0;
+  const total = keys.reduce((sum, k) => sum + (stats[k] || 0), 0);
+  return Math.min(100, Math.round((total / (gameCount * keys.length)) * 10));
+};
+
+const boxingConfig: SportConfig = {
+  id: "boxing",
+  name: "Boxing",
+  icon: "🥊",
+  positions: ["Orthodox", "Southpaw"],
+  statFields: [
+    // Session
+    { key: "total_minutes", label: "Session Minutes", shortLabel: "MIN", type: "integer", group: "Session", description: "Total length of the training session in minutes.", howToTrack: "Note the start and end time of the session." },
+    { key: "effort_rpe", label: "Effort (1-10)", shortLabel: "RPE", type: "integer", group: "Session", max: 10, description: "How hard the session felt, from 1 (very easy) to 10 (all-out).", howToTrack: "Ask the athlete right after the session to rate how hard it was.", isCore: true },
+    // Rounds
+    { key: "shadowboxing_rounds", label: "Shadowboxing Rounds", shortLabel: "SHADOW", type: "integer", group: "Rounds", description: "Rounds of shadowboxing (practicing punches and footwork with no target).", howToTrack: "Count each timed round completed.", isCore: true },
+    { key: "heavy_bag_rounds", label: "Heavy Bag Rounds", shortLabel: "BAG", type: "integer", group: "Rounds", description: "Rounds of work on the heavy bag.", howToTrack: "Count each timed round completed.", isCore: true },
+    { key: "mitt_rounds", label: "Mitt Rounds", shortLabel: "MITTS", type: "integer", group: "Rounds", description: "Rounds of focus-mitt work with a coach or partner.", howToTrack: "Count each timed round completed.", isCore: true },
+    { key: "sparring_rounds", label: "Sparring Rounds", shortLabel: "SPAR", type: "integer", group: "Rounds", description: "Rounds of controlled sparring with a partner.", howToTrack: "Count each sparring round completed." },
+    // Conditioning
+    { key: "jump_rope_minutes", label: "Jump Rope Minutes", shortLabel: "ROPE", type: "integer", group: "Conditioning", description: "Total minutes of jump rope, a staple for footwork and stamina.", howToTrack: "Add up the time spent skipping rope.", isCore: true },
+    { key: "roadwork_miles", label: "Roadwork Miles", shortLabel: "RUN", type: "decimal", group: "Conditioning", description: "Distance covered running (roadwork builds boxing stamina).", howToTrack: "Use a running app or a known route length.", isCore: true },
+    { key: "pushups_max", label: "Max Push-ups", shortLabel: "PU", type: "integer", group: "Conditioning", description: "Most push-ups with good form in one set.", howToTrack: "Count clean reps until form breaks down." },
+    { key: "situps_max", label: "Max Sit-ups", shortLabel: "SU", type: "integer", group: "Conditioning", description: "Most sit-ups with good form in one minute.", howToTrack: "Count clean reps in 60 seconds." },
+    // Form (coach rated)
+    { key: "coach_stance", label: "Stance", shortLabel: "STANCE", type: "integer", group: "Form (Coach Rating 1-10)", max: 10, description: "Balance, foot width, and weight distribution in the fighting stance.", howToTrack: "Coach rates 1 (needs work) to 10 (excellent) based on this session.", isCore: true },
+    { key: "coach_guard", label: "Guard", shortLabel: "GUARD", type: "integer", group: "Form (Coach Rating 1-10)", max: 10, description: "Hand height, elbows tucked, and chin down while moving and punching.", howToTrack: "Coach rates 1 to 10 based on this session.", isCore: true },
+    { key: "coach_footwork", label: "Footwork", shortLabel: "FEET", type: "integer", group: "Form (Coach Rating 1-10)", max: 10, description: "Moving in all directions without crossing feet or losing balance.", howToTrack: "Coach rates 1 to 10 based on this session.", isCore: true },
+    { key: "coach_jab", label: "Jab & Cross", shortLabel: "JAB", type: "integer", group: "Form (Coach Rating 1-10)", max: 10, description: "Technique of the straight punches: extension, rotation, and return to guard.", howToTrack: "Coach rates 1 to 10 based on this session.", isCore: true },
+    { key: "coach_power_punches", label: "Hooks & Uppercuts", shortLabel: "POWER", type: "integer", group: "Form (Coach Rating 1-10)", max: 10, description: "Technique of hooks and uppercuts: hip rotation, balance, and compact path.", howToTrack: "Coach rates 1 to 10 based on this session." },
+    { key: "coach_defense", label: "Defense", shortLabel: "DEF", type: "integer", group: "Form (Coach Rating 1-10)", max: 10, description: "Slips, blocks, and head movement.", howToTrack: "Coach rates 1 to 10 based on this session." },
+    // Bouts (optional, kept minimal for now)
+    { key: "bouts_won", label: "Bouts Won", shortLabel: "W", type: "integer", group: "Bouts (Optional)", description: "Competitive bouts won. Leave at 0 for training sessions.", howToTrack: "Record only for official or exhibition bouts." },
+    { key: "bouts_lost", label: "Bouts Lost", shortLabel: "L", type: "integer", group: "Bouts (Optional)", description: "Competitive bouts lost. Leave at 0 for training sessions.", howToTrack: "Record only for official or exhibition bouts." },
+  ],
+  computedStats: [
+    {
+      key: "total_rounds",
+      label: "Total Rounds",
+      shortLabel: "RDS",
+      description: "All training rounds in the session: shadowboxing, bag, mitts, and sparring.",
+      compute: (s) => boxingSessionRounds(s),
+      format: (v) => v.toFixed(0),
+    },
+    {
+      key: "avg_form_rating",
+      label: "Avg Form Rating",
+      shortLabel: "FORM",
+      description: "Average of the coach's form ratings entered for the session (1-10). Higher is better.",
+      compute: (s) => boxingSessionFormAvg(s),
+      format: (v) => v.toFixed(1),
+    },
+  ],
+  averageCards: [
+    {
+      key: "rounds_per_session", label: "Rounds/Session", description: "Average training rounds per session.", statKey: "computed",
+      compute: (totals, n) => n > 0 ? boxingSessionRounds(totals) / n : 0,
+      format: (v) => v.toFixed(1),
+    },
+    {
+      key: "roadwork_per_session", label: "Miles/Session", description: "Average roadwork miles per session.", statKey: "roadwork_miles",
+      compute: (totals, n) => n > 0 ? (totals.roadwork_miles || 0) / n : 0,
+      format: (v) => v.toFixed(1),
+    },
+    {
+      key: "effort", label: "Avg Effort", description: "Average effort rating (1-10) across sessions.", statKey: "effort_rpe",
+      compute: (totals, n) => n > 0 ? (totals.effort_rpe || 0) / n : 0,
+      format: (v) => v.toFixed(1),
+    },
+    {
+      key: "form_avg", label: "Avg Form", description: "Average coach form rating (1-10) across sessions.", statKey: "computed",
+      compute: (totals, n) => n > 0 ? BOXING_FORM_KEYS.reduce((sum, k) => sum + (totals[k] || 0), 0) / (n * BOXING_FORM_KEYS.length) : 0,
+      format: (v) => v.toFixed(1),
+    },
+  ],
+  trendChartLines: [
+    { dataKey: "total_rounds", label: "Rounds", color: "#ef4444", compute: (s) => boxingSessionRounds(s) },
+    { dataKey: "roadwork_miles", label: "Roadwork (mi)", color: "#22c55e", compute: (s) => s.roadwork_miles || 0 },
+    { dataKey: "jump_rope_minutes", label: "Jump Rope (min)", color: "#6366f1", compute: (s) => s.jump_rope_minutes || 0 },
+  ],
+  percentageChartLines: [
+    { dataKey: "form_score", label: "Form Score", color: "#ef4444", compute: (s) => boxingSessionFormAvg(s) * 10 },
+    { dataKey: "effort_score", label: "Effort", color: "#f59e0b", compute: (s) => (s.effort_rpe || 0) * 10 },
+  ],
+  tableColumns: [
+    { key: "total_rounds", label: "RDS", description: "Total training rounds", compute: (s) => boxingSessionRounds(s) },
+    { key: "roadwork_miles", label: "RUN", description: "Roadwork miles", compute: (s) => s.roadwork_miles ? Number(s.roadwork_miles).toFixed(1) : "—" },
+    { key: "jump_rope_minutes", label: "ROPE", description: "Jump rope minutes", compute: (s) => s.jump_rope_minutes || 0 },
+    { key: "avg_form_rating", label: "FORM", description: "Average coach form rating (1-10)", compute: (s) => boxingSessionFormAvg(s) > 0 ? boxingSessionFormAvg(s).toFixed(1) : "—" },
+    { key: "effort_rpe", label: "RPE", description: "Effort rating (1-10)", compute: (s) => s.effort_rpe || 0 },
+  ],
+  drillCategories: ["Stance & Guard", "Footwork", "Jab & Cross", "Combinations", "Defense", "Heavy Bag", "Mitts", "Shadowboxing", "Jump Rope", "Roadwork", "Conditioning"],
+  formAnalysisTypes: [
+    {
+      key: "stance_and_guard",
+      label: "Stance & Guard",
+      description: "Analyze fighting stance, balance, and guard position",
+      promptTemplate: `You are an expert boxing coach analyzing a young athlete's stance and guard. Evaluate:
+1. Foot width (about shoulder width) and stagger
+2. Weight distribution and balance (on the balls of the feet, knees slightly bent)
+3. Hands up with the guard protecting the chin
+4. Elbows tucked in to protect the body
+5. Chin tucked and eyes level
+6. Shoulder and hip alignment to the opponent
+7. Whether the guard stays up while moving
+
+Return your analysis as JSON with this exact structure:
+{"overall_score": <1-100>, "strengths": ["..."], "improvements": ["..."], "detailed_analysis": "...", "drill_recommendations": ["..."]}`,
+    },
+    {
+      key: "jab_cross",
+      label: "Jab & Cross",
+      description: "Analyze straight punch mechanics",
+      promptTemplate: `You are an expert boxing coach analyzing jab and cross technique. Evaluate:
+1. Stance before the punch and weight transfer
+2. Full arm extension with the shoulder protecting the chin
+3. Hip and shoulder rotation on the cross (back foot pivots)
+4. Punch path: straight line out and straight line back
+5. Returning the hand to the guard quickly
+6. Non-punching hand staying up
+7. Balance and head position after the punch
+
+Return your analysis as JSON with this exact structure:
+{"overall_score": <1-100>, "strengths": ["..."], "improvements": ["..."], "detailed_analysis": "...", "drill_recommendations": ["..."]}`,
+    },
+    {
+      key: "hooks_uppercuts",
+      label: "Hooks & Uppercuts",
+      description: "Analyze hook and uppercut mechanics",
+      promptTemplate: `You are an expert boxing coach analyzing hook and uppercut technique. Evaluate:
+1. Pivoting on the lead or rear foot with hip rotation driving the punch
+2. Compact elbow angle on the hook (not looping wide)
+3. Knee bend and drive on the uppercut
+4. Keeping the opposite hand protecting the chin
+5. Balance throughout the rotation
+6. Reset to stance and guard after the punch
+
+Return your analysis as JSON with this exact structure:
+{"overall_score": <1-100>, "strengths": ["..."], "improvements": ["..."], "detailed_analysis": "...", "drill_recommendations": ["..."]}`,
+    },
+    {
+      key: "footwork",
+      label: "Footwork",
+      description: "Analyze movement, balance, and ring positioning",
+      promptTemplate: `You are an expert boxing coach analyzing footwork. Evaluate:
+1. Step-and-slide movement without crossing the feet or bringing them together
+2. Keeping a consistent stance width while moving forward, back, and side to side
+3. Staying on the balls of the feet with light, balanced steps
+4. Pivoting to change angles
+5. Head height staying level while moving
+6. Guard staying up while moving
+
+Return your analysis as JSON with this exact structure:
+{"overall_score": <1-100>, "strengths": ["..."], "improvements": ["..."], "detailed_analysis": "...", "drill_recommendations": ["..."]}`,
+    },
+    {
+      key: "defense",
+      label: "Defense",
+      description: "Analyze slips, blocks, and head movement",
+      promptTemplate: `You are an expert boxing coach analyzing defensive technique. Evaluate:
+1. Slipping by bending the knees and shifting the head, not just leaning at the waist
+2. Blocking with the guard and absorbing with the arms and shoulders
+3. Head movement off the centerline
+4. Keeping the eyes forward
+5. Returning to a balanced stance after each defensive move
+6. Hands staying up during head movement
+
+Return your analysis as JSON with this exact structure:
+{"overall_score": <1-100>, "strengths": ["..."], "improvements": ["..."], "detailed_analysis": "...", "drill_recommendations": ["..."]}`,
+    },
+  ],
+  skillAreas: [
+    {
+      key: "stance_guard",
+      label: "Stance & Guard",
+      description: "Balance, stance, and keeping the guard up",
+      relatedStatKeys: ["coach_stance", "coach_guard"],
+      computeRating: boxingRatingFromKeys(["coach_stance", "coach_guard"]),
+    },
+    {
+      key: "footwork",
+      label: "Footwork",
+      description: "Movement, balance, and ring positioning",
+      relatedStatKeys: ["coach_footwork"],
+      computeRating: boxingRatingFromKeys(["coach_footwork"]),
+    },
+    {
+      key: "punching",
+      label: "Punching Technique",
+      description: "Straight punches, hooks, and uppercuts",
+      relatedStatKeys: ["coach_jab", "coach_power_punches"],
+      computeRating: boxingRatingFromKeys(["coach_jab", "coach_power_punches"]),
+    },
+    {
+      key: "defense",
+      label: "Defense",
+      description: "Slips, blocks, and head movement",
+      relatedStatKeys: ["coach_defense"],
+      computeRating: boxingRatingFromKeys(["coach_defense"]),
+    },
+    {
+      key: "conditioning",
+      label: "Conditioning",
+      description: "Rounds completed, roadwork, and jump rope volume",
+      relatedStatKeys: ["shadowboxing_rounds", "heavy_bag_rounds", "mitt_rounds", "sparring_rounds", "roadwork_miles", "jump_rope_minutes"],
+      computeRating: (stats, gameCount) => {
+        if (gameCount === 0) return 0;
+        const avgRounds = boxingSessionRounds(stats) / gameCount;
+        const avgMiles = (stats.roadwork_miles || 0) / gameCount;
+        const avgRope = (stats.jump_rope_minutes || 0) / gameCount;
+        const score = Math.min(avgRounds / 10, 1) * 50 + Math.min(avgMiles / 3, 1) * 25 + Math.min(avgRope / 10, 1) * 25;
+        return Math.min(100, Math.round(score));
+      },
+    },
+  ],
+  challengeTemplates: [
+    { name: "Daily Rounds", description: "Complete 3 boxing drills today", type: "daily", criteria: { metric: "drill_completions_category", target: 3, timeframe: "day" }, xp_reward: 50 },
+    { name: "Gym Regular", description: "Complete 15 drills this week", type: "weekly", criteria: { metric: "drill_completions", target: 15, timeframe: "week" }, xp_reward: 200 },
+    { name: "Film Study", description: "Upload a form analysis video", type: "daily", criteria: { metric: "form_analyses", target: 1, timeframe: "day" }, xp_reward: 30 },
+    { name: "Century Club", description: "Complete 100 total drills", type: "milestone", criteria: { metric: "total_drill_completions", target: 100 }, xp_reward: 500 },
+    { name: "Streak Starter", description: "Maintain a 7-day training streak", type: "milestone", criteria: { metric: "streak_days", target: 7 }, xp_reward: 300 },
+  ],
+};
+
+// ============================================================
 // EXPORTS
 // ============================================================
 export const SPORTS: Record<SportId, SportConfig> = {
@@ -1505,6 +1759,7 @@ export const SPORTS: Record<SportId, SportConfig> = {
   football: footballConfig,
   tennis: tennisConfig,
   volleyball: volleyballConfig,
+  boxing: boxingConfig,
 };
 
 export const getSportConfig = (sport: SportId): SportConfig => SPORTS[sport];

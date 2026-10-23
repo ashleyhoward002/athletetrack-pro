@@ -990,6 +990,148 @@ export const volleyballPhysicalConfig: SportPhysicalConfig = {
 };
 
 // ============================================================
+// BOXING PHYSICAL METRICS
+// ============================================================
+// Conditioning-first. No age benchmarks are set on purpose: for
+// young athletes the useful comparison is progress against their
+// own earlier results, so these are tracked without grading.
+// ============================================================
+export const boxingPhysicalConfig: SportPhysicalConfig = {
+  sportId: "boxing",
+  categories: [
+    universalMetrics,
+    {
+      category: "Conditioning",
+      icon: "🫁",
+      metrics: [
+        {
+          key: "mile_run",
+          label: "1-Mile Run",
+          shortLabel: "MILE",
+          unit: "seconds",
+          type: "time",
+          description: "Time to run one mile, a basic measure of aerobic stamina",
+          howToMeasure: "Run one mile on a track or measured route at a hard but steady pace and time it with a stopwatch",
+          higherIsBetter: false,
+        },
+        {
+          key: "resting_heart_rate",
+          label: "Resting Heart Rate",
+          shortLabel: "RHR",
+          unit: "bpm",
+          type: "number",
+          description: "Heart beats per minute at rest. It tends to drop as conditioning improves.",
+          howToMeasure: "Measure first thing in the morning before getting out of bed: count pulse for 60 seconds",
+          higherIsBetter: false,
+        },
+        {
+          key: "jump_rope_unbroken",
+          label: "Unbroken Jump Rope",
+          shortLabel: "ROPE",
+          unit: "seconds",
+          type: "time",
+          description: "Longest time jumping rope without a miss",
+          howToMeasure: "Jump at a steady pace and stop the timer at the first miss. Record the best of three tries.",
+          higherIsBetter: true,
+        },
+        {
+          key: "plank_hold",
+          label: "Plank Hold",
+          shortLabel: "PLANK",
+          unit: "seconds",
+          type: "time",
+          description: "Core endurance: longest plank with a straight body line",
+          howToMeasure: "Hold a forearm plank with hips level and stop the timer when form breaks",
+          higherIsBetter: true,
+        },
+        {
+          key: "pushups_1min",
+          label: "Push-ups (1 min)",
+          shortLabel: "PU-1M",
+          unit: "reps",
+          type: "number",
+          description: "Clean push-ups completed in one minute",
+          howToMeasure: "Count full-range push-ups with a straight body line in 60 seconds",
+          higherIsBetter: true,
+        },
+        {
+          key: "situps_1min",
+          label: "Sit-ups (1 min)",
+          shortLabel: "SU-1M",
+          unit: "reps",
+          type: "number",
+          description: "Sit-ups completed in one minute",
+          howToMeasure: "Count full sit-ups in 60 seconds with feet held or anchored",
+          higherIsBetter: true,
+        },
+      ],
+    },
+    {
+      category: "Speed & Reaction",
+      icon: "⚡",
+      metrics: [
+        {
+          key: "bag_punches_30s",
+          label: "Bag Punches (30 sec)",
+          shortLabel: "BAG-30",
+          unit: "punches",
+          type: "number",
+          description: "Punches landed on the heavy bag in 30 seconds with good form",
+          howToMeasure: "Have a coach or parent count clean punches on the bag for 30 seconds",
+          higherIsBetter: true,
+        },
+        {
+          key: "ruler_drop",
+          label: "Ruler Drop Reaction",
+          shortLabel: "RULER",
+          unit: "inches",
+          type: "number",
+          description: "Reaction time measured by how far a dropped ruler falls before it is caught. Shorter is faster.",
+          howToMeasure: "A partner drops a ruler without warning with the zero mark at the athlete's open fingers; record where it is caught. Average of five tries.",
+          higherIsBetter: false,
+        },
+        {
+          key: "shuttle_5_10_5",
+          label: "5-10-5 Shuttle",
+          shortLabel: "5-10-5",
+          unit: "seconds",
+          type: "time",
+          description: "Change-of-direction speed",
+          howToMeasure: "Start at the middle line, sprint 5 yards one way, 10 yards the other way, then 5 yards back to the start; time with a stopwatch",
+          higherIsBetter: false,
+        },
+      ],
+    },
+    {
+      category: "Power",
+      icon: "💥",
+      metrics: [
+        {
+          key: "med_ball_chest_throw",
+          label: "Med Ball Chest Throw",
+          shortLabel: "MB-CHEST",
+          unit: "feet",
+          type: "distance",
+          description: "Upper-body explosive power",
+          howToMeasure: "Seated or kneeling, throw a light medicine ball (matched to the athlete's size) from the chest as far as possible; measure the distance",
+          higherIsBetter: true,
+        },
+        {
+          key: "standing_broad_jump",
+          label: "Standing Broad Jump",
+          shortLabel: "BROAD",
+          unit: "inches",
+          type: "distance",
+          description: "Lower-body explosive power, which drives punching force",
+          howToMeasure: "Jump forward from a standing position with a two-foot takeoff and land balanced; measure from the start line to the back heel",
+          higherIsBetter: true,
+        },
+      ],
+    },
+  ],
+};
+
+// ============================================================
 // CONFIG MAP & HELPERS
 // ============================================================
 export const PHYSICAL_CONFIGS: Record<SportId, SportPhysicalConfig> = {
@@ -999,6 +1141,7 @@ export const PHYSICAL_CONFIGS: Record<SportId, SportPhysicalConfig> = {
   football: footballPhysicalConfig,
   tennis: tennisPhysicalConfig,
   volleyball: volleyballPhysicalConfig,
+  boxing: boxingPhysicalConfig,
 };
 
 export function getPhysicalConfig(sportId: SportId): SportPhysicalConfig {

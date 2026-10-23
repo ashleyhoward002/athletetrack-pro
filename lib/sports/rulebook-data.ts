@@ -3,7 +3,7 @@ import { SportId } from "./config";
 // ============================================================
 // Rulebook Data Module
 // ============================================================
-// Static rules content for all 6 supported sports.
+// Static rules content for all 7 supported sports.
 // Used by the /dashboard/rulebook page.
 // ============================================================
 
@@ -803,6 +803,129 @@ const volleyballRulebook: SportRulebook = {
 };
 
 // ============================================================
+// BOXING
+// ============================================================
+// General amateur boxing basics. Specific rules (round length, number
+// of rounds, equipment, matchmaking) vary by sanctioning body and age
+// group, so this content points readers to the official rulebook and
+// should be reviewed by a boxing coach before being treated as final.
+// ============================================================
+const boxingRulebook: SportRulebook = {
+  sportId: "boxing",
+  sportName: "Boxing",
+  sportIcon: "🥊",
+  officialBody: "USA Boxing (amateur) — check the current official rulebook for age-group rules",
+  sections: [
+    {
+      id: "basic-rules",
+      title: "Basic Rules",
+      icon: "📋",
+      entries: [
+        {
+          content: [
+            "A bout is contested between two boxers in a roped ring, controlled by a referee.",
+            "Boxers are matched by age, weight, and experience so bouts are as even as possible.",
+            "Punches must land with the knuckle part of a closed glove on the front or sides of the head or body above the belt line.",
+            "Boxers must wear a mouthguard and approved gloves. Amateur youth bouts also require protective equipment such as headgear; follow the sanctioning body's current equipment rules.",
+            "The referee can stop a bout at any time to protect a boxer, and a boxer who is hurt or outmatched can be stopped by the referee.",
+            "Round length and the number of rounds depend on age and level. Younger boxers box shorter rounds.",
+          ],
+        },
+      ],
+    },
+    {
+      id: "scoring",
+      title: "Scoring",
+      icon: "🎯",
+      entries: [
+        {
+          content: [
+            "Judges score each round based on clean, legal punches landed, effective aggression, ring generalship (controlling the fight), and defense.",
+            "Many competitions use a 10-point must system: the round winner receives 10 points and the other boxer receives 9 or fewer.",
+            "A bout is won by decision (judges' scores), by the referee stopping the contest, or by disqualification of the opponent.",
+            "Scoring details differ between sanctioning bodies and age groups, so check the official rulebook for the event.",
+          ],
+        },
+      ],
+    },
+    {
+      id: "positions",
+      title: "Positions & Roles",
+      icon: "👥",
+      entries: [
+        {
+          content: [
+            "Orthodox — A boxer who stands with the left foot and left hand forward and throws the power hand (right) from the rear.",
+            "Southpaw — A boxer who stands with the right foot and right hand forward and throws the power hand (left) from the rear.",
+            "Referee — Controls the bout, enforces the rules, and protects the boxers.",
+            "Judges — Score each round to decide the winner if the bout goes the distance.",
+            "Corner coach — Gives instruction between rounds and can stop a bout by throwing in the towel if the boxer is in danger.",
+          ],
+        },
+      ],
+    },
+    {
+      id: "dimensions",
+      title: "Field / Court Dimensions",
+      icon: "📐",
+      entries: [
+        {
+          content: [
+            "The ring is a square roped platform. Sizes vary by sanctioning body and event; amateur rings are commonly in the range of about 16 to 20 feet per side.",
+            "Each boxer has a corner (red or blue) and a neutral corner is used when a boxer is knocked down or the referee gives a count.",
+            "Always check the event or gym rules for the exact ring and equipment requirements.",
+          ],
+        },
+      ],
+    },
+    {
+      id: "penalties",
+      title: "Common Penalties & Violations",
+      icon: "🚫",
+      entries: [
+        {
+          content: [
+            "Low blow — Hitting below the belt line.",
+            "Holding — Holding the opponent to stop them from punching, or excessive clinching.",
+            "Hitting after the bell — Continuing to punch after the round has been stopped.",
+            "Illegal contact — Hitting with the head, elbows, shoulders, forearm, or an open glove, or hitting the back of the head or neck.",
+            "Hitting a downed opponent — Punching a boxer who is down or in the process of getting up.",
+            "Turning the back — Turning away from the opponent while still in the bout.",
+            "Rough tactics — Pushing, wrestling, spitting out the mouthguard on purpose, or other unsportsmanlike conduct.",
+            "Warnings and point deductions can be given for fouls, and repeated or serious fouls can lead to disqualification.",
+          ],
+        },
+      ],
+    },
+    {
+      id: "glossary",
+      title: "Key Terms / Glossary",
+      icon: "📖",
+      entries: [
+        {
+          content: [
+            "Jab — A quick straight punch with the lead hand.",
+            "Cross — A straight punch with the rear hand, thrown with hip and shoulder rotation.",
+            "Hook — A punch with a bent arm that travels in an arc to the side of the head or body.",
+            "Uppercut — A rising punch thrown up toward the chin or body.",
+            "Guard — The defensive hand position that protects the chin and body.",
+            "Stance — The boxer's body position: feet apart, knees slightly bent, balanced on the balls of the feet.",
+            "Slip — Moving the head to the side so a punch misses.",
+            "Parry — Using a hand to deflect an incoming punch.",
+            "Clinch — Close contact where a boxer ties up the opponent's arms; the referee will break it up.",
+            "Roadwork — Running done for boxing conditioning.",
+            "Shadowboxing — Practicing punches, footwork, and defense with no target or opponent.",
+            "Mitts — Padded gloves held by a coach or partner so the boxer can practice punches and combinations.",
+            "Round — A timed period of boxing, followed by a rest break.",
+            "Standing eight count — A count the referee may give to check whether a boxer who has been hurt is able to continue.",
+          ],
+        },
+      ],
+    },
+  ],
+};
+
+// ============================================================
 // EXPORT
 // ============================================================
 export const RULEBOOK_DATA: Record<SportId, SportRulebook> = {
@@ -812,4 +935,5 @@ export const RULEBOOK_DATA: Record<SportId, SportRulebook> = {
   football: footballRulebook,
   tennis: tennisRulebook,
   volleyball: volleyballRulebook,
+  boxing: boxingRulebook,
 };

@@ -44,6 +44,10 @@ export const challengesSeed: ChallengeSeed[] = [
     { sport: "volleyball", name: "Kill Mode", description: "Complete 2 attacking drills", type: "daily", criteria: { metric: "drill_completions_category", target: 2, timeframe: "day" }, xp_reward: 40 },
     { sport: "volleyball", name: "Wall of Steel", description: "Complete 2 blocking drills", type: "daily", criteria: { metric: "drill_completions_category", target: 2, timeframe: "day" }, xp_reward: 40 },
 
+    // Boxing daily
+    { sport: "boxing", name: "Footwork First", description: "Complete 2 footwork drills", type: "daily", criteria: { metric: "drill_completions_category", target: 2, timeframe: "day" }, xp_reward: 40 },
+    { sport: "boxing", name: "Stay Sharp", description: "Complete 2 stance and guard drills", type: "daily", criteria: { metric: "drill_completions_category", target: 2, timeframe: "day" }, xp_reward: 40 },
+
     // Milestone challenges
     { sport: null, name: "First Steps", description: "Complete your first drill", type: "milestone", criteria: { metric: "total_drill_completions", target: 1 }, xp_reward: 50 },
     { sport: null, name: "Getting Warmed Up", description: "Complete 10 total drills", type: "milestone", criteria: { metric: "total_drill_completions", target: 10 }, xp_reward: 100 },

@@ -39,6 +39,7 @@ const CAREER_HIGH_STATS: Record<SportId, string[]> = {
     football: ["passing_yards", "rushing_yards", "receiving_yards", "touchdowns", "tackles", "sacks"],
     tennis: ["aces", "winners", "games_won", "sets_won"],
     volleyball: ["kills", "assists", "blocks", "digs", "aces"],
+    boxing: ["roadwork_miles", "jump_rope_minutes", "shadowboxing_rounds", "heavy_bag_rounds", "mitt_rounds"],
 };
 
 /**
@@ -191,6 +192,26 @@ export function buildGameHighlightCard(
             label: "Games Won",
             value: game.stats.games_won || 0,
         });
+    } else if (game.sport === "boxing") {
+        const rounds =
+            (game.stats.shadowboxing_rounds || 0) +
+            (game.stats.heavy_bag_rounds || 0) +
+            (game.stats.mitt_rounds || 0) +
+            (game.stats.sparring_rounds || 0);
+        stats.push({
+            label: "Rounds",
+            value: rounds,
+        });
+        stats.push({
+            label: "Roadwork (mi)",
+            value: game.stats.roadwork_miles || 0,
+            highlight: careerHighs.some((ch) => ch.statKey === "roadwork_miles"),
+        });
+        stats.push({
+            label: "Jump Rope (min)",
+            value: game.stats.jump_rope_minutes || 0,
+            highlight: careerHighs.some((ch) => ch.statKey === "jump_rope_minutes"),
+        });
     }
 
     const hasCareerHigh = careerHighs.length > 0;
@@ -290,6 +311,11 @@ export const SPORT_COLORS: Record<SportId, { primary: string; secondary: string;
         secondary: "#2563eb",
         gradient: "from-blue-500 to-cyan-500",
     },
+    boxing: {
+        primary: "#be123c", // Crimson
+        secondary: "#9f1239",
+        gradient: "from-rose-600 to-red-800",
+    },
 };
 
 export const SPORT_EMOJI: Record<SportId, string> = {
@@ -299,4 +325,5 @@ export const SPORT_EMOJI: Record<SportId, string> = {
     football: "🏈",
     tennis: "🎾",
     volleyball: "🏐",
+    boxing: "🥊",
 };

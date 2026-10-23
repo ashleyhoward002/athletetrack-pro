@@ -222,4 +222,40 @@ export const SPORTS_ANGLE_DEFINITIONS: Record<string, {
             idealRange: [100, 130],
         },
     ],
+    // Boxing intentionally has NO idealRange values. Targets should come from a
+    // reference athlete's own recorded form (a coach or pro), not from generic
+    // numbers, and be compared per athlete over time. Film from the side or a
+    // consistent 45-degree angle so 2D angles are comparable between sessions.
+    boxing: [
+        {
+            name: "Left Guard Elbow",
+            joints: ["left_shoulder", "left_elbow", "left_wrist"],
+            description: "Left arm angle: guard position at rest, extension during a left punch",
+        },
+        {
+            name: "Right Guard Elbow",
+            joints: ["right_shoulder", "right_elbow", "right_wrist"],
+            description: "Right arm angle: guard position at rest, extension during a right punch",
+        },
+        {
+            name: "Left Knee Bend",
+            joints: ["left_hip", "left_knee", "left_ankle"],
+            description: "Left knee flexion in stance and while moving",
+        },
+        {
+            name: "Right Knee Bend",
+            joints: ["right_hip", "right_knee", "right_ankle"],
+            description: "Right knee flexion in stance and while moving",
+        },
+        {
+            name: "Left Torso Lean",
+            joints: ["left_shoulder", "left_hip", "left_knee"],
+            description: "Upper body lean relative to the hips (balance and forward lean)",
+        },
+        {
+            name: "Right Torso Lean",
+            joints: ["right_shoulder", "right_hip", "right_knee"],
+            description: "Upper body lean relative to the hips on the right side",
+        },
+    ],
 };

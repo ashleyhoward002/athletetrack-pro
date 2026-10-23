@@ -52,6 +52,17 @@ const PRELOADED_DRILLS = [
   { sport: "volleyball", name: "Block Timing", category: "Blocking", difficulty: "Pro", duration_minutes: 15, sets: 4, reps: 10, description: "Partner simulates sets. Practice timing jump to meet ball at peak. Focus on penetrating hands over net and sealing the block.", is_curated: true },
   { sport: "volleyball", name: "Defensive Reaction", category: "Defense", difficulty: "All-Star", duration_minutes: 15, sets: 5, reps: 1, description: "Coach or partner hits balls in random directions. Work on reading hitter, quick reactions, and digging to target. 1 minute per set.", is_curated: true },
   { sport: "volleyball", name: "Setting Accuracy", category: "Setting", difficulty: "Rookie", duration_minutes: 15, sets: 4, reps: 15, description: "Set to targets placed at antenna. Practice setting from different positions on court. Focus on hand position and consistent height.", is_curated: true },
+  // Boxing (conditioning and form first; do all partner and bag work with coach supervision)
+  { sport: "boxing", name: "Stance & Guard Check", category: "Stance & Guard", difficulty: "Rookie", duration_minutes: 10, sets: 3, reps: 1, description: "Set your stance in front of a mirror or have someone film you from the side. Feet about shoulder width and staggered, knees slightly bent, hands up protecting the chin, elbows tucked. Hold for 30 seconds, relax, reset, and repeat. Compare each set to the last.", is_curated: true },
+  { sport: "boxing", name: "Shadowboxing Rounds", category: "Shadowboxing", difficulty: "Rookie", duration_minutes: 12, sets: 3, reps: 1, description: "Work 3 rounds of shadowboxing with a rest between rounds. Focus on balance, keeping the guard up, and returning each punch to your guard. Slow and clean beats fast and sloppy. Film one round to review your form.", is_curated: true },
+  { sport: "boxing", name: "Jab Technique Reps", category: "Jab & Cross", difficulty: "Rookie", duration_minutes: 15, sets: 4, reps: 15, description: "Throw straight jabs in your stance. Extend fully, rotate the shoulder to protect the chin, and snap the hand straight back to your guard. Keep the back hand up. Check your form on video between sets.", is_curated: true },
+  { sport: "boxing", name: "Jab-Cross Combination", category: "Combinations", difficulty: "Pro", duration_minutes: 15, sets: 4, reps: 12, description: "Throw a jab followed by a cross. Rotate the hips and pivot the back foot on the cross, then return to your stance and guard. Slow down until each rep is balanced, then add speed.", is_curated: true },
+  { sport: "boxing", name: "Step-and-Slide Footwork", category: "Footwork", difficulty: "Rookie", duration_minutes: 10, sets: 4, reps: 1, description: "Move forward, back, left, and right with your stance width staying the same. Push off the foot nearest the direction you want to go and slide the other. Do not cross your feet or bring them together. Keep your guard up for the whole set.", is_curated: true },
+  { sport: "boxing", name: "Slip Line Drill", category: "Defense", difficulty: "Pro", duration_minutes: 12, sets: 4, reps: 1, description: "Hang a light rope or cord at head height. Slip side to side past it by bending the knees and shifting your head, not by leaning at the waist. Keep your eyes forward and your hands up. 1 minute per set.", is_curated: true },
+  { sport: "boxing", name: "Jump Rope Rounds", category: "Jump Rope", difficulty: "Rookie", duration_minutes: 12, sets: 4, reps: 1, description: "Jump rope in timed rounds with short rests. Stay light on the balls of your feet with small jumps. Track your longest streak without a miss and try to beat it next session.", is_curated: true },
+  { sport: "boxing", name: "Roadwork Intervals", category: "Roadwork", difficulty: "Pro", duration_minutes: 20, sets: 6, reps: 1, description: "Alternate hard running and easy jogging, such as 1 minute hard and 1 minute easy. Warm up first, keep a steady breathing rhythm, and track total distance to watch your stamina improve over time.", is_curated: true },
+  { sport: "boxing", name: "Heavy Bag Rounds", category: "Heavy Bag", difficulty: "Pro", duration_minutes: 15, sets: 3, reps: 1, description: "Work the heavy bag in timed rounds with wrapped hands and bag gloves, under coach supervision. Focus on clean technique, balance, and moving off the bag between combinations rather than power.", is_curated: true },
+  { sport: "boxing", name: "Core & Push-up Circuit", category: "Conditioning", difficulty: "Rookie", duration_minutes: 15, sets: 3, reps: 1, description: "Circuit of push-ups, sit-ups, and a forearm plank, working until form starts to break down. Rest 1 minute between circuits. Record your numbers to track progress.", is_curated: true },
 ];
 
 export async function POST() {
@@ -64,23 +75,31 @@ export async function POST() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Check if drills already exist
-    const { count } = await supabase
+    // Check which sports already have curated drills so newly added sports
+    // (like boxing) can be seeded without duplicating existing ones
+    const { data: existing, error: existingError } = await supabase
       .from("drills")
-      .select("*", { count: "exact", head: true })
+      .select("sport")
       .eq("is_curated", true);
 
-    if (count && count > 0) {
+    if (existingError) {
+      return NextResponse.json({ error: existingError.message }, { status: 500 });
+    }
+
+    const seededSports = new Set((existing || []).map((d: { sport: string }) => d.sport));
+    const drillsToInsert = PRELOADED_DRILLS.filter((d) => !seededSports.has(d.sport));
+
+    if (drillsToInsert.length === 0) {
       return NextResponse.json({
         message: "Drills already seeded",
-        count: count
+        count: existing?.length || 0
       });
     }
 
-    // Insert all preloaded drills
+    // Insert preloaded drills for sports that have none yet
     const { data, error } = await supabase
       .from("drills")
-      .insert(PRELOADED_DRILLS)
+      .insert(drillsToInsert)
       .select();
 
     if (error) {
